@@ -1,0 +1,12 @@
+---
+- name: Configure art-reports.linaro.org
+  hosts: all
+  sudo: yes
+  vars_files:
+    - "secrets/{{inventory_hostname}}"
+  roles:
+  - postgres
+  - art-reports-deps
+  - django
+  - art-reports-populate
+  - {role: apache-site, src: "art-reports.linaro.org", config: "{{inventory_hostname}}", tags: [apache] }

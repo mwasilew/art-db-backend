@@ -1,0 +1,38 @@
+- name: Install Apache site config
+  template: src=files/{{src}} dest=/etc/apache2/sites-available/{{config}} mode=0644 backup=yes
+            owner=root
+            group=root
+  sudo: yes
+  notify:
+      - restart-apache
+  tags:
+      - apache
+      - apache-conf
+
+- name: Add Apache 2.4 compatibility symlink
+  sudo: yes
+  file: state=link force=yes
+        src={{config}}
+        dest=/etc/apache2/sites-available/{{config}}.conf
+  tags:
+      - apache
+
+- name: Enable site config
+  command: a2ensite {{config}}
+  sudo: yes
+  register: result
+  changed_when: "'already enabled' not in result.stdout"
+  notify:
+      - restart-apache
+  tags:
+      - apache
+
+- name: Disable OS default site config
+  command: a2dissite 000-default
+  sudo: yes
+  register: result
+  changed_when: "'already disabled' not in result.stdout"
+  notify:
+      - restart-apache
+  tags:
+      - apache

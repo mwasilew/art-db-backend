@@ -1,0 +1,43 @@
+- name: Install packages
+  apt: pkg={{item}} state=installed update-cache=yes
+  with_items:
+    - postgresql
+    - python-psycopg2
+    - postgresql-contrib
+  tags:
+    - install
+    - update
+
+- name: Enable postgres to listen on local interface
+  lineinfile: dest=/etc/postgresql/9.3/main/postgresql.conf
+              regexp="^listen_addresses"
+              insertafter="^#listen_addresses"
+              line="listen_addresses = 'localhost'"
+  notify:
+    - restart-postgres
+
+- name: Create postgres user
+  sudo_user: postgres
+  postgresql_user: user={{db_user}}
+                   password={{db_password}}
+                   role_attr_flags=CREATEDB,NOSUPERUSER
+  tags:
+    - database
+
+- name: Create postgres database
+  sudo_user: postgres
+  postgresql_db: name={{db_name}}
+                 owner={{db_user}}
+  tags:
+    - database
+
+#- name: Alter postgresql database template for extension hstore
+#  command: psql {{db_name}} -c 'create extension if not exists hstore;'
+#  register: psql_hstore
+#  sudo: yes
+#  sudo_user: postgres
+#  ignore_errors: True
+#  changed_when: not psql_hstore.stderr
+#  when: setting_hstore_extension == true
+#  tags:
+#    - database

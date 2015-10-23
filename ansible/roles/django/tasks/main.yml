@@ -1,0 +1,116 @@
+---
+- name: Install required packages
+  apt: pkg={{item}} state=installed update-cache=yes
+  with_items:
+    - git
+    - python-django
+    - apache2
+    - libapache2-mod-wsgi
+  tags:
+    - install
+    - update
+
+
+- name: Create base directory for installation
+  file: path={{install_base}}/{{hostname}}
+        owner={{apache_user}}
+        group={{apache_user}}
+        mode=0755
+        state=directory
+  tags:
+    - install
+
+- name: Checkout application code
+  # NOTE: we can't use "accept_hostkey=yes" because the user we clone as
+  # will likely not have a proper .ssh directory. We instead use ssh_opts
+  git: repo={{git_repo}}
+       dest={{install_base}}/{{hostname}}/project
+       version={{git_tag}}
+       update=yes
+       ssh_opts="-o StrictHostKeyChecking=no"
+  sudo_user: "{{apache_user}}"
+  notify: restart-apache
+  tags:
+    - install
+    - update
+    - django
+
+- name: Check for requirements.txt in django application
+  stat: path={{django_app_root}}/requirements.txt
+  register: requirements
+
+- name: Check for requirements-no-deps.txt in django application
+  stat: path={{django_app_root}}/requirements-no-deps.txt
+  register: requirementsnodeps
+
+# Pip will always report changed even when it installs no new packages. This is a known bug
+# in ansible-modules-core which has been around forever, and doesn't look like it will be
+# fixed any time soon. REF:
+# https://github.com/ansible/ansible-modules-core/issues/1645
+# https://github.com/ansible/ansible/issues/1705
+
+- name: Install Pip Requirements
+  pip: requirements={{django_app_root}}/requirements.txt
+  when: requirements.stat.exists
+  tags:
+    - django
+    - install
+
+- name: Install Pip Requirements without deps
+  pip: requirements={{django_app_root}}/requirements-no-deps.txt extra_args="--no-deps"
+  when: requirementsnodeps.stat.exists
+  tags:
+    - django
+    - install
+
+- name: Copy local settings
+  when: django_local_settings is defined
+  template: src={{django_local_settings}}
+            dest={{django_app_root}}/local_settings.py
+            owner={{apache_user}} group={{apache_user}} mode=0755
+  notify: restart-apache
+  tags:
+    - install
+    - update
+    - django
+
+- name: Run syncdb command
+  django_manage: app_path={{django_app_root}}
+                 settings={{django_settings}}
+                 command=syncdb
+  # syncdb logic is wrong and always makes ansible think it changes w/o this:
+  register: syncdb
+  changed_when: "'Creating table ' in syncdb.out"
+  when: delay_syncdb is not defined
+  tags:
+    - update
+    - django
+
+- name: Run migrations (if installed)
+  django_manage: app_path={{django_app_root}}
+                 settings={{django_settings}}
+                 command=migrate
+  register: django_migrate
+  failed_when: 'django_migrate.failed and "Unknown django command" not in django_migrate.msg'
+  tags:
+    - django
+    - update
+
+- name: Run collectstatic (if supported)
+  django_manage: app_path={{django_app_root}}
+                 settings={{django_settings}}
+                 command=collectstatic
+  register: django_static
+  failed_when: 'django_static.failed and (django_static.msg is defined and ("Unknown django command" not in django_static.msg))'
+  notify: restart-apache
+  tags:
+    - update
+    - django
+
+- name: Enable mod_wsgi
+  command:  a2enmod {{ item }}
+            creates=/etc/apache2/mods-enabled/{{ item }}.load
+  with_items: apache_modules
+  notify: restart-apache
+  tags:
+    - install

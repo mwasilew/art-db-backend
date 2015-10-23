@@ -1,0 +1,15 @@
+- name: Run syncdb command
+  django_manage: app_path={{django_app_root}}
+                 settings={{django_settings}}
+                 command=syncdb
+  # syncdb logic is wrong and always makes ansible think it changes w/o this:
+  register: syncdb
+  changed_when: "'Creating table ' in syncdb.out"
+  when: delay_syncdb is defined
+  tags:
+    - update
+    - django
+
+- name: Create logfile directory
+  file: path=/var/log/art-reports.linaro.org/ state=directory
+        owner=root group=root mode=0744

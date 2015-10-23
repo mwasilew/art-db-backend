@@ -1,0 +1,17 @@
+---
+- name: Install required packages
+  apt: pkg={{item}} state=installed update-cache=yes
+  with_items:
+    - python-django-extensions
+    - python-djangorestframework
+    - python-httplib2
+    - python-yaml
+    - python-jsonschema
+    - python-keyring
+    - python-psycopg2
+    - python-simplejson
+    - python-virtualenv
+    - python-django-filter
+  tags:
+    - install
+    - update
