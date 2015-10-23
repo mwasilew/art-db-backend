@@ -32,9 +32,10 @@ class Branch(models.Model):
 
 class Manifest(models.Model):
     manifest = models.TextField()
-
+    #manifest_sha1 = models.CharField(max_length=40)
 
     def __unicode__(self):
+        #return self.manifest_sha1
         return hashlib.sha1(self.manifest).hexdigest()
 
 
@@ -58,7 +59,7 @@ class Result(models.Model):
 class ResultData(models.Model):
     name = models.CharField(max_length=256)
     benchmark = models.ForeignKey(Benchmark, related_name="data")
-    measurement = models.DecimalField(max_digits=14, decimal_places=2)
+    measurement = models.FloatField()
     timestamp = models.DateTimeField(null=True)
     result = models.ForeignKey(Result, related_name="data")
 

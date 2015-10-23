@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'nj-(o5lt29qsl*z$on_4cz-53lscyf3*a+c%0hh&nyjv@qk-qq'
+SECRET_KEY = 'very-secret-password'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -28,6 +28,9 @@ DEBUG = True
 ALLOWED_HOSTS = []
 APPEND_SLASH=False
 
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+)
 # Application definition
 
 INSTALLED_APPS = (
@@ -37,14 +40,21 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_extensions',
 
     'rest_framework',
+    'rest_framework.authtoken',
     'benchmarks',
     'api'
 )
 
 REST_FRAMEWORK = {
-    'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',)
+    'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    )
 }
 
 MIDDLEWARE_CLASSES = (
@@ -79,17 +89,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'crayonbox.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/1.8/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
-
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
@@ -108,3 +107,25 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+
+try:
+    from local_settings import *
+except ImportError:
+    import random
+    import string
+
+    # Create local_settings with random SECRET_KEY.
+    char_selection = string.ascii_letters + string.digits
+    char_selection_with_punctuation = char_selection + '!@#$%^&*(-_=+)'
+
+    # SECRET_KEY contains anything but whitespace
+    secret_key = ''.join(random.sample(char_selection_with_punctuation, 50))
+    local_settings_content = "SECRET_KEY = '{0}'\n".format(secret_key)
+
+    with open(os.path.join(PROJECT_ROOT, "local_settings.py"), "w") as f:
+        f.write(local_settings_content)
+
+    from local_settings import *
+
+TEMPLATE_DEBUG = DEBUG
+
