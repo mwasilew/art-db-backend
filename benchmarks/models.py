@@ -1,5 +1,6 @@
-from django.db import models
 import hashlib
+
+from django.db import models
 
 
 class Configuration(models.Model):
@@ -31,12 +32,17 @@ class Branch(models.Model):
 
 
 class Manifest(models.Model):
+    manifest_hash = models.CharField(max_length=40, editable=False)
     manifest = models.TextField()
-    #manifest_sha1 = models.CharField(max_length=40)
 
     def __unicode__(self):
-        #return self.manifest_sha1
-        return hashlib.sha1(self.manifest).hexdigest()
+        return self.hash
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.manifest_hash = hashlib.sha1(self.manifest).hexdigest()
+        return super(Manifest, self).save(*args, **kwargs)
+
 
 
 class Result(models.Model):
