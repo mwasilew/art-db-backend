@@ -3,6 +3,7 @@ import sys
 
 sys.path.append('/srv/art-reports.linaro.org/project')
 sys.path.append('/srv/art-reports.linaro.org/project/crayonbox/')
+sys.path.append('/srv/art-reports.linaro.org/.virtualenv/src/django-crowd-rest-backend/')
 sys.path.append('/srv/art-reports.linaro.org/.virtualenv/lib/python2.7/site-packages/')
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'crayonbox.settings'
