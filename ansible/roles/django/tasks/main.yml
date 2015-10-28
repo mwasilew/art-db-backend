@@ -68,18 +68,34 @@
     - django
 
 - name: Run syncdb command
-  sudo_user: "{{apache_user}}"
-  command: "{{install_base}}/{{hostname}}/.virtualenv/bin/python {{django_app_root}}/manage.py syncdb --settings={{django_settings}} --noinput"
+  django_manage: app_path={{django_app_root}}
+                 settings={{django_settings}}
+                 virtualenv={{install_base}}/{{hostname}}/.virtualenv
+                 command=syncdb
   tags:
     - update
     - django
 
 - name: Run migrations (if installed)
-  sudo_user: "{{apache_user}}"
-  command: "{{install_base}}/{{hostname}}/.virtualenv/bin/python {{django_app_root}}/manage.py syncdb --settings={{django_settings}} --noinput"
+  django_manage: app_path={{django_app_root}}
+                 settings={{django_settings}}
+                 virtualenv={{install_base}}/{{hostname}}/.virtualenv
+                 command=migrate
   tags:
     - django
     - update
+
+- name: Run collectstatic (if supported)
+  django_manage: app_path={{django_app_root}}
+                 settings={{django_settings}}
+                 virtualenv={{install_base}}/{{hostname}}/.virtualenv
+                 command=collectstatic
+  register: django_static
+  failed_when: 'django_static.failed and (django_static.msg is defined and ("Unknown django command" not in django_static.msg))'
+  notify: restart-apache
+  tags:
+    - update
+    - django
 
 - name: Enable mod_wsgi
   command:  a2enmod {{ item }}
