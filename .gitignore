@@ -1,3 +1,4 @@
+ansible/secrets/
 .env/
 .vagrant/
 *.pyc

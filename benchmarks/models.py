@@ -36,7 +36,7 @@ class Manifest(models.Model):
     manifest = models.TextField()
 
     def __unicode__(self):
-        return self.hash
+        return self.manifest_hash
 
     def save(self, *args, **kwargs):
         if not self.pk:
@@ -44,12 +44,11 @@ class Manifest(models.Model):
         return super(Manifest, self).save(*args, **kwargs)
 
 
-
 class Result(models.Model):
     board = models.ForeignKey(Board, related_name="results")
     branch = models.ForeignKey(Branch, related_name="results")
     revision = models.CharField(max_length=32, null=True, blank=True)
-    configuration = models.ForeignKey(Configuration, blank=True, null=True) # is it needed ?
+    configuration = models.ForeignKey(Configuration, blank=True, null=True)  # is it needed ?
     timestamp = models.DateTimeField(null=True)
     gerrit_change_number = models.DecimalField(blank=True, null=True, max_digits=9, decimal_places=2)
     gerrit_patchset_number = models.DecimalField(blank=True, null=True, max_digits=9, decimal_places=2)

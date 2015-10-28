@@ -26,11 +26,12 @@ SECRET_KEY = 'very-secret-password'
 DEBUG = True
 
 ALLOWED_HOSTS = []
-APPEND_SLASH=False
+APPEND_SLASH = False
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
+
 # Application definition
 
 INSTALLED_APPS = (
@@ -40,12 +41,12 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_extensions',
 
     'rest_framework',
     'rest_framework.authtoken',
+
     'benchmarks',
-    'api'
+    'api',
 )
 
 REST_FRAMEWORK = {
@@ -73,21 +74,19 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'crayonbox.urls'
 
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
-]
+TEMPLATES = [{
+    'BACKEND': 'django.template.backends.django.DjangoTemplates',
+    'DIRS': [],
+    'APP_DIRS': True,
+    'OPTIONS': {
+        'context_processors': [
+            'django.template.context_processors.debug',
+            'django.template.context_processors.request',
+            'django.contrib.auth.context_processors.auth',
+            'django.contrib.messages.context_processors.messages',
+        ],
+    }
+}]
 
 WSGI_APPLICATION = 'crayonbox.wsgi.application'
 
@@ -98,6 +97,7 @@ WSGI_APPLICATION = 'crayonbox.wsgi.application'
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
+
 
 USE_I18N = True
 
@@ -129,6 +129,3 @@ except ImportError:
         f.write(local_settings_content)
 
     from local_settings import *
-
-TEMPLATE_DEBUG = DEBUG
-
