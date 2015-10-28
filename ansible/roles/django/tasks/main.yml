@@ -1,11 +1,22 @@
 ---
-- name: Install required packages
+- name: Install required system packages
   apt: pkg={{item}} state=installed update-cache=yes
   with_items:
     - git
-    - python-django
     - apache2
     - libapache2-mod-wsgi
+    - python-dev
+    - python-pip
+    - python-virtualenv
+  tags:
+    - install
+    - update
+
+
+- name: Upgrade PIP manager
+  pip: name=pip extra_args="-U"
+  pip: name=virtualenv extra_args="-U"
+
   tags:
     - install
     - update
@@ -35,35 +46,17 @@
     - update
     - django
 
-- name: Check for requirements.txt in django application
-  stat: path={{django_app_root}}/requirements.txt
-  register: requirements
-
-- name: Check for requirements-no-deps.txt in django application
-  stat: path={{django_app_root}}/requirements-no-deps.txt
-  register: requirementsnodeps
-
-# Pip will always report changed even when it installs no new packages. This is a known bug
-# in ansible-modules-core which has been around forever, and doesn't look like it will be
-# fixed any time soon. REF:
-# https://github.com/ansible/ansible-modules-core/issues/1645
-# https://github.com/ansible/ansible/issues/1705
-
-- name: Install Pip Requirements
-  pip: requirements={{django_app_root}}/requirements.txt
-  when: requirements.stat.exists
+- name: Install required application packages
+  sudo_user: "{{apache_user}}"
+  pip: >
+    requirements={{install_base}}/{{hostname}}/project/requirements.txt
+    virtualenv={{install_base}}/{{hostname}}/.virtualenv
   tags:
-    - django
     - install
-
-- name: Install Pip Requirements without deps
-  pip: requirements={{django_app_root}}/requirements-no-deps.txt extra_args="--no-deps"
-  when: requirementsnodeps.stat.exists
-  tags:
-    - django
-    - install
+    - update
 
 - name: Copy local settings
+  sudo_user: "{{apache_user}}"
   when: django_local_settings is defined
   template: src={{django_local_settings}}
             dest={{django_app_root}}/local_settings.py
@@ -75,37 +68,18 @@
     - django
 
 - name: Run syncdb command
-  django_manage: app_path={{django_app_root}}
-                 settings={{django_settings}}
-                 command=syncdb
-  # syncdb logic is wrong and always makes ansible think it changes w/o this:
-  register: syncdb
-  changed_when: "'Creating table ' in syncdb.out"
-  when: delay_syncdb is not defined
+  sudo_user: "{{apache_user}}"
+  command: "{{install_base}}/{{hostname}}/.virtualenv/bin/python {{django_app_root}}/manage.py syncdb --settings={{django_settings}} --noinput"
   tags:
     - update
     - django
 
 - name: Run migrations (if installed)
-  django_manage: app_path={{django_app_root}}
-                 settings={{django_settings}}
-                 command=migrate
-  register: django_migrate
-  failed_when: 'django_migrate.failed and "Unknown django command" not in django_migrate.msg'
+  sudo_user: "{{apache_user}}"
+  command: "{{install_base}}/{{hostname}}/.virtualenv/bin/python {{django_app_root}}/manage.py syncdb --settings={{django_settings}} --noinput"
   tags:
     - django
     - update
-
-- name: Run collectstatic (if supported)
-  django_manage: app_path={{django_app_root}}
-                 settings={{django_settings}}
-                 command=collectstatic
-  register: django_static
-  failed_when: 'django_static.failed and (django_static.msg is defined and ("Unknown django command" not in django_static.msg))'
-  notify: restart-apache
-  tags:
-    - update
-    - django
 
 - name: Enable mod_wsgi
   command:  a2enmod {{ item }}

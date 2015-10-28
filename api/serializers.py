@@ -14,7 +14,7 @@ class DynamicFieldsMixin(object):
     """
     def __init__(self, *args, **kwargs):
         super(DynamicFieldsMixin, self).__init__(*args, **kwargs)
-        fields = self.context['request'].QUERY_PARAMS.get('fields')
+        fields = self.context['request'].query_params.get('fields')
         if fields:
             fields = fields.split(',')
             # Drop any fields that are not specified in the `fields` argument.
@@ -70,7 +70,7 @@ class ManifestSerializer(serializers.ModelSerializer):
         model = models.Manifest
 
     def create(self, validated_data):
-        manifest, created = models.Manifest.objects.get_or_create(**validated_data)
+        manifest, _ = models.Manifest.objects.get_or_create(**validated_data)
         return manifest
 
 
