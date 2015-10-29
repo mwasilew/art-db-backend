@@ -28,6 +28,10 @@ DEBUG = True
 ALLOWED_HOSTS = []
 APPEND_SLASH = False
 
+LOGIN_REDIRECT_URL = "/"
+LOGIN_URL = "/login"
+LOGOUT_URL = "/logout"
+
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
@@ -47,6 +51,7 @@ INSTALLED_APPS = (
 
     'benchmarks',
     'api',
+    'userprofile',
 )
 
 REST_FRAMEWORK = {
@@ -76,7 +81,7 @@ ROOT_URLCONF = 'crayonbox.urls'
 
 TEMPLATES = [{
     'BACKEND': 'django.template.backends.django.DjangoTemplates',
-    'DIRS': [],
+    'DIRS': ['templates'],
     'APP_DIRS': True,
     'OPTIONS': {
         'context_processors': [
