@@ -7,10 +7,12 @@ from rest_framework import viewsets
 from rest_framework import response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import list_route, detail_route
 
 from benchmarks import models
 
 from . import serializers
+from . import permissions
 
 
 # manifest
@@ -118,13 +120,10 @@ class ResultDataForManifest(views.APIView):
         return ret
 
 
-from rest_framework.decorators import detail_route, list_route
-
-
 class ComapreResults(viewsets.ViewSet):
 
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (permissions.IsAdminGroup,)
 
     # no statistics module in Python 2
     def mean(self, data):

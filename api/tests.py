@@ -1,7 +1,11 @@
 import hashlib
 
+from django_dynamic_fixture import G
+from django.contrib.auth.models import User
+
 from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
+
 
 from benchmarks import models
 
@@ -38,12 +42,14 @@ class ManifestTests(APITestCase):
         self.assertEqual(models.Manifest.objects.count(), 1)
 
 
-from django_dynamic_fixture import G
-
-
 class CompareTests(APITestCase):
 
-    def test_compare_with_manifest_0_(self):
+    def setUp(self):
+        user = User.objects.create_user('test', None, 'pass')
+        user.groups.create(name="admin")
+        self.client.force_authenticate(user=user)
+
+    def test_compare_with_manifest_0(self):
         response = self.client.get('/api/compare/manifest/')
 
         self.assertEqual(response.status_code, 200)
@@ -59,23 +65,19 @@ class CompareTests(APITestCase):
         manifest_1_result = G(models.Result, manifest=manifest_1)
         manifest_2_result = G(models.Result, manifest=manifest_2)
 
-        manifest_1_result_result_data = G(
-            models.ResultData,
+        G(models.ResultData,
             result=manifest_1_result,
             benchmark=benchmark,
             name="load",
 
-            measurement=10
-        )
+            measurement=10)
 
-        manifest_2_result_result_data = G(
-            models.ResultData,
-            result=manifest_2_result,
-            benchmark=benchmark,
-            name="load",
+        G(models.ResultData,
+          result=manifest_2_result,
+          benchmark=benchmark,
+          name="load",
 
-            measurement=2
-        )
+          measurement=2)
 
         response = self.client.get('/api/compare/manifest/', {
             'manifest_1': manifest_1.manifest_hash,
@@ -135,7 +137,6 @@ class CompareTests(APITestCase):
 
           measurement=20)
 
-
         response = self.client.get('/api/compare/manifest/', {
             'manifest_1': manifest_1.manifest_hash,
             'manifest_2': manifest_2.manifest_hash
@@ -151,7 +152,6 @@ class CompareTests(APITestCase):
         self.assertEqual(response.data['cpu']['load']['stddev']['target'], 9)
         self.assertEqual(response.data['cpu']['load']['stddev']['diff'], -4)
 
-
     def test_compare_with_branch(self):
 
         benchmark = G(models.Benchmark, name="cpu")
@@ -162,23 +162,19 @@ class CompareTests(APITestCase):
         branch_1_result = G(models.Result, branch=branch_1)
         branch_2_result = G(models.Result, branch=branch_2)
 
-        branch_1_result_result_data = G(
-            models.ResultData,
-            result=branch_1_result,
-            benchmark=benchmark,
-            name="load",
+        G(models.ResultData,
+          result=branch_1_result,
+          benchmark=benchmark,
+          name="load",
 
-            measurement=10
-        )
+          measurement=10)
 
-        branch_2_result_result_data = G(
-            models.ResultData,
-            result=branch_2_result,
-            benchmark=benchmark,
-            name="load",
+        G(models.ResultData,
+          result=branch_2_result,
+          benchmark=benchmark,
+          name="load",
 
-            measurement=2
-        )
+          measurement=2)
 
         response = self.client.get('/api/compare/branch/', {
             'branch_1': branch_1.name,
@@ -204,16 +200,13 @@ class CompareTests(APITestCase):
         manifest_2 = G(models.Manifest, manifest="2")
 
         manifest_1_result = G(models.Result, manifest=manifest_1)
-        manifest_2_result = G(models.Result, manifest=manifest_2)
 
-        manifest_1_result_result_data = G(
-            models.ResultData,
-            result=manifest_1_result,
-            benchmark=benchmark,
-            name="load",
+        G(models.ResultData,
+          result=manifest_1_result,
+          benchmark=benchmark,
+          name="load",
 
-            measurement=10
-        )
+          measurement=10)
 
         response = self.client.get('/api/compare/manifest/', {
             'manifest_1': manifest_1.manifest_hash,
