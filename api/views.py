@@ -6,7 +6,7 @@ from rest_framework import views
 from rest_framework import viewsets
 from rest_framework import response
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from rest_framework.decorators import list_route, detail_route
 
 from benchmarks import models
@@ -20,7 +20,7 @@ class ManifestViewSet(viewsets.ModelViewSet):
     """
     Authentication is needed for this methods
     """
-
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
     queryset = models.Manifest.objects.all()
     serializer_class = serializers.ManifestSerializer
     filter_fields = ('id', 'manifest_hash', 'manifest')
@@ -28,6 +28,7 @@ class ManifestViewSet(viewsets.ModelViewSet):
 
 # board
 class BoardViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
     queryset = models.Board.objects.all()
     serializer_class = serializers.BoardSerializer
     filter_fields = ('id', 'displayname')
@@ -35,6 +36,7 @@ class BoardViewSet(viewsets.ModelViewSet):
 
 # board configuration ?
 class BoardConfigurationViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
     queryset = models.BoardConfiguration.objects.all()
     serializer_class = serializers.BoardConfigurationSerializer
     filter_fields = ('id', 'name')
@@ -42,6 +44,7 @@ class BoardConfigurationViewSet(viewsets.ModelViewSet):
 
 # benchmark
 class BenchmarkViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
     queryset = models.Benchmark.objects.all()
     serializer_class = serializers.BenchmarkSerializer
     filter_fields = ('id', 'name')
@@ -49,6 +52,7 @@ class BenchmarkViewSet(viewsets.ModelViewSet):
 
 # branch
 class BranchViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
     queryset = models.Branch.objects.all()
     serializer_class = serializers.BranchSerializer
     filter_fields = ('id', 'name')
@@ -56,6 +60,7 @@ class BranchViewSet(viewsets.ModelViewSet):
 
 # result
 class ResultViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
     queryset = models.Result.objects.all()
     serializer_class = serializers.ResultSerializer
     filter_fields = ('id',
@@ -70,6 +75,7 @@ class ResultViewSet(viewsets.ModelViewSet):
 
 # result data
 class ResultDataViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
     queryset = models.ResultData.objects.all()
     serializer_class = serializers.ResultDataSerializer
     filter_fields = ('id',
@@ -122,8 +128,8 @@ class ResultDataForManifest(views.APIView):
 
 class ComapreResults(viewsets.ViewSet):
 
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (permissions.IsAdminGroup,)
+    #authentication_classes = (TokenAuthentication,)
+    #permission_classes = (permissions.IsAdminGroup,)
 
     # no statistics module in Python 2
     def mean(self, data):
