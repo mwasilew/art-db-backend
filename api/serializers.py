@@ -65,7 +65,14 @@ class BranchSerializer(serializers.ModelSerializer):
         return branch
 
 
-class ManifestSerializer(serializers.ModelSerializer):
+class ReducedManifestSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
+    class Meta:
+        model = models.Manifest
+        fields = ("id", "manifest_hash", "results")
+        depth = 2
+
+
+class ManifestSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
     class Meta:
         model = models.Manifest
 

@@ -19,4 +19,5 @@ router.register(r'compare', views.ComapreResults, base_name="compare")
 
 urlpatterns = [
     url(r'^', include(router.urls)),
+    url(r'details/', views.ResultDataForManifest.as_view()),
 ]
