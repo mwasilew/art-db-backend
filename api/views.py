@@ -1,6 +1,6 @@
 from itertools import groupby
 
-from django.db.models import Avg, StdDev
+from django.db.models import Avg, StdDev, Count
 
 from rest_framework import views
 from rest_framework import viewsets
@@ -23,6 +23,13 @@ class ManifestViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
     queryset = models.Manifest.objects.all()
     serializer_class = serializers.ManifestSerializer
+    filter_fields = ('id', 'manifest_hash', 'manifest')
+
+
+class ReducedManifestViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    queryset = models.Manifest.objects.all()
+    serializer_class = serializers.ReducedManifestSerializer
     filter_fields = ('id', 'manifest_hash', 'manifest')
 
 
@@ -73,6 +80,7 @@ class ResultViewSet(viewsets.ModelViewSet):
         'gerrit_change_id',
         'build_url')
 
+
 # result data
 class ResultDataViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
@@ -91,15 +99,16 @@ class ResultDataForManifest(views.APIView):
      - gerrit change ID/number/patchset
     """
     def get_queryset(self):
-        queryset = ResultData.objects.all()
-        manifest = self.request.query_params.get('manifest', None)
+        queryset = models.ResultData.objects.all()
+        manifest = self.request.query_params.get('manifest_id', None)
         gerrit_change_id = self.request.query_params.get('gerrit_change_id', None)
         gerrit_change_number = self.request.query_params.get('gerrit_change_number', None)
         gerrit_patchset_number = self.request.query_params.get('gerrit_patchset_number', None)
-        results = Result.objects.all()
+        results = models.Result.objects.all()
         if manifest:
-            results = results.filter(manifest__manifest=manifest)
-        results = results.filter(gerrit_change_id=gerrit_change_id)
+            results = results.filter(manifest__id=manifest)
+        if gerrit_change_id:
+            results = results.filter(gerrit_change_id=gerrit_change_id)
         results = results.filter(gerrit_change_number=gerrit_change_number)
         results = results.filter(gerrit_patchset_number=gerrit_patchset_number)
 
@@ -111,19 +120,22 @@ class ResultDataForManifest(views.APIView):
         ret = []
         benchmark_name_list = self.get_queryset().values_list('benchmark__name').distinct()
         for benchmark in benchmark_name_list:
-            res_list = filtered_result_data.filter(benchmark__name=benchmark[0])
+            res_list = self.get_queryset().filter(benchmark__name=benchmark[0])
             subscore_name_list = res_list.values_list('name').distinct()
             for subscore in subscore_name_list:
                 s = res_list.filter(name=subscore[0])
                 avg = s.aggregate(Avg('measurement'))
                 stddev = s.aggregate(StdDev('measurement'))
-                ret.append({
+                length = s.aggregate(Count('measurement'))
+                subscore_dict = {
                     'benchmark': benchmark[0],
-                    'subscore': subscore[0],
-                    'avg_value': avg,
-                    'stddev': stddev
-                    })
-        return ret
+                    'subscore': subscore[0]
+                    }
+                subscore_dict.update(avg)
+                subscore_dict.update(stddev)
+                subscore_dict.update(length)
+                ret.append(subscore_dict)
+        return response.Response(ret)
 
 
 class ComapreResults(viewsets.ViewSet):
