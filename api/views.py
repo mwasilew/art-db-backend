@@ -79,7 +79,8 @@ class ResultViewSet(viewsets.ModelViewSet):
         'gerrit_patchset_number',
         'gerrit_change_url',
         'gerrit_change_id',
-        'build_url')
+        'build_url',
+        'manifest')
 
 
 # result data
