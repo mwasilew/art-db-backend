@@ -24,6 +24,7 @@ class ManifestViewSet(viewsets.ModelViewSet):
     queryset = models.Manifest.objects.all()
     serializer_class = serializers.ManifestSerializer
     filter_fields = ('id', 'manifest_hash', 'manifest')
+    ordering_fields = ('id',)
 
 
 class ReducedManifestViewSet(viewsets.ModelViewSet):
