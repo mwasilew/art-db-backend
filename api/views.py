@@ -111,16 +111,48 @@ class ResultDataForManifest(views.APIView):
             results = results.filter(gerrit_change_id=gerrit_change_id)
         results = results.filter(gerrit_change_number=gerrit_change_number)
         results = results.filter(gerrit_patchset_number=gerrit_patchset_number)
+        if manifest is None:
+            # get results for latest available manifest baseline
+            manifest = models.Manifest.objects.latest("id").pk
+            results = results.filter(manifest__id=manifest)
 
         # All result data that matches manifest and/or gerrit
         queryset = queryset.filter(result__in=results)
         return queryset
 
     def get(self, request, format=None):
-        ret = []
-        benchmark_name_list = self.get_queryset().values_list('benchmark__name').distinct()
+        results = []
+        metadata = {}
+        ret = {
+            "data": results,
+            "metadata": metadata
+        }
+        queryset = self.get_queryset()
+        results_objects = models.Result.objects.filter(data__in=queryset)
+        branches = results_objects.values_list("branch__name").distinct()
+        if len(branches) == 1:
+            # there should be only one
+            metadata['branch'] = branches[0][0]
+        manifests = results_objects.values_list("manifest__id").distinct()
+        if len(manifests) == 1:
+            # there should be only one
+            metadata['manifest'] = manifests[0][0]
+        boards = results_objects.values_list("board__displayname").distinct()
+        metadata['boards'] = [x[0] for x in boards]
+        build_urls = results_objects.values_list("build_url").distinct()
+        metadata['builds'] = [x[0] for x in build_urls]
+
+        gerrit_change_numbers = results_objects.values_list("gerrit_change_number").distinct()
+        gerrit_patchset_numbers = results_objects.values_list("gerrit_patchset_number").distinct()
+        if len(gerrit_patchset_numbers) == 1 and \
+            len(gerrit_change_numbers) == 1:
+                if gerrit_patchset_numbers[0][0] is not None and \
+                    gerrit_change_numbers[0][0] is not None:
+                    metadata['gerrit'] = "%s/%s" % (gerrit_change_numbers[0][0], gerrit_patchset_numbers[0][0])
+
+        benchmark_name_list = queryset.values_list('benchmark__name').distinct()
         for benchmark in benchmark_name_list:
-            res_list = self.get_queryset().filter(benchmark__name=benchmark[0])
+            res_list = queryset.filter(benchmark__name=benchmark[0])
             subscore_name_list = res_list.values_list('name').distinct()
             for subscore in subscore_name_list:
                 s = res_list.filter(name=subscore[0])
@@ -134,7 +166,7 @@ class ResultDataForManifest(views.APIView):
                 subscore_dict.update(avg)
                 subscore_dict.update(stddev)
                 subscore_dict.update(length)
-                ret.append(subscore_dict)
+                results.append(subscore_dict)
         return response.Response(ret)
 
 
