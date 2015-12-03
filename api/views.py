@@ -106,6 +106,12 @@ class ResultDataForManifest(views.APIView):
         gerrit_change_id = self.request.query_params.get('gerrit_change_id', None)
         gerrit_change_number = self.request.query_params.get('gerrit_change_number', None)
         gerrit_patchset_number = self.request.query_params.get('gerrit_patchset_number', None)
+
+        print manifest
+        print gerrit_change_id
+        print gerrit_change_number
+        print gerrit_patchset_number
+
         results = models.Result.objects.all()
         if manifest:
             results = results.filter(manifest__id=manifest)
@@ -113,13 +119,17 @@ class ResultDataForManifest(views.APIView):
             results = results.filter(gerrit_change_id=gerrit_change_id)
         results = results.filter(gerrit_change_number=gerrit_change_number)
         results = results.filter(gerrit_patchset_number=gerrit_patchset_number)
-        if manifest is None:
+        if gerrit_change_number is None \
+            and gerrit_patchset_number is None \
+            and gerrit_change_id is None \
+            and manifest is None:
             # get results for latest available manifest baseline
             manifest = models.Manifest.objects.latest("id").pk
             results = results.filter(manifest__id=manifest)
 
         # All result data that matches manifest and/or gerrit
         queryset = queryset.filter(result__in=results)
+        print queryset.all()
         return queryset
 
     def get(self, request, format=None):
