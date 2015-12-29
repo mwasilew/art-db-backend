@@ -1,0 +1,46 @@
+---
+- name: Copy supervisord.conf
+  sudo_user: "{{apache_user}}"
+  when: supervisord_conf is defined
+  template: src=templates/supervisord.conf
+            dest={{supervisord_conf}}
+            owner={{apache_user}} group={{apache_user}} mode=0755
+  tags:
+    - install
+    - update
+    - celery
+
+- name: ensuring required supervisor directories
+  file: path={{item}}
+        state=directory
+        owner={{apache_user}} group={{apache_user}}
+  with_items:
+    - '{{supervisor_config_dir}}'
+
+- name: Copy supervisor service files
+  sudo_user: "{{apache_user}}"
+  template: src={{item.src}}
+            dest={{item.dest}}
+            owner={{apache_user}} group={{apache_user}} mode=0755
+  with_items:
+    - { src: 'templates/supervisor.celerybeat.conf', dest: '{{supervisor_config_dir}}/supervisor.celerybeat.conf' }
+    - { src: 'templates/supervisor.celerycam.conf', dest: '{{supervisor_config_dir}}/supervisor.celerycam.conf' }
+    - { src: 'templates/supervisor.celeryd.conf', dest: '{{supervisor_config_dir}}/supervisor.celeryd.conf' }
+  tags:
+    - install
+    - update
+    - celery
+
+- name: checking if supervisord is running
+  shell: pgrep -u {{ apache_user }} supervisor
+  ignore_errors: on
+  changed_when: off
+  register: supervisor_running
+
+- name: running supervisord
+  shell: "{{supervisord_path}} -c {{supervisord_conf}}"
+  when: supervisor_running|failed
+  tags:
+    - install
+    - update
+    - celery

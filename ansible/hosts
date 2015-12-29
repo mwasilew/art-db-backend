@@ -1,2 +1,5 @@
 [production]
 art-reports.linaro.org
+
+[staging]
+staging-art-reports.linaro.org

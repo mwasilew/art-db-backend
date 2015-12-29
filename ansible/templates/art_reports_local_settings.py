@@ -24,7 +24,7 @@ DATABASES = {
 
 SECRET_KEY = '{{secret_key}}'
 
-STATIC_ROOT = '/var/www/art-reports.linaro.org/static/'
+STATIC_ROOT = '/var/www/{{hostname}}/static/'
 
 LOG_LEVEL = 'DEBUG'
 
@@ -54,7 +54,7 @@ LOGGING = {
         'file': {
             'level': LOG_LEVEL,
             'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': '/var/log/art-reports.linaro.org/art-reports.log',
+            'filename': '/var/log/{{hostname}}/art-reports.log',
             'backupCount': 5,
             'when': 'midnight',
             'formatter': 'simple',
