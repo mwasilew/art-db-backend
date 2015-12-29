@@ -39,6 +39,7 @@
 
 - name: running supervisord
   shell: "{{supervisord_path}} -c {{supervisord_conf}}"
+  sudo_user: "{{apache_user}}"
   when: supervisor_running|failed
   tags:
     - install
