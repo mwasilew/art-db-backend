@@ -55,6 +55,18 @@
     - install
     - update
 
+- name: Copy index.wsgi
+  sudo_user: "{{apache_user}}"
+  when: django_local_wsgi is defined
+  template: src={{django_local_wsgi}}
+            dest={{django_app_root}}/index.wsgi
+            owner={{apache_user}} group={{apache_user}} mode=0755
+  notify: restart-apache
+  tags:
+    - install
+    - update
+    - django
+
 - name: Copy local settings
   sudo_user: "{{apache_user}}"
   when: django_local_settings is defined
@@ -103,4 +115,4 @@
   with_items: apache_modules
   notify: restart-apache
   tags:
-    - install
+      - install

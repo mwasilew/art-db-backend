@@ -14,11 +14,16 @@ apache_modules:
 hostname: "{{inventory_hostname}}"
 apache_user: www-data
 git_repo: "https://git.linaro.org/people/milosz.wasilewski/art-db-backend.git"
-git_tag: master
-django_app_root: "{{install_base}}/art-reports.linaro.org/project"
+git_tag: celery
+django_app_root: "{{install_base}}/{{hostname}}/project"
 django_settings: crayonbox.settings
 django_local_settings: templates/art_reports_local_settings.py
+django_local_wsgi: templates/art_reports_index.wsgi
 install_base: /srv
+
+supervisord_conf: "{{django_app_root}}/supervisord.conf"
+supervisord_path: "{{install_base}}/{{hostname}}/.virtualenv/bin/supervisord"
+supervisor_config_dir: "{{django_app_root}}/supervisor.conf.d"
 
 ssl_key: /etc/ssl/private/ssl-cert-snakeoil.key
 ssl_cert: /etc/ssl/certs/ssl-cert-snakeoil.pem
