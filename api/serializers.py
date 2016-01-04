@@ -1,6 +1,11 @@
-from rest_framework import serializers
-from benchmarks import models
 from datetime import datetime
+
+from rest_framework import serializers
+from rest_framework.authtoken.models import Token
+
+from benchmarks import models as benchmarks_models
+from jobs import models as jobs_models
+
 
 
 class DynamicFieldsMixin(object):
@@ -26,64 +31,64 @@ class DynamicFieldsMixin(object):
 
 class ConfigurationSerializer(serializers.ModelSerializer, DynamicFieldsMixin):
     class Meta:
-        model = models.Configuration
+        model = benchmarks_models.Configuration
 
 
 class BoardSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Board
+        model = benchmarks_models.Board
 
     def create(self, validated_data):
-        board, created = models.Board.objects.get_or_create(**validated_data)
+        board, created = benchmarks_models.Board.objects.get_or_create(**validated_data)
         return board
 
 
 class BoardConfigurationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.BoardConfiguration
+        model = benchmarks_models.BoardConfiguration
 
     def create(self, validated_data):
-        boardconfig, created = models.BoardConfiguration.objects.get_or_create(**validated_data)
+        boardconfig, created = benchmarks_models.BoardConfiguration.objects.get_or_create(**validated_data)
         return boardconfig
 
 
 class BenchmarkSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Benchmark
+        model = benchmarks_models.Benchmark
 
     def create(self, validated_data):
-        benchmark, created = models.Benchmark.objects.get_or_create(**validated_data)
+        benchmark, created = benchmarks_models.Benchmark.objects.get_or_create(**validated_data)
         return benchmark
 
 
 class BranchSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Branch
+        model = benchmarks_models.Branch
 
     def create(self, validated_data):
-        branch, created = models.Branch.objects.get_or_create(**validated_data)
+        branch, created = benchmarks_models.Branch.objects.get_or_create(**validated_data)
         return branch
 
 
 class ReducedManifestSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
     class Meta:
-        model = models.Manifest
+        model = benchmarks_models.Manifest
         fields = ("id", "manifest_hash", "results")
         depth = 2
 
 
 class ManifestSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
     class Meta:
-        model = models.Manifest
+        model = benchmarks_models.Manifest
 
     def create(self, validated_data):
-        manifest, _ = models.Manifest.objects.get_or_create(**validated_data)
+        manifest, _ = benchmarks_models.Manifest.objects.get_or_create(**validated_data)
         return manifest
 
 
 class ResultDataSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
     class Meta:
-        model = models.ResultData
+        model = benchmarks_models.ResultData
         #depth = 1
         #fields = ('id', 'name', 'benchmark', 'measurement', 'timestamp', 'result')
 
@@ -91,17 +96,27 @@ class ResultDataSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
         defaults = {
             "timestamp": datetime.now()
         }
-        resultdata, created = models.ResultData.objects.get_or_create(defaults=defaults, **validated_data)
+        resultdata, created = benchmarks_models.ResultData.objects.get_or_create(defaults=defaults, **validated_data)
         return resultdata
 
 class ResultSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
     class Meta:
-        model = models.Result
+        model = benchmarks_models.Result
         #depth = 1
 
     def create(self, validated_data):
         defaults = {
             "timestamp": datetime.now()
         }
-        result, created = models.Result.objects.get_or_create(defaults=defaults, **validated_data)
+        result, created = benchmarks_models.Result.objects.get_or_create(defaults=defaults, **validated_data)
         return result
+
+
+class BuildJobSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = jobs_models.BuildJob
+
+
+class TokenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Token
