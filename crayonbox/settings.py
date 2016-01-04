@@ -54,8 +54,10 @@ INSTALLED_APPS = (
 
     # local apps
     'benchmarks',
+    'jobs',
     'api',
     'userprofile',
+    'frontend'
 )
 
 REST_FRAMEWORK = {
@@ -122,6 +124,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Celery settings
 BROKER_URL='redis://localhost:6379/0'
@@ -149,3 +152,4 @@ except ImportError:
         f.write(local_settings_content)
 
     from local_settings import *
+

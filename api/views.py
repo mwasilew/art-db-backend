@@ -5,15 +5,27 @@ from django.db.models import Avg, StdDev, Count
 from rest_framework import views
 from rest_framework import viewsets
 from rest_framework import response
+from rest_framework import mixins
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from rest_framework.decorators import list_route, detail_route
 
-from benchmarks import models
+from benchmarks import models as benchmarks_models
+from jobs import models as jobs_models
 
 from . import serializers
 from . import permissions
 
+
+class TokenViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    permission_classes = (IsAuthenticated, )
+    queryset = Token.objects.all()
+    serializer_class = serializers.TokenSerializer
+
+    def list(self, request, pk=None):
+        serializer = self.serializer_class(Token.objects.get(user=request.user))
+        return response.Response(serializer.data)
 
 # manifest
 class ManifestViewSet(viewsets.ModelViewSet):
@@ -21,7 +33,7 @@ class ManifestViewSet(viewsets.ModelViewSet):
     Authentication is needed for this methods
     """
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
-    queryset = models.Manifest.objects.all()
+    queryset = benchmarks_models.Manifest.objects.all()
     serializer_class = serializers.ManifestSerializer
     filter_fields = ('id', 'manifest_hash', 'manifest')
     ordering_fields = ('id',)
@@ -29,7 +41,7 @@ class ManifestViewSet(viewsets.ModelViewSet):
 
 class ReducedManifestViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
-    queryset = models.Manifest.objects.all()
+    queryset = benchmarks_models.Manifest.objects.all()
     serializer_class = serializers.ReducedManifestSerializer
     filter_fields = ('id', 'manifest_hash', 'manifest')
 
@@ -37,7 +49,7 @@ class ReducedManifestViewSet(viewsets.ModelViewSet):
 # board
 class BoardViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
-    queryset = models.Board.objects.all()
+    queryset = benchmarks_models.Board.objects.all()
     serializer_class = serializers.BoardSerializer
     filter_fields = ('id', 'displayname')
 
@@ -45,7 +57,7 @@ class BoardViewSet(viewsets.ModelViewSet):
 # board configuration ?
 class BoardConfigurationViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
-    queryset = models.BoardConfiguration.objects.all()
+    queryset = benchmarks_models.BoardConfiguration.objects.all()
     serializer_class = serializers.BoardConfigurationSerializer
     filter_fields = ('id', 'name')
 
@@ -53,7 +65,7 @@ class BoardConfigurationViewSet(viewsets.ModelViewSet):
 # benchmark
 class BenchmarkViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
-    queryset = models.Benchmark.objects.all()
+    queryset = benchmarks_models.Benchmark.objects.all()
     serializer_class = serializers.BenchmarkSerializer
     filter_fields = ('id', 'name')
 
@@ -61,7 +73,7 @@ class BenchmarkViewSet(viewsets.ModelViewSet):
 # branch
 class BranchViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
-    queryset = models.Branch.objects.all()
+    queryset = benchmarks_models.Branch.objects.all()
     serializer_class = serializers.BranchSerializer
     filter_fields = ('id', 'name')
 
@@ -69,7 +81,7 @@ class BranchViewSet(viewsets.ModelViewSet):
 # result
 class ResultViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
-    queryset = models.Result.objects.all()
+    queryset = benchmarks_models.Result.objects.all()
     serializer_class = serializers.ResultSerializer
     filter_fields = ('id',
         'board',
@@ -86,7 +98,7 @@ class ResultViewSet(viewsets.ModelViewSet):
 # result data
 class ResultDataViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
-    queryset = models.ResultData.objects.all()
+    queryset = benchmarks_models.ResultData.objects.all()
     serializer_class = serializers.ResultDataSerializer
     filter_fields = ('id',
         'benchmark',
@@ -101,7 +113,7 @@ class ResultDataForManifest(views.APIView):
      - gerrit change ID/number/patchset
     """
     def get_queryset(self):
-        queryset = models.ResultData.objects.all()
+        queryset = benchmarks_models.ResultData.objects.all()
         manifest = self.request.query_params.get('manifest_id', None)
         gerrit_change_id = self.request.query_params.get('gerrit_change_id', None)
         gerrit_change_number = self.request.query_params.get('gerrit_change_number', None)
@@ -112,7 +124,7 @@ class ResultDataForManifest(views.APIView):
         print gerrit_change_number
         print gerrit_patchset_number
 
-        results = models.Result.objects.all()
+        results = benchmarks_models.Result.objects.all()
         if manifest:
             results = results.filter(manifest__id=manifest)
         if gerrit_change_id:
@@ -124,7 +136,7 @@ class ResultDataForManifest(views.APIView):
             and gerrit_change_id is None \
             and manifest is None:
             # get results for latest available manifest baseline
-            manifest = models.Manifest.objects.latest("id").pk
+            manifest = benchmarks_models.Manifest.objects.latest("id").pk
             results = results.filter(manifest__id=manifest)
 
         # All result data that matches manifest and/or gerrit
@@ -140,7 +152,7 @@ class ResultDataForManifest(views.APIView):
             "metadata": metadata
         }
         queryset = self.get_queryset()
-        results_objects = models.Result.objects.filter(data__in=queryset)
+        results_objects = benchmarks_models.Result.objects.filter(data__in=queryset)
         branches = results_objects.values_list("branch__name").distinct()
         if len(branches) == 1:
             # there should be only one
@@ -269,11 +281,11 @@ class ComapreResults(viewsets.ViewSet):
         if not (branch_1 and branch_2):
             return response.Response([])
 
-        base_query = (models.ResultData.objects
+        base_query = (benchmarks_models.ResultData.objects
                       .filter(result__branch__name=branch_1)
                       .select_related('benchmark'))
 
-        target_query = (models.ResultData.objects
+        target_query = (benchmarks_models.ResultData.objects
                         .filter(result__branch__name=branch_2)
                         .select_related('benchmark'))
 
@@ -289,14 +301,21 @@ class ComapreResults(viewsets.ViewSet):
         if not (manifest_1 and manifest_2):
             return response.Response([])
 
-        base_query = (models.ResultData.objects
+        base_query = (benchmarks_models.ResultData.objects
                       .filter(result__manifest__manifest_hash=manifest_1)
                       .select_related('benchmark'))
 
-        target_query = (models.ResultData.objects
+        target_query = (benchmarks_models.ResultData.objects
                         .filter(result__manifest__manifest_hash=manifest_2)
                         .select_related('benchmark'))
 
         data = self.compare_query(base_query, target_query)
 
         return response.Response(data)
+
+
+class BuildJobViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    queryset = jobs_models.BuildJob.objects.all()
+    serializer_class = serializers.BuildJobSerializer
+    ordering_fields = ('id',)
