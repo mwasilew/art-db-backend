@@ -24,19 +24,18 @@
   </head>
   <body ng-app="art" ng-cloak>
 
-    <md-toolbar class="md-display-3">
+    <md-toolbar ng-controller="Toolbar" class="md-display-3" >
 
       <div class="md-toolbar-tools">
 	<i class="material-icons">insert_chart</i>
 	<h1>Art</h1>
         <span flex></span>
-	<i class="material-icons">vpn_key</i> Token
+	<i class="material-icons">vpn_key</i>{{ token }}
       </div>
 
     </md-toolbar>
 
     <md-content flex layout-padding>
-      asd
     </md-content>
 
   </body>
