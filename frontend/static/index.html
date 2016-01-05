@@ -17,13 +17,15 @@
     <script src="/static/bower_components/angular/angular.js"></script>
     <script src="/static/bower_components/angular-aria/angular-aria.js"></script>
     <script src="/static/bower_components/angular-animate/angular-animate.js"></script>
+    <script src="/static/bower_components/angular-route/angular-route.js"></script>
     <script src="/static/bower_components/angular-material/angular-material.js"></script>
 
     <script src="/static/main.js"></script>
 
   </head>
-  <body ng-app="art" ng-cloak>
 
+  <body ng-app="art" ng-cloak>
+    
     <md-toolbar ng-controller="Toolbar" class="md-display-3" >
 
       <div class="md-toolbar-tools">
@@ -36,40 +38,8 @@
 
     </md-toolbar>
 
-    <md-content ng-controller="JobsList">
-      <md-list>
+    <div ng-view></div>
 
-	<md-subheader class="md-no-sticky">
-	  jobs in progress
-	</md-subheader>
-
-	<md-list-item ng-repeat="build in builds" ng-click="open()">
-
-	  <p layout="row">
-	    <span flex="20">
-	      <b>{{ build.id }}</b>
-	    </span>
-	    <span flex></span>
-	    <span flex="15">
-	      {{ build.created_at }}
-	    </span>
-	  </p>
-
-	</md-list-item>
-
-	<md-divider ></md-divider>
-
-	<md-subheader class="md-no-sticky">
-	  jobs completed
-	</md-subheader>
-
-	<md-list-item class="md-2-line" ng-repeat="build in builds">
-	  <i class="md-avatar material-icons">check_circle</i>
-          <div class="md-list-item-text">
-	</md-list-item>
-
-      </md-list>
-    </md-content>
 
   </body>
 </html>
