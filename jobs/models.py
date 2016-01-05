@@ -16,6 +16,9 @@ class BuildJob(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ['-created_at']
+
     def __str__(self):
         return '%s %s' % (self.id, self.name)
 
@@ -25,6 +28,9 @@ class TestJob(models.Model):
     id = models.CharField(primary_key=True, max_length=100)
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
 
     def __str__(self):
         return '%s %s' % (self.id, self.build_job)
