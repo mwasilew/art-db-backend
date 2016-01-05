@@ -14,8 +14,14 @@ class BuildJob(models.Model):
     gerrit_change_number = models.CharField(blank=True, max_length=256)
     gerrit_patchset_number = models.CharField(blank=True, max_length=256)
 
+    def __str__(self):
+        return '%s %s' % (self.id, self.name)
 
 class TestJob(models.Model):
     build_job = models.ForeignKey('BuildJob')
 
     id = models.CharField(primary_key=True, max_length=100)
+
+    def __str__(self):
+        return '%s %s' % (self.id, self.build_job)
+
