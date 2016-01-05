@@ -61,6 +61,7 @@ INSTALLED_APPS = (
 )
 
 REST_FRAMEWORK = {
+    'DATETIME_FORMAT': "%Y-%m-%d %H:%M:%S",
     'DEFAULT_FILTER_BACKENDS': (
         'rest_framework.filters.DjangoFilterBackend',
         'rest_framework.filters.OrderingFilter',),
@@ -152,4 +153,5 @@ except ImportError:
         f.write(local_settings_content)
 
     from local_settings import *
+
 
