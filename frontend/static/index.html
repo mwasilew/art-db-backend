@@ -36,7 +36,26 @@
 
     </md-toolbar>
 
-    <md-content flex layout-padding>
+    <md-content ng-controller="JobsList" layout-padding>
+      <md-list>
+
+	<md-subheader class="md-no-sticky">
+	  Build Jobs Subbmited
+	</md-subheader>
+
+	<md-list-item class="md-2-line" ng-repeat="build in builds">
+	  <i class="md-avatar material-icons">check_circle</i>
+          <div class="md-list-item-text">
+
+            <h3>{{ build.id }}</h3>
+	    <span flex></span>
+            <p>Secondary text</p>
+
+          </div>
+	</md-list-item>
+
+	<md-divider ></md-divider>
+      </md-list>
     </md-content>
 
   </body>
