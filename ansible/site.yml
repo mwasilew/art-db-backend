@@ -9,5 +9,6 @@
   - art-reports-deps
   - django
   - art-reports-populate
+  - redis
   - celeryd
   - {role: apache-site, src: "art-reports.linaro.org", config: "{{inventory_hostname}}", tags: [apache] }
