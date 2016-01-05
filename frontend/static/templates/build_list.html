@@ -5,19 +5,15 @@
       jobs in progress
     </md-subheader>
 
-    <md-list-item ng-repeat="build in builds"
+    <md-list-item layout="row" 
+		  aria-label="{{ build.name }}"
+		  ng-repeat="build in builds"
 		  ng-href="#/build/{{ build.id }}">
 
-      <p layout="row">
-    	<span flex="20">
-    	  <b>{{ build.id }}</b>
-    	</span>
-    	<span flex></span>
-    	<span flex="15">
-    	  {{ build.created_at }}
-    	</span>
-      </p>
-
+      <div flex>{{ build.id }} {{ build.name }}</div>
+      <div flex=10>Test 3</div>
+      <div>{{ build.created_at }}</div>
+      
     </md-list-item>
 
     <md-divider ></md-divider>
