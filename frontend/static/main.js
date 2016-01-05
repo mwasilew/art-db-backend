@@ -1,14 +1,25 @@
-var app = angular.module('art', ['ngMaterial']);
+var app = angular.module('art', ['ngMaterial', 'ngRoute']);
 
 app.controller('Toolbar', ['$scope', '$http', function($scope, $http) {
-
     $http.get('/api/token/').then(function(response) {
         $scope.auth = response.data;
     });
-
 }]);
 
-app.controller('JobsList', ['$scope', '$http', function($scope, $http) {
+app.config(['$routeProvider', function($routeProvider) {
+    $routeProvider
+        .when('/', {
+            templateUrl: '/static/templates/build_list.html',
+            controller: 'BuildList'
+        })
+        .when('/build/:buildId', {
+            templateUrl: '/static/templates/build_detail.html',
+            controller: 'BuildDetail'
+        });
+}]);
+
+
+app.controller('BuildList', ['$scope', '$http', function($scope, $http) {
 
     $http.get('/api/build/').then(function(response) {
         $scope.builds = response.data;
@@ -16,3 +27,10 @@ app.controller('JobsList', ['$scope', '$http', function($scope, $http) {
 
 }]);
 
+app.controller('BuildDetail', ['$scope', '$http', function($scope, $http) {
+
+    // $http.get('/api/build/').then(function(response) {
+    //     $scope.builds = response.data;
+    // });
+
+}]);
