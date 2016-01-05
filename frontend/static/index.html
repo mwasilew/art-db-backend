@@ -36,26 +36,38 @@
 
     </md-toolbar>
 
-    <md-content ng-controller="JobsList" layout-padding>
+    <md-content ng-controller="JobsList">
       <md-list>
 
 	<md-subheader class="md-no-sticky">
-	  Build Jobs Subbmited
+	  jobs in progress
+	</md-subheader>
+
+	<md-list-item ng-repeat="build in builds" ng-click="open()">
+
+	  <p layout="row">
+	    <span flex="20">
+	      <b>{{ build.id }}</b>
+	    </span>
+	    <span flex></span>
+	    <span flex="15">
+	      {{ build.created_at }}
+	    </span>
+	  </p>
+
+	</md-list-item>
+
+	<md-divider ></md-divider>
+
+	<md-subheader class="md-no-sticky">
+	  jobs completed
 	</md-subheader>
 
 	<md-list-item class="md-2-line" ng-repeat="build in builds">
 	  <i class="md-avatar material-icons">check_circle</i>
           <div class="md-list-item-text">
-
-            <h3>{{ build.id }}</h3>
-	    <span flex></span>
-            <p>Secondary text</p>
-	    <p>{{ build.created_at }}</p>
-
-          </div>
 	</md-list-item>
 
-	<md-divider ></md-divider>
       </md-list>
     </md-content>
 
