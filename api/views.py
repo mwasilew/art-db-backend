@@ -6,6 +6,7 @@ from rest_framework import views
 from rest_framework import viewsets
 from rest_framework import response
 from rest_framework import mixins
+from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
@@ -318,4 +319,30 @@ class BuildJobViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
     queryset = jobs_models.BuildJob.objects.all()
     serializer_class = serializers.BuildJobSerializer
-    ordering_fields = ('id',)
+
+    def create(self, request, *args, **kwargs):
+
+        test_jobs = []
+        if 'id' in request.data:
+            test_jobs = request.data.get('test_jobs').split(",")
+            del request.data['test_jobs']
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        obj = serializer.save()
+
+        for test_job in test_jobs:
+            if not jobs_models.TestJob.objects.filter(id=test_job).exists():
+                jobs_models.TestJob.objects.get_or_create(
+                    build_job=obj,
+                    pk=test_job)
+
+        return response.Response(
+            serializer.data, status=status.HTTP_201_CREATED)
+
+
+class TestJobViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    queryset = jobs_models.TestJob.objects.all()
+    serializer_class = serializers.TestJobSerializer
+

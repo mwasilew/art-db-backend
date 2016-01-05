@@ -15,6 +15,7 @@ router.register(r'boardconfiguration', views.BoardConfigurationViewSet)
 router.register(r'benchmark', views.BenchmarkViewSet)
 
 router.register(r'build', views.BuildJobViewSet)
+router.register(r'test', views.TestJobViewSet)
 
 # functional view
 router.register(r'compare', views.ComapreResults, base_name="compare")

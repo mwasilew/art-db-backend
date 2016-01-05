@@ -113,8 +113,16 @@ class ResultSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
 
 
 class BuildJobSerializer(serializers.ModelSerializer):
+    test_jobs = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
     class Meta:
         model = jobs_models.BuildJob
+
+
+class TestJobSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = jobs_models.TestJob
 
 
 class TokenSerializer(serializers.ModelSerializer):
