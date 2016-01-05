@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+from datetime import timedelta
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -132,8 +133,20 @@ BROKER_URL='redis://localhost:6379/0'
 CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
 CELERY_ACCEPT_CONTENT = ['json', 'pickle']
 
+
+CELERYBEAT_SCHEDULE = {
+    'check_incomplete_testjob': {
+        'task': 'jobs.tasks.check_incomplete_testjob',
+        'schedule': timedelta(minutes=5),
+    },
+}
+
+CELERY_TIMEZONE = 'UTC'
+
 import djcelery
 djcelery.setup_loader()
+
+
 
 try:
     from local_settings import *
