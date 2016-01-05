@@ -118,5 +118,7 @@ class BuildJobSerializer(serializers.ModelSerializer):
 
 
 class TokenSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username')
     class Meta:
         model = Token
+        fields = ('key', 'username')
