@@ -14,7 +14,7 @@ router.register(r'board', views.BoardViewSet)
 router.register(r'boardconfiguration', views.BoardConfigurationViewSet)
 router.register(r'benchmark', views.BenchmarkViewSet)
 
-router.register(r'job', views.BuildJobViewSet)
+router.register(r'build', views.BuildJobViewSet)
 
 # functional view
 router.register(r'compare', views.ComapreResults, base_name="compare")
@@ -23,3 +23,4 @@ urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'details/', views.ResultDataForManifest.as_view()),
 ]
+
