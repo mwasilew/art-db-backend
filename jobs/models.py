@@ -28,6 +28,8 @@ class TestJob(models.Model):
 
     id = models.CharField(primary_key=True, max_length=100)
 
+    completed = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
