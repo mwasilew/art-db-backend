@@ -1,3 +1,12 @@
+<md-content layout-padding>
+  <form name="userForm">
+    <md-input-container class="md-block">
+      <label>Search</label>
+      <input ng-change="search()" ng-model="searchQuery">
+      </md-input-container>
+  </form>
+</md-content>
+
 <md-content>
   <md-list>
 
@@ -22,10 +31,7 @@
       jobs completed
     </md-subheader>
 
-    <md-list-item class="md-2-line" ng-repeat="build in builds">
-      <i class="md-avatar material-icons">check_circle</i>
-      <div class="md-list-item-text">
-    </md-list-item>
+    Not implemented
 
   </md-list>
 </md-content>

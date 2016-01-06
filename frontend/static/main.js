@@ -25,6 +25,12 @@ app.controller('BuildList', ['$scope', '$http', function($scope, $http) {
         $scope.builds = response.data;
     });
 
+    $scope.search = function() {
+        $http.get('/api/build/', {params: {'name': $scope.searchQuery }})
+            .then(function(response) {
+                $scope.builds = response.data;
+            });
+    };
 }]);
 
 app.controller('BuildDetail', ['$scope', '$http', function($scope, $http) {

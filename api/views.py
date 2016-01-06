@@ -17,6 +17,7 @@ from jobs import models as jobs_models
 
 from . import serializers
 from . import permissions
+from . import filters
 
 
 class TokenViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -315,10 +316,13 @@ class ComapreResults(viewsets.ViewSet):
         return response.Response(data)
 
 
+
+
 class BuildJobViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
     queryset = jobs_models.BuildJob.objects.all()
     serializer_class = serializers.BuildJobSerializer
+    filter_class = filters.BuildJobFilter
 
     def create(self, request, *args, **kwargs):
 
@@ -345,4 +349,5 @@ class TestJobViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
     queryset = jobs_models.TestJob.objects.all()
     serializer_class = serializers.TestJobSerializer
+
 
