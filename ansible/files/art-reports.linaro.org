@@ -13,8 +13,8 @@ WSGILazyInitialization On
     ServerAdmin webmaster@linaro.org
     DocumentRoot {{django_app_root}}/
 
-    CustomLog ${APACHE_LOG_DIR}/art-reports.linaro.org-access.log combined
-    ErrorLog ${APACHE_LOG_DIR}/art-reports.linaro.org-error.log
+    CustomLog ${APACHE_LOG_DIR}/{{hostname}}-access.log combined
+    ErrorLog ${APACHE_LOG_DIR}/{{hostname}}-error.log
 
 
     KeepAlive On
@@ -37,8 +37,8 @@ WSGILazyInitialization On
 
     SetEnvIf User-Agent ".*MSIE.*" nokeepalive ssl-unclean-shutdown
 
-    WSGIDaemonProcess art-reports.linaro.org
-    WSGIProcessGroup art-reports.linaro.org
+    WSGIDaemonProcess {{hostname}}
+    WSGIProcessGroup {{hostname}}
     WSGIScriptAlias / {{django_app_root}}/index.wsgi
     WSGIApplicationGroup %{GLOBAL}
     WSGIPassAuthorization On
@@ -70,7 +70,7 @@ WSGILazyInitialization On
         Header add Cache-Control "max-age=604800"
     </FilesMatch>
 
-    Alias /static/ /var/www/art-reports.linaro.org/static/
+    Alias /static/ /var/www/{{hostname}}/static/
     <Location "/static/">
         Options -Indexes
         SetOutputFilter DEFLATE

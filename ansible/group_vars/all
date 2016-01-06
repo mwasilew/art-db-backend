@@ -1,4 +1,4 @@
-db_name: art-reports
+db_name: "{{inventory_hostname}}"
 db_user: art-reports
 db_password: art-reports
 db_host: 127.0.0.1
@@ -15,7 +15,7 @@ hostname: "{{inventory_hostname}}"
 apache_user: www-data
 git_repo: "https://git.linaro.org/people/milosz.wasilewski/art-db-backend.git"
 git_tag: master
-django_app_root: "{{install_base}}/art-reports.linaro.org/project"
+django_app_root: "{{install_base}}/{{inventory_hostname}}/project"
 django_settings: crayonbox.settings
 django_local_settings: templates/art_reports_local_settings.py
 install_base: /srv

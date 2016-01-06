@@ -11,5 +11,5 @@
     - django
 
 - name: Create logfile directory
-  file: path=/var/log/art-reports.linaro.org/ state=directory
+  file: path=/var/log/{{hostname}}/ state=directory
         owner=root group=root mode=0744
