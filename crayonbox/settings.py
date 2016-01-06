@@ -26,35 +26,48 @@ SECRET_KEY = 'very-secret-password'
 DEBUG = True
 
 ALLOWED_HOSTS = []
-APPEND_SLASH=False
+APPEND_SLASH = False
+
+LOGIN_REDIRECT_URL = "/"
+LOGIN_URL = "/login"
+LOGOUT_URL = "/logout"
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
+
 # Application definition
 
 INSTALLED_APPS = (
+    'longusername',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_extensions',
 
     'rest_framework',
     'rest_framework.authtoken',
+
     'benchmarks',
-    'api'
+    'api',
+    'userprofile',
 )
 
 REST_FRAMEWORK = {
-    'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',),
+    'DEFAULT_FILTER_BACKENDS': (
+        'rest_framework.filters.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter',),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
-    )
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination'
 }
 
 MIDDLEWARE_CLASSES = (
@@ -70,21 +83,19 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'crayonbox.urls'
 
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
-]
+TEMPLATES = [{
+    'BACKEND': 'django.template.backends.django.DjangoTemplates',
+    'DIRS': [BASE_DIR + '/templates'],
+    'APP_DIRS': True,
+    'OPTIONS': {
+        'context_processors': [
+            'django.template.context_processors.debug',
+            'django.template.context_processors.request',
+            'django.contrib.auth.context_processors.auth',
+            'django.contrib.messages.context_processors.messages',
+        ],
+    }
+}]
 
 WSGI_APPLICATION = 'crayonbox.wsgi.application'
 
@@ -95,6 +106,7 @@ WSGI_APPLICATION = 'crayonbox.wsgi.application'
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
+
 
 USE_I18N = True
 
@@ -126,6 +138,3 @@ except ImportError:
         f.write(local_settings_content)
 
     from local_settings import *
-
-TEMPLATE_DEBUG = DEBUG
-

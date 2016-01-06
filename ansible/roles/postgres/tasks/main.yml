@@ -4,6 +4,7 @@
     - postgresql
     - python-psycopg2
     - postgresql-contrib
+    - libpq-dev
   tags:
     - install
     - update

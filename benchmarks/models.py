@@ -1,5 +1,6 @@
-from django.db import models
 import hashlib
+
+from django.db import models
 
 
 class Configuration(models.Model):
@@ -31,22 +32,26 @@ class Branch(models.Model):
 
 
 class Manifest(models.Model):
+    manifest_hash = models.CharField(max_length=40, editable=False)
     manifest = models.TextField()
-    #manifest_sha1 = models.CharField(max_length=40)
 
     def __unicode__(self):
-        #return self.manifest_sha1
-        return hashlib.sha1(self.manifest).hexdigest()
+        return self.manifest_hash
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.manifest_hash = hashlib.sha1(self.manifest).hexdigest()
+        return super(Manifest, self).save(*args, **kwargs)
 
 
 class Result(models.Model):
     board = models.ForeignKey(Board, related_name="results")
     branch = models.ForeignKey(Branch, related_name="results")
     revision = models.CharField(max_length=32, null=True, blank=True)
-    configuration = models.ForeignKey(Configuration, blank=True, null=True) # is it needed ?
+    configuration = models.ForeignKey(Configuration, blank=True, null=True)  # is it needed ?
     timestamp = models.DateTimeField(null=True)
-    gerrit_change_number = models.DecimalField(blank=True, null=True, max_digits=9, decimal_places=2)
-    gerrit_patchset_number = models.DecimalField(blank=True, null=True, max_digits=9, decimal_places=2)
+    gerrit_change_number = models.IntegerField(blank=True, null=True)
+    gerrit_patchset_number = models.IntegerField(blank=True, null=True)
     gerrit_change_url = models.URLField(blank=True, null=True)
     gerrit_change_id = models.CharField(max_length=42, blank=True, null=True)
     build_url = models.URLField(null=True, blank=True)

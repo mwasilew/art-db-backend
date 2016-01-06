@@ -5,7 +5,7 @@ WSGILazyInitialization On
     ServerName {{hostname}}
     ServerAdmin webmaster@linaro.org
 
-    Redirect permanent / https://{{hostname}}
+    Redirect permanent / https://{{hostname}}/
 </VirtualHost>
 
 <VirtualHost *:443>
@@ -41,6 +41,7 @@ WSGILazyInitialization On
     WSGIProcessGroup art-reports.linaro.org
     WSGIScriptAlias / {{django_app_root}}/index.wsgi
     WSGIApplicationGroup %{GLOBAL}
+    WSGIPassAuthorization On
 
     ExpiresActive   On
     ExpiresDefault  "access plus 300 seconds"
