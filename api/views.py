@@ -327,8 +327,8 @@ class BuildJobViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
 
         test_jobs = []
-        if 'id' in request.data:
-            test_jobs = request.data.get('test_jobs').split(",")
+        if 'test_jobs' in request.data:
+            test_jobs = request.data.get('test_jobs', '').split(",")
             del request.data['test_jobs']
 
         serializer = self.get_serializer(data=request.data)
