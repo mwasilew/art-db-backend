@@ -59,7 +59,7 @@
   sudo_user: "{{apache_user}}"
   when: django_local_wsgi is defined
   template: src={{django_local_wsgi}}
-            dest={{django_app_root}}/index.wsgi
+            dest={{install_base}}/{{hostname}}/index.wsgi
             owner={{apache_user}} group={{apache_user}} mode=0755
   notify: restart-apache
   tags:

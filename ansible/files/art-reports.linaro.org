@@ -39,7 +39,7 @@ WSGILazyInitialization On
 
     WSGIDaemonProcess {{hostname}}
     WSGIProcessGroup {{hostname}}
-    WSGIScriptAlias / {{django_app_root}}/index.wsgi
+    WSGIScriptAlias / {{install_base}}/{{hostname}}/index.wsgi
     WSGIApplicationGroup %{GLOBAL}
     WSGIPassAuthorization On
 
