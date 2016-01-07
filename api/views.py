@@ -37,7 +37,7 @@ class ManifestViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
     queryset = benchmarks_models.Manifest.objects.all()
     serializer_class = serializers.ManifestSerializer
-    filter_fields = ('id', 'manifest_hash', 'manifest')
+    filter_fields = ('id', 'manifest_hash', 'reduced_hash', 'manifest')
     ordering_fields = ('id',)
 
 
@@ -45,7 +45,7 @@ class ReducedManifestViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
     queryset = benchmarks_models.Manifest.objects.all()
     serializer_class = serializers.ReducedManifestSerializer
-    filter_fields = ('id', 'manifest_hash', 'manifest')
+    filter_fields = ('id', 'manifest_hash', 'reduced_hash', 'manifest')
 
 
 # board
@@ -94,7 +94,8 @@ class ResultViewSet(viewsets.ModelViewSet):
         'gerrit_change_url',
         'gerrit_change_id',
         'build_url',
-        'manifest')
+        'manifest',
+        'manifest__reduced_hash')
 
 
 # result data
