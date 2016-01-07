@@ -165,7 +165,7 @@ except ImportError:
     secret_key = ''.join(random.sample(char_selection_with_punctuation, 50))
     local_settings_content = "SECRET_KEY = '{0}'\n".format(secret_key)
 
-    with open(os.path.join(PROJECT_ROOT, "local_settings.py"), "w") as f:
+    with open(os.path.join(BASE_DIR, "local_settings.py"), "w") as f:
         f.write(local_settings_content)
 
     from local_settings import *
