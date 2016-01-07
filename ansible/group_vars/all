@@ -13,8 +13,8 @@ apache_modules:
 
 hostname: "{{inventory_hostname}}"
 apache_user: www-data
-git_repo: "https://git.linaro.org/people/milosz.wasilewski/art-db-backend.git"
-git_tag: celery
+git_repo: "{{ repo | default('https://git.linaro.org/people/milosz.wasilewski/art-db-backend.git') }}"
+git_tag: "{{ branch | default('master') }}"
 django_app_root: "{{install_base}}/{{hostname}}/project"
 django_settings: crayonbox.settings
 django_local_settings: templates/art_reports_local_settings.py
