@@ -12,13 +12,13 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import djcelery
+
 from datetime import timedelta
 
+djcelery.setup_loader()
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'very-secret-password'
@@ -37,8 +37,8 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
-# Application definition
 
+# Application definition
 INSTALLED_APPS = (
     'longusername',
     'django.contrib.admin',
@@ -60,6 +60,7 @@ INSTALLED_APPS = (
     'userprofile',
     'frontend'
 )
+
 
 REST_FRAMEWORK = {
     'DATETIME_FORMAT': "%Y-%m-%d %H:%M:%S",
@@ -118,32 +119,24 @@ BENCHMARK_MANIFEST_PROJECT_LIST = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
-
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
-
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Celery settings
-BROKER_URL='redis://localhost:6379/0'
-CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
+BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
 CELERY_ACCEPT_CONTENT = ['json', 'pickle']
 CELERYBEAT_SCHEDULE_FILENAME = "/tmp/celery-beat"
-
-
 CELERYBEAT_SCHEDULE = {
     'check_incomplete_testjob': {
         'task': 'jobs.tasks.check_incomplete_testjob',
@@ -151,20 +144,6 @@ CELERYBEAT_SCHEDULE = {
     },
 }
 
-CELERY_TIMEZONE = 'UTC'
-
-import djcelery
-djcelery.setup_loader()
-
-
-
-# Celery settings
-BROKER_URL='redis://localhost:6379/0'
-CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
-CELERY_ACCEPT_CONTENT = ['json', 'pickle']
-
-import djcelery
-djcelery.setup_loader()
 
 try:
     from local_settings import *
@@ -184,5 +163,3 @@ except ImportError:
         f.write(local_settings_content)
 
     from local_settings import *
-
-
