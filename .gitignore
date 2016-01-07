@@ -1,4 +1,5 @@
 ansible/secrets/
+local_settings.py
 .env/
 .vagrant/
 *.pyc
