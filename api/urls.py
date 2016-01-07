@@ -18,7 +18,7 @@ router.register(r'build', views.BuildJobViewSet)
 router.register(r'test', views.TestJobViewSet)
 
 # functional view
-router.register(r'compare', views.ComapreResults, base_name="compare")
+router.register(r'compare', views.CompareResults, base_name="compare")
 
 urlpatterns = [
     url(r'^', include(router.urls)),

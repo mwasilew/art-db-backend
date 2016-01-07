@@ -197,7 +197,7 @@ class ResultDataForManifest(views.APIView):
         return response.Response(ret)
 
 
-class ComapreResults(viewsets.ViewSet):
+class CompareResults(viewsets.ViewSet):
 
     #authentication_classes = (TokenAuthentication,)
     #permission_classes = (permissions.IsAdminGroup,)
