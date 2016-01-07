@@ -15,7 +15,7 @@ router.register(r'boardconfiguration', views.BoardConfigurationViewSet)
 router.register(r'benchmark', views.BenchmarkViewSet)
 
 # functional view
-router.register(r'compare', views.ComapreResults, base_name="compare")
+router.register(r'compare', views.CompareResults, base_name="compare")
 
 urlpatterns = [
     url(r'^', include(router.urls)),
