@@ -1,7 +1,8 @@
 import hashlib
+import xml.etree.ElementTree as ET
 
 from django.db import models
-
+from django.conf import settings
 
 class Configuration(models.Model):
     name = models.CharField(max_length=256)
@@ -33,6 +34,9 @@ class Branch(models.Model):
 
 class Manifest(models.Model):
     manifest_hash = models.CharField(max_length=40, editable=False)
+    # sha1 for selected projects in manifest
+    # project list is defined in settings
+    reduced_hash = models.CharField(max_length=40, editable=False, default=None)
     manifest = models.TextField()
 
     def __unicode__(self):
@@ -41,6 +45,16 @@ class Manifest(models.Model):
     def save(self, *args, **kwargs):
         if not self.pk:
             self.manifest_hash = hashlib.sha1(self.manifest).hexdigest()
+            doc = ET.fromstring(self.manifest)
+            commit_id_hash = hashlib.sha1()
+            for project in settings.BENCHMARK_MANIFEST_PROJECT_LIST:
+                project_element_list = doc.findall('.//project[@name="%s"]' % project)
+                if project_element_list:
+                    for project_element in project_element_list:
+                        if project_element.tag == "project":
+                            commit_id = project_element.get('revision')
+                            commit_id_hash.update(commit_id)
+            self.reduced_hash = commit_id_hash.hexdigest()
         return super(Manifest, self).save(*args, **kwargs)
 
 

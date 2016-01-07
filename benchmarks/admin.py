@@ -9,9 +9,13 @@ from .models import (
     ResultData
 )
 
+
+class ManifestAdmin(admin.ModelAdmin):
+    readonly_fields=('manifest_hash', 'reduced_hash')
+
 admin.site.register(Branch)
 admin.site.register(Board)
 admin.site.register(BoardConfiguration)
-admin.site.register(Manifest)
+admin.site.register(Manifest, ManifestAdmin)
 admin.site.register(Result)
 admin.site.register(ResultData)

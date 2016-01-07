@@ -99,6 +99,12 @@ TEMPLATES = [{
 
 WSGI_APPLICATION = 'crayonbox.wsgi.application'
 
+BENCHMARK_MANIFEST_PROJECT_LIST = [
+    'linaro-art/platform/bionic',
+    'linaro-art/platform/build',
+    'linaro-art/platform/external/vixl',
+    'linaro-art/platform/art'
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
