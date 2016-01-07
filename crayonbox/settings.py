@@ -141,6 +141,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 BROKER_URL='redis://localhost:6379/0'
 CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
 CELERY_ACCEPT_CONTENT = ['json', 'pickle']
+CELERYBEAT_SCHEDULE_FILENAME = "/tmp/celery-beat"
 
 
 CELERYBEAT_SCHEDULE = {
