@@ -1,0 +1,13 @@
+- name: directory - base
+  file: path={{install_base}}
+        owner={{apache_user}}
+        group={{apache_user}}
+        mode=0755
+        state=directory
+
+- name: directory - logs
+  file: path={{logs_base}}
+        owner={{apache_user}}
+        group={{apache_user}}
+        mode=0755
+        state=directory
