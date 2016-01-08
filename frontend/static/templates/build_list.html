@@ -17,8 +17,12 @@
   <tbody>
     <tr ng-repeat="build in builds">
       <th scope="row"><a ng-href="#/build/{{ build.id }}">#{{ build.id }}</a></th>
-      <td><a ng-href="#/build/{{ build.id }}">{{ build.name }}</a></td>
-      <td>LAVA jobs: #123 (Submitted), #124 (Running)</td>
+      <td><a ng-href="#/build/{{ build.id }}">{{ build.name }}</a> <br/>{{ build.url }}</td>
+      <td>LAVA jobs:
+	#123 (<span class="label label-primary">Submitted</span>),
+	#124 (<span class="label label-warning">Warning</span>)
+	#125 (<span class="label label-danger">Incomplete</span>)
+      </td>
       <td>{{ build.created_at }}</td>
     </tr>
   </tbody>
