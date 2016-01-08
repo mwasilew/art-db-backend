@@ -42,6 +42,11 @@ WSGILazyInitialization On
     WSGIScriptAlias / {{install_base}}/{{hostname}}/index.wsgi
     WSGIApplicationGroup %{GLOBAL}
     WSGIPassAuthorization On
+    <Directory {{install_base}}/{{hostname}}>
+      <Files index.wsgi>
+	Require all granted
+      </Files>
+    </Directory>
 
     ExpiresActive   On
     ExpiresDefault  "access plus 300 seconds"
