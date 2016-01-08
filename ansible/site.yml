@@ -6,7 +6,6 @@
     - "secrets/{{inventory_hostname}}"
   roles:
   - postgres
-  - art-reports-deps
   - django
   - art-reports-populate
   - redis
