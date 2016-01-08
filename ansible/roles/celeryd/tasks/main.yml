@@ -47,5 +47,5 @@
     - celery
 
 - name: restart task
-  shell: "{{supervisord_bin}} -c {{supervisord_conf}} restart all"
+  shell: "{{supervisorctl_bin}} -c {{supervisord_conf}} restart all"
   sudo_user: "{{apache_user}}"
