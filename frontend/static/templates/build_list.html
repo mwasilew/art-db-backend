@@ -8,23 +8,30 @@
 <table class="table table-striped">
   <thead>
     <tr>
-      <th>#</th>
-      <th>build name</th>
-      <th>LAVA jobs</th>
-      <th>created at</th>
+      <th style="width: 10%;">#</th>
+      <th style="width: 45%;">build name</th>
+      <th style="width: 45%;">LAVA jobs</th>
+      <th style="width: 20%;">created at</th>
     </tr>
   </thead>
   <tbody>
     <tr ng-repeat="build in builds">
-      <th scope="row"><a ng-href="#/build/{{ build.id }}">#{{ build.id }}</a></th>
-      <td><a ng-href="#/build/{{ build.id }}">{{ build.name }}</a> <br/>
+
+      <td>
+	<a ng-href="#/build/{{ build.id }}">#{{ build.id }}</a>
+      </td>
+
+      <td>
+	<a ng-href="#/build/{{ build.id }}">{{ build.name }}</a> <br/>
 	<a style="color:#999" href="{{ build.url }}">{{ build.url }}</a>
       </td>
+
       <td>LAVA jobs:
 	#123 (<span class="label label-primary">Submitted</span>),
 	#124 (<span class="label label-warning">Warning</span>)
 	#125 (<span class="label label-danger">Incomplete</span>)
       </td>
+
       <td>{{ build.created_at }}</td>
     </tr>
   </tbody>
