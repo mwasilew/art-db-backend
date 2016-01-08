@@ -1,31 +1,25 @@
-<md-content layout-padding>
-  <form name="userForm">
-    <md-input-container class="md-block">
-      <label>Search</label>
-      <input ng-change="search()" ng-model="searchQuery">
-      </md-input-container>
-  </form>
-</md-content>
 
-<md-content>
-  <md-list>
+<form>
+  <div class="form-group">
+    <input type="text" ng-change="search()" ng-model="searchQuery" class="form-control" placeholder="search query">
+  </div>
+</form>
 
-    <md-subheader class="md-no-sticky">
-      jobs in progress
-    </md-subheader>
-
-    <md-list-item layout="row" 
-		  aria-label="{{ build.name }}"
-		  ng-repeat="build in builds"
-		  ng-href="#/build/{{ build.id }}">
-
-      <div flex>{{ build.id }} {{ build.name }}</div>
-      <div flex=10>Test 3</div>
-      <div>{{ build.created_at }}</div>
-      
-    </md-list-item>
-
-    <md-divider ></md-divider>
-
-  </md-list>
-</md-content>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>build name</th>
+      <th>LAVA jobs</th>
+      <th>created at</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="build in builds">
+      <th scope="row"><a ng-href="#/build/{{ build.id }}">#{{ build.id }}</a></th>
+      <td><a ng-href="#/build/{{ build.id }}">{{ build.name }}</a></td>
+      <td>LAVA jobs: #123 (Submitted), #124 (Running)</td>
+      <td>{{ build.created_at }}</td>
+    </tr>
+  </tbody>
+</table>

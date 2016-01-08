@@ -1,4 +1,4 @@
-var app = angular.module('art', ['ngMaterial', 'ngRoute']);
+var app = angular.module('art', ['ngRoute']);
 
 app.controller('Toolbar', ['$scope', '$http', function($scope, $http) {
     $http.get('/api/token/').then(function(response) {

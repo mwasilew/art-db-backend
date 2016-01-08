@@ -11,14 +11,14 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href='https://fonts.googleapis.com/css?family=Nothing+You+Could+Do' rel='stylesheet' type='text/css'>
 
-    <link rel="stylesheet" href="/static/bower_components/angular-material/angular-material.css">
+    <link rel="stylesheet" href="/static/bower_components/bootstrap/dist/css/bootstrap.css">
     <link rel="stylesheet" href="/static/main.css">
 
     <script src="/static/bower_components/angular/angular.js"></script>
-    <script src="/static/bower_components/angular-aria/angular-aria.js"></script>
-    <script src="/static/bower_components/angular-animate/angular-animate.js"></script>
     <script src="/static/bower_components/angular-route/angular-route.js"></script>
-    <script src="/static/bower_components/angular-material/angular-material.js"></script>
+    <!-- <script src="/static/bower_components/angular-aria/angular-aria.js"></script> -->
+    <!-- <script src="/static/bower_components/angular-animate/angular-animate.js"></script> -->
+    <!-- <script src="/static/bower_components/angular-material/angular-material.js"></script> -->
 
     <script src="/static/main.js"></script>
 
@@ -26,20 +26,20 @@
 
   <body ng-app="art" ng-cloak>
     
-    <md-toolbar ng-controller="Toolbar" class="md-display-3" >
-
-      <div class="md-toolbar-tools">
-	<i class="material-icons"><a ng-href="#/">insert_chart</a></i>
-	<h1><a ng-href="#/">Art</a></h1>
-        <span flex></span>
-	<i class="material-icons">tag_faces</i>{{ auth.username }}
-	<i class="material-icons">vpn_key</i>{{ auth.key }}
+    <nav ng-controller="Toolbar" class="navbar navbar-default">
+      <div class="container-fluid">
+	<div class="navbar-header">
+	  <a class="navbar-brand" href="#">
+	    <span class="glyphicon glyphicon-cloud-upload" aria-hidden="true"></span>
+	    Art
+	  </a>
+	  
+	</div>
+	<p class="navbar-text navbar-right">{{ auth.username }} / {{ auth.key }}</p>
       </div>
-
-    </md-toolbar>
-
-    <div ng-view></div>
-
-
+    </nav>
+    
+    <div class="container" ng-view></div>
+    
   </body>
 </html>
