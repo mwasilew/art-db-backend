@@ -21,9 +21,9 @@ django_local_settings: templates/art_reports_local_settings.py
 django_local_wsgi: templates/art_reports_index.wsgi
 install_base: /srv
 
-supervisord_conf: "{{django_app_root}}/supervisord.conf"
-supervisord_path: "{{install_base}}/{{hostname}}/.virtualenv/bin/supervisord"
-supervisor_config_dir: "{{django_app_root}}/supervisor.conf.d"
+supervisord_conf: "{{install_base}}/{{hostname}}/supervisord.conf"
+supervisord_bin: "{{install_base}}/{{hostname}}/.virtualenv/bin/supervisord"
+supervisor_config_dir: "{{install_base}}/{{hostname}}/supervisor.conf.d"
 
 ssl_key: /etc/ssl/private/wildcard.linaro.org.key
 ssl_cert: /etc/ssl/certs/wildcard.linaro.org.crt

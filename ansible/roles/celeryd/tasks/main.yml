@@ -38,7 +38,7 @@
   register: supervisor_running
 
 - name: running supervisord
-  shell: "{{supervisord_path}} -c {{supervisord_conf}}"
+  shell: "{{supervisord_bin}} -c {{supervisord_conf}}"
   sudo_user: "{{apache_user}}"
   when: supervisor_running|failed
   tags:
