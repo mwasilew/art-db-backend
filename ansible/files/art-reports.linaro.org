@@ -39,10 +39,10 @@ WSGILazyInitialization On
 
     WSGIDaemonProcess {{hostname}}
     WSGIProcessGroup {{hostname}}
-    WSGIScriptAlias / {{install_base}}/{{hostname}}/index.wsgi
+    WSGIScriptAlias / {{install_base}}/index.wsgi
     WSGIApplicationGroup %{GLOBAL}
     WSGIPassAuthorization On
-    <Directory {{install_base}}/{{hostname}}>
+    <Directory {{install_base}}>
       <Files index.wsgi>
 	Require all granted
       </Files>

@@ -1,3 +1,8 @@
+apache_user: www-data
+
+git_repo: "{{ repo | default('https://git.linaro.org/people/milosz.wasilewski/art-db-backend.git') }}"
+git_tag: "{{ branch | default('master') }}"
+
 db_name: "{{inventory_hostname}}"
 db_user: art-reports
 db_password: art-reports
@@ -12,18 +17,16 @@ apache_modules:
   - rewrite
 
 hostname: "{{inventory_hostname}}"
-apache_user: www-data
-git_repo: "{{ repo | default('https://git.linaro.org/people/milosz.wasilewski/art-db-backend.git') }}"
-git_tag: "{{ branch | default('master') }}"
-django_app_root: "{{install_base}}/{{hostname}}/project"
+install_base: "/srv/{{inventory_hostname}}"
+
+django_app_root: "{{install_base}}/project"
 django_settings: crayonbox.settings
 django_local_settings: templates/art_reports_local_settings.py
 django_local_wsgi: templates/art_reports_index.wsgi
-install_base: /srv
 
-supervisord_conf: "{{install_base}}/{{hostname}}/supervisord.conf"
-supervisord_bin: "{{install_base}}/{{hostname}}/.virtualenv/bin/supervisord"
-supervisor_config_dir: "{{install_base}}/{{hostname}}/supervisor.conf.d"
+supervisord_conf: "{{install_base}}/supervisord.conf"
+supervisord_bin: "{{install_base}}/.virtualenv/bin/supervisord"
+supervisor_config_dir: "{{install_base}}/supervisor.conf.d"
 
 ssl_key: /etc/ssl/private/wildcard.linaro.org.key
 ssl_cert: /etc/ssl/certs/wildcard.linaro.org.crt

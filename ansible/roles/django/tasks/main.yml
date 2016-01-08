@@ -23,7 +23,7 @@
 
 
 - name: Create base directory for installation
-  file: path={{install_base}}/{{hostname}}
+  file: path={{install_base}}
         owner={{apache_user}}
         group={{apache_user}}
         mode=0755
@@ -35,7 +35,7 @@
   # NOTE: we can't use "accept_hostkey=yes" because the user we clone as
   # will likely not have a proper .ssh directory. We instead use ssh_opts
   git: repo={{git_repo}}
-       dest={{install_base}}/{{hostname}}/project
+       dest={{install_base}}/project
        version={{git_tag}}
        update=yes
        ssh_opts="-o StrictHostKeyChecking=no"
@@ -49,8 +49,8 @@
 - name: Install required application packages
   sudo_user: "{{apache_user}}"
   pip: >
-    requirements={{install_base}}/{{hostname}}/project/requirements.txt
-    virtualenv={{install_base}}/{{hostname}}/.virtualenv
+    requirements={{install_base}}/project/requirements.txt
+    virtualenv={{install_base}}/.virtualenv
   tags:
     - install
     - update
@@ -59,7 +59,7 @@
   sudo_user: "{{apache_user}}"
   when: django_local_wsgi is defined
   template: src={{django_local_wsgi}}
-            dest={{install_base}}/{{hostname}}/index.wsgi
+            dest={{install_base}}/index.wsgi
             owner={{apache_user}} group={{apache_user}} mode=0755
   notify: restart-apache
   tags:
@@ -82,7 +82,7 @@
 - name: Run syncdb command
   django_manage: app_path={{django_app_root}}
                  settings={{django_settings}}
-                 virtualenv={{install_base}}/{{hostname}}/.virtualenv
+                 virtualenv={{install_base}}/.virtualenv
                  command=syncdb
   tags:
     - update
@@ -91,7 +91,7 @@
 - name: Run migrations (if installed)
   django_manage: app_path={{django_app_root}}
                  settings={{django_settings}}
-                 virtualenv={{install_base}}/{{hostname}}/.virtualenv
+                 virtualenv={{install_base}}/.virtualenv
                  command=migrate
   tags:
     - django
@@ -100,7 +100,7 @@
 - name: Run collectstatic (if supported)
   django_manage: app_path={{django_app_root}}
                  settings={{django_settings}}
-                 virtualenv={{install_base}}/{{hostname}}/.virtualenv
+                 virtualenv={{install_base}}/.virtualenv
                  command=collectstatic
   register: django_static
   failed_when: 'django_static.failed and (django_static.msg is defined and ("Unknown django command" not in django_static.msg))'
