@@ -22,15 +22,6 @@
     - update
 
 
-- name: Create base directory for installation
-  file: path={{install_base}}
-        owner={{apache_user}}
-        group={{apache_user}}
-        mode=0755
-        state=directory
-  tags:
-    - install
-
 - name: Checkout application code
   # NOTE: we can't use "accept_hostkey=yes" because the user we clone as
   # will likely not have a proper .ssh directory. We instead use ssh_opts

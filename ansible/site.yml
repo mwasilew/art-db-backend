@@ -4,6 +4,22 @@
   sudo: yes
   vars_files:
     - "secrets/{{inventory_hostname}}"
+
+  tasks:
+    - name: base directory for installation
+      file: path={{install_base}}
+            owner={{apache_user}}
+            group={{apache_user}}
+            mode=0755
+            state=directory
+
+    - name: base directory for logs
+      file: path={{logs_base}}
+            owner={{apache_user}}
+            group={{apache_user}}
+            mode=0755
+            state=directory
+
   roles:
   - postgres
   - django
