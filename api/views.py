@@ -317,10 +317,8 @@ class CompareResults(viewsets.ViewSet):
         return response.Response(data)
 
 
-
-
 class BuildJobViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    permission_classes = [DjangoModelPermissions]
     queryset = jobs_models.BuildJob.objects.all()
     serializer_class = serializers.BuildJobSerializer
     filter_class = filters.BuildJobFilter
@@ -347,8 +345,6 @@ class BuildJobViewSet(viewsets.ModelViewSet):
 
 
 class TestJobViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    permission_classes = [DjangoModelPermissions]
     queryset = jobs_models.TestJob.objects.all()
     serializer_class = serializers.TestJobSerializer
-
-
