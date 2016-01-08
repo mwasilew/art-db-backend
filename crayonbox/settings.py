@@ -117,6 +117,10 @@ BENCHMARK_MANIFEST_PROJECT_LIST = [
     'linaro-art/platform/art'
 ]
 
+CREDENTIALS = {
+    'host.url.netloc': ('username', 'password'),
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 LANGUAGE_CODE = 'en-us'
@@ -137,12 +141,12 @@ BROKER_URL = 'redis://localhost:6379/0'
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
 CELERY_ACCEPT_CONTENT = ['json', 'pickle']
 CELERYBEAT_SCHEDULE_FILENAME = "/tmp/celery-beat"
-CELERYBEAT_SCHEDULE = {
-    'check_incomplete_testjob': {
-        'task': 'jobs.tasks.check_incomplete_testjob',
-        'schedule': timedelta(minutes=5),
-    },
-}
+#CELERYBEAT_SCHEDULE = {
+#    'check_incomplete_testjob': {
+#        'task': 'jobs.tasks.check_incomplete_testjob',
+#        'schedule': timedelta(minutes=5),
+#    },
+#}
 
 
 try:

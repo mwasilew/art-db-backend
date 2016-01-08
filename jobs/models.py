@@ -29,7 +29,7 @@ class TestJob(models.Model):
     id = models.CharField(primary_key=True, max_length=100)
 
     completed = models.BooleanField(default=False)
-
+    status = models.CharField(blank=True, null=True, max_length=16)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

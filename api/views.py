@@ -14,6 +14,7 @@ from rest_framework.decorators import list_route, detail_route
 
 from benchmarks import models as benchmarks_models
 from jobs import models as jobs_models
+from jobs import tasks
 
 from . import serializers
 from . import permissions
@@ -317,6 +318,12 @@ class CompareResults(viewsets.ViewSet):
         return response.Response(data)
 
 
+class TestConfig(object):
+    def __init__(self):
+        self.testrunnerurl = "https://validation.linaro.org/"
+        self.testrunnerclass = "ArtMicrobenchmarksTestResults"
+
+
 class BuildJobViewSet(viewsets.ModelViewSet):
     permission_classes = [DjangoModelPermissions]
     queryset = jobs_models.BuildJob.objects.all()
@@ -336,9 +343,12 @@ class BuildJobViewSet(viewsets.ModelViewSet):
 
         for test_job in test_jobs:
             if not jobs_models.TestJob.objects.filter(id=test_job).exists():
-                jobs_models.TestJob.objects.get_or_create(
+                db_test_job, created = jobs_models.TestJob.objects.get_or_create(
                     build_job=obj,
                     pk=test_job)
+            # todo: define test_config to match existing code
+            test_config = TestConfig()
+            tasks.download_test_results.delay(test_config, db_test_job)
 
         return response.Response(
             serializer.data, status=status.HTTP_201_CREATED)
