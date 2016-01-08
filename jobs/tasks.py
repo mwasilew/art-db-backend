@@ -9,7 +9,7 @@ from . import models, testminer
 
 
 def get_credentials(netloc):
-    username, password = settings.CREDENTIALS[netloc]
+    username, password = settings.LAVA_CREDENTIALS[netloc]
     return (username, password)
 
 

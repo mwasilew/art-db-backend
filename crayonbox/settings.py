@@ -117,7 +117,7 @@ BENCHMARK_MANIFEST_PROJECT_LIST = [
     'linaro-art/platform/art'
 ]
 
-CREDENTIALS = {
+LAVA_CREDENTIALS = {
     'host.url.netloc': ('username', 'password'),
 }
 
