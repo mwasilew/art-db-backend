@@ -12,6 +12,7 @@ def get_credentials(netloc):
     username, password = settings.CREDENTIALS[netloc]
     return (username, password)
 
+
 @celery_app.task(bind=True)
 def dig_test(self, tester, test_job):
     test_job_id = test_job.id
@@ -47,7 +48,7 @@ def dig_test(self, tester, test_job):
             #    if 'parameters' in result.keys():
             #        parameters = result['parameters']
 
-            tester.cleanup() # remove all temporary files
+            tester.cleanup()  # remove all temporary files
         else:
             # start a new task after 5 minutes
             dig_test.apply_async(args=[tester, test_job], countdown=300)
