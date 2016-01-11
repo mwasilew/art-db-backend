@@ -15,7 +15,7 @@ install:
 
 
 script:
-  - manage.py test
+  - python manage.py test --noinput -v 2
 
 
 notifications:
