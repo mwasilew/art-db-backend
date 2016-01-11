@@ -13,5 +13,5 @@ from django.core.wsgi import get_wsgi_application
 
 djcelery.setup_loader()
 
-os.environ['DJANGO_SETTINGS_MODULE'] = "crayonbox.settings"
+os.environ['DJANGO_SETTINGS_MODULE'] = "crayonbox.settings.private"
 application = get_wsgi_application()
