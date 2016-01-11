@@ -26,10 +26,16 @@
 	<a style="color:#999" href="{{ build.url }}">{{ build.url }}</a>
       </td>
 
-      <td>LAVA jobs:
-	#123 (<span class="label label-primary">Submitted</span>),
-	#124 (<span class="label label-warning">Warning</span>)
-	#125 (<span class="label label-danger">Incomplete</span>)
+      <td>
+	  <span ng-repeat="test in build.test_jobs">
+	    [#{{ test.id }}
+	    <span ng-if="!test.status" class="label label-default">Not set</span>
+	    <span ng-if="test.status === 'Complete'" class="label label-success">{{ test.status }}</span>
+	    <span ng-if="test.status === 'Submitted'" class="label label-info">{{ test.status }}</span>
+	    <span ng-if="test.status === 'Running'" class="label label-primary">{{ test.status }}</span>
+	    <span ng-if="test.status === 'Incomplete'" class="label label-warning">{{ test.status }}</span>
+	    <span ng-if="test.status === 'Canceling' || test.status === 'Canceled'" class="label label-danger">{{ test.status }}</span>]
+	  </span>
       </td>
 
       <td>{{ build.created_at }}</td>
