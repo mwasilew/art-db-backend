@@ -6,7 +6,7 @@ addons:
   postgresql: "9.3"
 
 before_install:
-  - psql -c 'create database art-reports;' -U postgres
+  - psql -c 'create database "art-reports";' -U postgres
   
 install:
   - pip install -r requirements/requirements-dev.txt
