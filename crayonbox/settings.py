@@ -117,7 +117,7 @@ BENCHMARK_MANIFEST_PROJECT_LIST = [
     'linaro-art/platform/art'
 ]
 
-LAVA_CREDENTIALS = {
+CREDENTIALS = {
     'host.url.netloc': ('username', 'password'),
 }
 
@@ -143,10 +143,6 @@ CELERY_ACCEPT_CONTENT = ['json', 'pickle']
 CELERYBEAT_SCHEDULE_FILENAME = "/tmp/celery-beat"
 
 CELERYBEAT_SCHEDULE = {
-   'check_incomplete_testjob': {
-       'task': 'jobs.tasks.update_incopleted_testjobs',
-       'schedule': timedelta(minutes=1),
-   },
 }
 
 

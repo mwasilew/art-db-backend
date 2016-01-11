@@ -337,13 +337,12 @@ class BuildJobViewSet(viewsets.ModelViewSet):
         for test_job_id in test_jobs:
             if not jobs_models.TestJob.objects.filter(id=test_job_id).exists():
 
-                _status = tasks.lava_scheduler_job_status(test_job_id)
-
-                jobs_models.TestJob.objects.create(
+                db_test_job, created = jobs_models.TestJob.objects.get_or_create(
                     id=test_job_id,
                     build_job=obj,
-                    status=_status
                 )
+                config = tasks.TestConfig()
+                tasks.download_test_results.delay(config, db_test_job)
 
         return response.Response(serializer.data, status=status.HTTP_201_CREATED)
 
