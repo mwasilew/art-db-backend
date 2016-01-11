@@ -5,6 +5,9 @@ python: 2.7
 addons:
   postgresql: "9.3"
 
+services:
+  - redis-server
+  
 env:
 - DJANGO_SETTINGS_MODULE=crayonbox.settings.travis
 
