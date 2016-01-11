@@ -1,3 +1,4 @@
+import mock
 import hashlib
 
 from django_dynamic_fixture import G
@@ -44,6 +45,7 @@ class BuildJobTests(APITestCase):
         response = self.client.post('/api/build/', data=data)
         self.assertEqual(response.status_code, 201)
 
+    @mock.patch("jobs.tasks.lava_scheduler_job_status", lambda x: 'Completed')
     def test_post_2(self):
 
         data = {
