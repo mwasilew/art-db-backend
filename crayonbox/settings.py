@@ -141,12 +141,13 @@ BROKER_URL = 'redis://localhost:6379/0'
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
 CELERY_ACCEPT_CONTENT = ['json', 'pickle']
 CELERYBEAT_SCHEDULE_FILENAME = "/tmp/celery-beat"
-#CELERYBEAT_SCHEDULE = {
-#    'check_incomplete_testjob': {
-#        'task': 'jobs.tasks.check_incomplete_testjob',
-#        'schedule': timedelta(minutes=5),
-#    },
-#}
+
+CELERYBEAT_SCHEDULE = {
+   'check_incomplete_testjob': {
+       'task': 'jobs.tasks.update_incopleted_testjobs',
+       'schedule': timedelta(minutes=1),
+   },
+}
 
 
 try:

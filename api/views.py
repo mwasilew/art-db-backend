@@ -318,12 +318,6 @@ class CompareResults(viewsets.ViewSet):
         return response.Response(data)
 
 
-class TestConfig(object):
-    def __init__(self):
-        self.testrunnerurl = "https://validation.linaro.org/"
-        self.testrunnerclass = "ArtMicrobenchmarksTestResults"
-
-
 class BuildJobViewSet(viewsets.ModelViewSet):
     permission_classes = [DjangoModelPermissions]
     queryset = jobs_models.BuildJob.objects.all()
@@ -342,7 +336,12 @@ class BuildJobViewSet(viewsets.ModelViewSet):
 
         for test_job in test_jobs:
             if not jobs_models.TestJob.objects.filter(id=test_job).exists():
-                jobs_models.TestJob.objects.create(id=test_job, build_job=obj)
+
+                status = tasks.lava_scheduler_job_status(job_status)
+
+                test_job = jobs_models.TestJob.objects.create(
+                    id=test_job, build_job=obj, status=status
+                )
 
         return response.Response(serializer.data,
                                  status=status.HTTP_201_CREATED)
