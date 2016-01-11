@@ -62,7 +62,7 @@
   sudo_user: "{{apache_user}}"
   when: django_local_settings is defined
   template: src={{django_local_settings}}
-            dest={{django_app_root}}/local_settings.py
+            dest={{django_app_root}}/crayonbox/settings/private.py
             owner={{apache_user}} group={{apache_user}} mode=0755
   notify: restart-apache
   tags:
