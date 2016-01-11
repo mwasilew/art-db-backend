@@ -5,6 +5,9 @@ python: 2.7
 addons:
   postgresql: "9.3"
 
+env:
+- DJANGO_SETTINGS_MODULE=crayonbox.settings.travis
+
 before_install:
   - psql -c 'create database "art-reports";' -U postgres
   
