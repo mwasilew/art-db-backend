@@ -12,8 +12,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'art-reports',
-        'USER': 'art-reports',
-        'PASSWORD': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'art-reports',
         'HOST': '127.0.0.1',
         'PORT': '5432',
     }
