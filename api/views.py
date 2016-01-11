@@ -334,17 +334,18 @@ class BuildJobViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         obj = serializer.save()
 
-        for test_job in test_jobs:
-            if not jobs_models.TestJob.objects.filter(id=test_job).exists():
+        for test_job_id in test_jobs:
+            if not jobs_models.TestJob.objects.filter(id=test_job_id).exists():
 
-                status = tasks.lava_scheduler_job_status(job_status)
+                _status = tasks.lava_scheduler_job_status(test_job_id)
 
-                test_job = jobs_models.TestJob.objects.create(
-                    id=test_job, build_job=obj, status=status
+                jobs_models.TestJob.objects.create(
+                    id=test_job_id,
+                    build_job=obj,
+                    status=_status
                 )
 
-        return response.Response(serializer.data,
-                                 status=status.HTTP_201_CREATED)
+        return response.Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class TestJobViewSet(viewsets.ModelViewSet):
