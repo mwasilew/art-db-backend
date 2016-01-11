@@ -6,10 +6,62 @@ from django.contrib.auth.models import User
 from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
 
-from benchmarks import models
+from benchmarks import models as benchmarks_models
+from jobs import models as jobs_models
 
 
 MINIMAL_XML = '<?xml version="1.0" encoding="UTF-8"?><body></body>'
+
+
+class BuildJobTests(APITestCase):
+
+    def setUp(self):
+        user = User.objects.create_superuser('test', 'email@test.com', 'test')
+        self.client.force_authenticate(user=user)
+
+    def test_get_1(self):
+        response = self.client.get('/api/build/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, [])
+
+    def test_get_2(self):
+        G(jobs_models.BuildJob, id='123')
+
+        response = self.client.get('/api/build/123/')
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(response.data['id'], '123')
+
+    def test_post_1(self):
+
+        data = {
+            'name': u'linaro-art-stable-m-build-juno',
+            'url': u'http://dynamicfixture1.com',
+            'id': u'123'
+        }
+
+        response = self.client.post('/api/build/', data=data)
+        self.assertEqual(response.status_code, 201)
+
+    def test_post_2(self):
+
+        data = {
+            'name': u'linaro-art-stable-m-build-juno',
+            'url': u'http://dynamicfixture1.com',
+            'id': u'123',
+            'test_jobs': '655839.0, 655838.0'
+        }
+
+        response = self.client.post('/api/build/', data=data)
+        self.assertEqual(response.status_code, 201)
+
+        self.assertEqual(jobs_models.TestJob.objects.count(), 2)
+
+        items = jobs_models.TestJob.objects.values_list('id', flat=True)
+        self.assertIn('655839.0', items)
+        self.assertIn('655838.0', items)
 
 
 class ManifestTests(APITestCase):
@@ -27,7 +79,7 @@ class ManifestTests(APITestCase):
     def test_get_2(self):
         manifest_hash = hashlib.sha1(MINIMAL_XML).hexdigest()
 
-        models.Manifest.objects.create(manifest=MINIMAL_XML)
+        benchmarks_models.Manifest.objects.create(manifest=MINIMAL_XML)
 
         response = self.client.get('/api/manifest/')
 
@@ -43,7 +95,7 @@ class ManifestTests(APITestCase):
         self.assertEqual(response.data['manifest_hash'],
                          hashlib.sha1(MINIMAL_XML).hexdigest())
 
-        self.assertEqual(models.Manifest.objects.count(), 1)
+        self.assertEqual(benchmarks_models.Manifest.objects.count(), 1)
 
         response = self.client.post('/api/manifest/',
                                     data={'manifest': MINIMAL_XML})
@@ -51,7 +103,7 @@ class ManifestTests(APITestCase):
         self.assertEqual(response.data['manifest_hash'],
                          hashlib.sha1(MINIMAL_XML).hexdigest())
 
-        self.assertEqual(models.Manifest.objects.count(), 1)
+        self.assertEqual(benchmarks_models.Manifest.objects.count(), 1)
 
 
 class CompareTests(APITestCase):
@@ -69,22 +121,22 @@ class CompareTests(APITestCase):
 
     def test_compare_with_manifest_1(self):
 
-        benchmark = G(models.Benchmark, name="cpu")
+        benchmark = G(benchmarks_models.Benchmark, name="cpu")
 
-        manifest_1 = G(models.Manifest, manifest=MINIMAL_XML)
-        manifest_2 = G(models.Manifest, manifest=MINIMAL_XML)
+        manifest_1 = G(benchmarks_models.Manifest, manifest=MINIMAL_XML)
+        manifest_2 = G(benchmarks_models.Manifest, manifest=MINIMAL_XML)
 
-        manifest_1_result = G(models.Result, manifest=manifest_1)
-        manifest_2_result = G(models.Result, manifest=manifest_2)
+        manifest_1_result = G(benchmarks_models.Result, manifest=manifest_1)
+        manifest_2_result = G(benchmarks_models.Result, manifest=manifest_2)
 
-        G(models.ResultData,
+        G(benchmarks_models.ResultData,
             result=manifest_1_result,
             benchmark=benchmark,
             name="load",
 
             measurement=10)
 
-        G(models.ResultData,
+        G(benchmarks_models.ResultData,
           result=manifest_2_result,
           benchmark=benchmark,
           name="load",
@@ -114,26 +166,26 @@ class CompareTests(APITestCase):
 
     def test_compare_with_branch(self):
 
-        benchmark = G(models.Benchmark, name="cpu")
+        benchmark = G(benchmarks_models.Benchmark, name="cpu")
 
-        branch_1 = G(models.Branch)
-        branch_2 = G(models.Branch)
+        branch_1 = G(benchmarks_models.Branch)
+        branch_2 = G(benchmarks_models.Branch)
 
-        branch_1_result = G(models.Result,
+        branch_1_result = G(benchmarks_models.Result,
                             branch=branch_1,
-                            manifest=G(models.Manifest, manifest=MINIMAL_XML))
+                            manifest=G(benchmarks_models.Manifest, manifest=MINIMAL_XML))
 
-        branch_2_result = G(models.Result,
+        branch_2_result = G(benchmarks_models.Result,
                             branch=branch_2,
-                            manifest=G(models.Manifest, manifest=MINIMAL_XML))
+                            manifest=G(benchmarks_models.Manifest, manifest=MINIMAL_XML))
 
-        G(models.ResultData,
+        G(benchmarks_models.ResultData,
           result=branch_1_result,
           benchmark=benchmark,
           name="load",
           measurement=10)
 
-        G(models.ResultData,
+        G(benchmarks_models.ResultData,
           result=branch_2_result,
           benchmark=benchmark,
           name="load",
@@ -157,14 +209,14 @@ class CompareTests(APITestCase):
 
     def test_compare_missing_benchmark(self):
 
-        benchmark = G(models.Benchmark, name="cpu")
+        benchmark = G(benchmarks_models.Benchmark, name="cpu")
 
-        manifest_1 = G(models.Manifest, manifest=MINIMAL_XML)
-        manifest_2 = G(models.Manifest, manifest=MINIMAL_XML)
+        manifest_1 = G(benchmarks_models.Manifest, manifest=MINIMAL_XML)
+        manifest_2 = G(benchmarks_models.Manifest, manifest=MINIMAL_XML)
 
-        manifest_1_result = G(models.Result, manifest=manifest_1)
+        manifest_1_result = G(benchmarks_models.Result, manifest=manifest_1)
 
-        G(models.ResultData,
+        G(benchmarks_models.ResultData,
           result=manifest_1_result,
           benchmark=benchmark,
           name="load",

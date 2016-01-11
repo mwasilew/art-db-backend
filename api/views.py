@@ -331,11 +331,10 @@ class BuildJobViewSet(viewsets.ModelViewSet):
     filter_class = filters.BuildJobFilter
 
     def create(self, request, *args, **kwargs):
-
         test_jobs = []
         if 'test_jobs' in request.data:
-            test_jobs = request.data.get('test_jobs', '').split(",")
-            del request.data['test_jobs']
+            test_jobs = map(lambda x: x.strip(),
+                            request.data.get('test_jobs', '').split(","))
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -343,15 +342,10 @@ class BuildJobViewSet(viewsets.ModelViewSet):
 
         for test_job in test_jobs:
             if not jobs_models.TestJob.objects.filter(id=test_job).exists():
-                db_test_job, created = jobs_models.TestJob.objects.get_or_create(
-                    build_job=obj,
-                    pk=test_job)
-            # todo: define test_config to match existing code
-            test_config = TestConfig()
-            tasks.download_test_results.delay(test_config, db_test_job)
+                jobs_models.TestJob.objects.create(id=test_job, build_job=obj)
 
-        return response.Response(
-            serializer.data, status=status.HTTP_201_CREATED)
+        return response.Response(serializer.data,
+                                 status=status.HTTP_201_CREATED)
 
 
 class TestJobViewSet(viewsets.ModelViewSet):
