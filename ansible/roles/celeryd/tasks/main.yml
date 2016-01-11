@@ -23,7 +23,6 @@
             dest={{item.dest}}
             owner={{apache_user}} group={{apache_user}} mode=0755
   with_items:
-    - { src: 'templates/supervisor.celerybeat.conf', dest: '{{supervisor_config_dir}}/supervisor.celerybeat.conf' }
     - { src: 'templates/supervisor.celerycam.conf', dest: '{{supervisor_config_dir}}/supervisor.celerycam.conf' }
     - { src: 'templates/supervisor.celeryd.conf', dest: '{{supervisor_config_dir}}/supervisor.celeryd.conf' }
   tags:
