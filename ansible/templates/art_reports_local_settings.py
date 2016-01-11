@@ -11,6 +11,11 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
+LAVA_CREDENTIALS = {
+    'validation.linaro.org': ('{{lava_user}}', '{{lava_key}}')
+}
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
