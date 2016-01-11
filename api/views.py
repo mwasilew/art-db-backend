@@ -320,8 +320,8 @@ class CompareResults(viewsets.ViewSet):
 
 class BuildJobViewSet(viewsets.ModelViewSet):
     permission_classes = [DjangoModelPermissions]
-    queryset = jobs_models.BuildJob.objects.all()
-    serializer_class = serializers.BuildJobSerializer
+    queryset = jobs_models.BuildJob.objects.prefetch_related('test_jobs')
+    serializer_class = serializers.BuildJob
     filter_class = filters.BuildJobFilter
 
     def create(self, request, *args, **kwargs):
@@ -351,4 +351,4 @@ class BuildJobViewSet(viewsets.ModelViewSet):
 class TestJobViewSet(viewsets.ModelViewSet):
     permission_classes = [DjangoModelPermissions]
     queryset = jobs_models.TestJob.objects.all()
-    serializer_class = serializers.TestJobSerializer
+    serializer_class = serializers.TestJob
