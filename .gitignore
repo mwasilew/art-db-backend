@@ -1,5 +1,5 @@
 ansible/secrets/
-local_settings.py
+crayonbox/settings/development.py
 .env/
 .vagrant/
 *.pyc
