@@ -1,5 +1,8 @@
 import sys
 
+from . import *
+
+
 AUTH_CROWD_ALWAYS_UPDATE_USER = False
 AUTH_CROWD_ALWAYS_UPDATE_GROUPS = False
 AUTH_CROWD_APPLICATION_USER = '{{crowd_user}}'
