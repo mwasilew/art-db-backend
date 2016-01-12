@@ -13,3 +13,7 @@ nav .navbar-brand {
 #build-detail dt {
 	text-align: left;
 }
+
+table {
+	table-layout: fixed;
+}

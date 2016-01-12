@@ -9,17 +9,15 @@
   <thead>
     <tr>
       <th style="width: 10%;">#</th>
-      <th style="width: 45%;">build name</th>
-      <th style="width: 45%;">LAVA jobs</th>
-      <th style="width: 20%;">created at</th>
+      <th style="width: 40%;">build name</th>
+      <th style="width: 35%;">LAVA jobs</th>
+      <th style="width: 15%;">created at</th>
     </tr>
   </thead>
   <tbody>
     <tr ng-repeat="build in builds">
 
-      <td>
-	<a ng-href="#/build/{{ build.id }}">#{{ build.id }}</a>
-      </td>
+      <td><a ng-href="#/build/{{ build.id }}">#{{ build.id }}</a></td>
 
       <td>
 	<a ng-href="#/build/{{ build.id }}">{{ build.name }}</a> <br/>
