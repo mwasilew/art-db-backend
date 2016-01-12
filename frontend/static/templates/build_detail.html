@@ -6,10 +6,12 @@
 
 <div id="build-detail" ng-show="build">
   
-  <h1 class="md-display-1">{{ build.name }} <small>{{ build.created_at }}</small></h1>
+  <h1 class="md-display-1"> <small>{{ build.created_at }}</small><br/>#{{ build.id }} {{ build.name }}</h1>
   <hr/>
 
   <a ng-href="{{ build.url }}">{{ build.url }}</a>
+
+  <hr/>
   
   <dl class="dl-horizontal">
     
@@ -26,6 +28,8 @@
     <dd>{{ build.gerrit_patchset_number || "not set" }}</dd>
 
   </dl>
+
+  <hr/ ng-show="build.test_jobs.length">
 
   <table class="table table-striped" ng-show="build.test_jobs.length">
     <thead>
