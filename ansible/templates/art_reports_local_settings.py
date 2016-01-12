@@ -36,55 +36,47 @@ STATIC_ROOT = '/var/www/{{hostname}}/static/'
 
 LOG_LEVEL = 'DEBUG'
 
+
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': True,
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse'
-        },
-        'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue'
-        }
-    },
+    'disable_existing_loggers': False,
     'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(message)s'
+        },
         'simple': {
-            'format': u'[%(asctime)s] %(levelname)-8s %(message)s',
-        }
+            'format': '%(levelname)s %(message)s'
+        },
     },
     'handlers': {
-        'console':{
-            'level': LOG_LEVEL,
-            'class': 'logging.StreamHandler',
-            'stream': sys.stdout,
-            'formatter':'simple'
-        },
         'file': {
-            'level': LOG_LEVEL,
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': '/var/log/{{hostname}}/art-reports.log',
+            'level':'DEBUG',
+            'class':'logging.handlers.TimedRotatingFileHandler',
+            'filename': '{{logs_base}}/django.log',
             'backupCount': 5,
             'when': 'midnight',
-            'formatter': 'simple',
             'encoding': 'utf8',
-            'delay': True,
-        }
+            'formatter': 'verbose',
+
+        },
+        'console': {
+            'level':'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
     },
     'loggers': {
-        'testplanner': {
-            'level': LOG_LEVEL,
-            'handlers': ['console', 'file'],
-            'filters': ['require_debug_true'],
-            'propagate': False,
+        'django.request': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
         },
-        'testrunner': {
-            'level': LOG_LEVEL,
+        'scripts': {
             'handlers': ['console', 'file'],
-            'filters': ['require_debug_true'],
-            'propagate': False,
-        },
+            'level': 'INFO',
+            'propagate': True,
+        }
     }
 }
-
 
 DEBUG=True
