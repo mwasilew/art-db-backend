@@ -26,7 +26,7 @@
 
       <td>
 	  <span ng-repeat="test in build.test_jobs">
-	    (#{{ test.id }} <ng-include src="'/static/templates/_test_job_status.html'"></ng-include>)
+          (<a href="{{ test.url }}">#{{ test.id }}</a><ng-include src="'/static/templates/_test_job_status.html'"></ng-include>)
 	  </span>
       </td>
 
