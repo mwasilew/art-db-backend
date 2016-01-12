@@ -21,7 +21,7 @@ app.config(['$routeProvider', function($routeProvider) {
 
 app.controller('BuildList', ['$scope', '$http', function($scope, $http) {
 
-    $http.get('/api/build/').then(function(response) {
+    $http.get('/api/build/', {cache: false}).then(function(response) {
         $scope.builds = response.data;
     });
 
@@ -33,10 +33,10 @@ app.controller('BuildList', ['$scope', '$http', function($scope, $http) {
     };
 }]);
 
-app.controller('BuildDetail', ['$scope', '$http', function($scope, $http) {
+app.controller('BuildDetail', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
 
-    // $http.get('/api/build/').then(function(response) {
-    //     $scope.builds = response.data;
-    // });
+    $http.get('/api/build/' + $routeParams.buildId + '/', {cache: false}).then(function(response) {
+        $scope.build = response.data;
+    });
 
 }]);

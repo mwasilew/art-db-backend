@@ -28,13 +28,7 @@
 
       <td>
 	  <span ng-repeat="test in build.test_jobs">
-	    [#{{ test.id }}
-	    <span ng-if="!test.status" class="label label-default">Not set</span>
-	    <span ng-if="test.status === 'Complete'" class="label label-success">{{ test.status }}</span>
-	    <span ng-if="test.status === 'Submitted'" class="label label-info">{{ test.status }}</span>
-	    <span ng-if="test.status === 'Running'" class="label label-primary">{{ test.status }}</span>
-	    <span ng-if="test.status === 'Incomplete'" class="label label-warning">{{ test.status }}</span>
-	    <span ng-if="test.status === 'Canceling' || test.status === 'Canceled'" class="label label-danger">{{ test.status }}</span>]
+	    [#{{ test.id }} <ng-include src="'/static/templates/_test_job_status.html'"></ng-include>]
 	  </span>
       </td>
 

@@ -1,4 +1,51 @@
-<md-content flex layout-padding>
-  <h1 class="md-display-1">Build</h1>
-  <md-divider></md-divider>
-</md-content>
+<div class="progress" ng-show="!build">
+  <div class="progress-bar progress-bar-striped active" role="progressbar" style="width: 100%">
+    <span class="sr-only">45% Complete</span>
+  </div>
+</div>
+
+<div id="build-detail" ng-show="build">
+  
+  <h1 class="md-display-1">{{ build.name }} <small>{{ build.created_at }}</small></h1>
+  <hr/>
+
+  <a ng-href="{{ build.url }}">{{ build.url }}</a>
+  
+  <dl class="dl-horizontal">
+    
+    <dt>Branch</dt>
+    <dd>{{ build.branch_name || "not set"}}</dd>
+
+    <dt>Gerrit Change Id</dt>
+    <dd>{{ build.gerrit_change_id || "not set" }}</dd>
+
+    <dt>Gerrit Change Number</dt>
+    <dd>{{ build.gerrit_change_number || "not set" }}</dd>
+
+    <dt>Gerrit Patchset Number</dt>
+    <dd>{{ build.gerrit_patchset_number || "not set" }}</dd>
+
+  </dl>
+
+  <table class="table table-striped" ng-show="build.test_jobs.length">
+    <thead>
+      <tr>
+	<th style="width: 10%;">#</th>
+	<th style="width: 45%;">status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="test in build.test_jobs">
+
+	<td>{{ test.id}}</td>
+	<td>
+
+	  <ng-include src="'/static/templates/_test_job_status.html'"></ng-include>
+
+	</td>
+	
+      </tr>
+    </tbody>
+  </table>
+
+</div>
