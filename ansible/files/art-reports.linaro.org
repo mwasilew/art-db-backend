@@ -13,8 +13,8 @@ WSGILazyInitialization On
     ServerAdmin webmaster@linaro.org
     DocumentRoot {{django_app_root}}/
 
-    CustomLog ${APACHE_LOG_DIR}/{{hostname}}-access.log combined
-    ErrorLog ${APACHE_LOG_DIR}/{{hostname}}-error.log
+    CustomLog {{logs_base}}/apache-access.log combined
+    ErrorLog {{logs_base}}/apache-error.log
 
 
     KeepAlive On
