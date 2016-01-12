@@ -2,7 +2,7 @@ from django.db import models
 
 
 class BuildJob(models.Model):
-    id = models.CharField(primary_key=True, max_length=100)
+    id = models.CharField(primary_key=True, max_length=99)
 
     name = models.CharField(max_length=256)
     url = models.URLField()
@@ -10,9 +10,9 @@ class BuildJob(models.Model):
     manifest = models.TextField(blank=True)
     branch_name = models.CharField(blank=True, max_length=256)
 
-    gerrit_change_id = models.CharField(blank=True, max_length=256)
-    gerrit_change_number = models.CharField(blank=True, max_length=256)
-    gerrit_patchset_number = models.CharField(blank=True, max_length=256)
+    gerrit_change_id = models.CharField(blank=True, default="", max_length=256)
+    gerrit_change_number = models.CharField(blank=True, default="", max_length=256)
+    gerrit_patchset_number = models.CharField(blank=True, default="", max_length=256)
     gerrit_change_url = models.URLField(blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -31,7 +31,7 @@ class TestJob(models.Model):
 
     url = models.URLField(blank=True, null=True)
     completed = models.BooleanField(default=False)
-    status = models.CharField(blank=True, null=True, max_length=16)
+    status = models.CharField(blank=True, default="", max_length=16)
     created_at = models.DateTimeField(auto_now_add=True)
     definition = models.TextField(blank=True, null=True)
 

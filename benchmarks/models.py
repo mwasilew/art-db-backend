@@ -68,13 +68,13 @@ class Manifest(models.Model):
 class Result(models.Model):
     board = models.ForeignKey(Board, related_name="results")
     branch = models.ForeignKey(Branch, related_name="results")
-    revision = models.CharField(max_length=32, null=True, blank=True)
+    revision = models.CharField(max_length=32, blank=True, default="")
     configuration = models.ForeignKey(Configuration, blank=True, null=True)  # is it needed ?
     timestamp = models.DateTimeField(null=True, auto_now_add=True)
     gerrit_change_number = models.IntegerField(blank=True, null=True)
     gerrit_patchset_number = models.IntegerField(blank=True, null=True)
     gerrit_change_url = models.URLField(blank=True, null=True)
-    gerrit_change_id = models.CharField(max_length=42, blank=True, null=True)
+    gerrit_change_id = models.CharField(max_length=42, blank=True, default="")
     build_url = models.URLField(null=True, blank=True)
     manifest = models.ForeignKey(Manifest, related_name="results", null=True)
     test_job = models.ForeignKey(TestJob, related_name="results", null=True)
