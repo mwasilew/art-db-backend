@@ -1,4 +1,5 @@
 import ast
+import base64
 import csv
 import json
 import os
@@ -267,11 +268,14 @@ class LavaTestSystem(TestSystem):
         if 'bundle_sha1' in status:
             details.update({"bundle": status['bundle_sha1']})
         content = self.call_xmlrpc('scheduler.job_details', job_id)
+        import pprint
+        pprint.pprint(content)
         definition = json.loads(content['definition'])
         if content['multinode_definition']:
             definition = json.loads(content['multinode_definition'])
+        details.update({"definition": str(json.dumps(definition))})
         for action in definition['actions']:
-            if action['command'] == "submit_results":
+            if action['command'].startswith("submit_results"):
                 if 'stream' in action['parameters'].keys():
                     details.update({"bundlestream": action['parameters']['stream']})
             if 'metadata' in action.keys():
@@ -470,7 +474,50 @@ class LavaTestSystem(TestSystem):
 class ArtMicrobenchmarksTestResults(LavaTestSystem):
     def get_test_job_results(self, test_job_id):
         # extract json file with results
-        return {}
+        test_result_list = []
+        status = self.call_xmlrpc('scheduler.job_status', test_job_id)
+        sha1 = None
+        if 'bundle_sha1' in status:
+            sha1 = status['bundle_sha1']
+        result_bundle = self.call_xmlrpc('dashboard.get', sha1)
+        bundle = json.loads(result_bundle['content'])
+
+        target = (t for t in bundle['test_runs'] if t['test_id'] == 'multinode-target').next()
+        host   = (t for t in bundle['test_runs'] if t['test_id'] == 'art-microbenchmarks').next()
+        src = (s for s in host['software_context']['sources'] if 'test_params' in s).next()
+        # This is an art-microbenchmarks test
+        # The test name and test results are in the attachmented pkl file
+        # get test results for the attachment
+        test_mode        = ast.literal_eval(src['test_params'])['MODE']
+        json_content      = (a['content'] for a in host['attachments'] if a['pathname'].endswith('json')).next()
+        json_text         = base64.b64decode(json_content)
+        # save json file locally
+        #with open(self.result_file_name + "_" + str(test_mode) + ".json", "w") as json_file:
+        #    json_file.write(json_text)
+        test_result_dict = json.loads(json_text)
+        # Key Format: benchmarks/micro/<BENCHMARK_NAME>.<SUBSCORE>
+        # Extract and unique them to form a benchmark name list
+        test_result_keys = list(bn.split('/')[-1].split('.')[0] for bn in test_result_dict.keys())
+        benchmark_list   = list(set(test_result_keys))
+        for benchmark in benchmark_list:
+            test_result = {}
+            test_result['board']        = target['attributes']['target']
+            test_result['board_config'] = target['attributes']['target']
+            # benchmark iteration
+            test_result['benchmark_name'] = benchmark
+            test_result['subscore'] = []
+            key_word = "/%s." % benchmark
+            tests    = ((k, test_result_dict[k]) for k in test_result_dict.keys() if k.find(key_word) > 0)
+            for test in tests:
+                # subscore iteration
+                subscore = "%s_%s" % (test[0].split('.')[-1], test_mode)
+                for i in test[1]:
+                    test_case = { "name": subscore,
+                                  "measurement": i }
+                    test_result['subscore'].append(test_case)
+
+            test_result_list.append(test_result)
+        return test_result_list
 
 class ArtWATestResults(LavaTestSystem):
     def get_test_job_results(self, test_job_id):

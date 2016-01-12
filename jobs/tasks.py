@@ -2,6 +2,14 @@ import xmlrpclib
 import traceback
 import urlparse
 
+from benchmarks.models import (
+    Branch,
+    Benchmark,
+    Board,
+    Manifest,
+    Result,
+    ResultData
+)
 from crayonbox import celery_app
 from celery.utils.log import get_task_logger
 
@@ -66,9 +74,52 @@ def dig_test(self, tester, test_job):
 
     if tester.test_results_available(test_job_id):
         test_metadata = tester.get_test_job_details(test_job_id)
-        # metadata contains information about:
-        #  - board
+        test_job.definition = test_metadata['definition']
+        test_job.url = tester.get_job_url(test_job_id)
+        test_job.save()
+
+        db_manifest, created = Manifest.objects.get_or_create(manifest=test_job.build_job.manifest)
+        db_branch, created = Branch.objects.get_or_create(name=test_job.build_job.branch_name)
         test_results = tester.get_test_job_results(test_job_id)
+        for benchmark in test_results:
+            # {'subscore': [{'name': u'LongRotateLeft_32', 'measurement': 812.58}, {'name': u'IntegerRotateRight_32', 'measurement': 115.13}, {'name': u'IntegerRotateLeft_32', 'measurement': 116.78}, {'name': u'LongRotateRight_32', 'measurement': 813.57}, {'name': u'SHA1DigestProcessBlock_32', 'measurement': 768.09}], 'board_config': u'mn-nexus9-02', 'board': u'mn-nexus9-02', 'benchmark_name': u'BitfieldRotate'}
+            db_board, created = Board.objects.get_or_create(
+                displayname=benchmark['board'],
+                display=benchmark['board']
+            )
+            db_benchmark, created = Benchmark.objects.get_or_create(
+                name=benchmark['benchmark_name']
+            )
+            db_result, created = Result.objects.get_or_create(
+                board=db_board,
+                branch=db_branch,
+                build_url=test_job.build_job.url,
+                manifest=db_manifest
+            )
+
+            if test_job.build_job.gerrit_change_number:
+                db_result.gerrit_change_number=test_job.build_job.gerrit_change_number
+
+            if test_job.build_job.gerrit_change_id:
+                db_result.gerrit_change_id=test_job.build_job.gerrit_change_id
+
+            if test_job.build_job.gerrit_change_url:
+                db_result.gerrit_change_url=test_job.build_job.gerrit_change_url
+
+            if test_job.build_job.gerrit_patchset_number:
+                db_result.gerrit_patchset_number=test_job.build_job.gerrit_patchset_number
+            db_result.save()
+
+            for subscore in benchmark['subscore']:
+                db_resultdata = ResultData(
+                    name=subscore['name'],
+                    measurement=subscore['measurement'],
+                    result=db_result,
+                    benchmark=db_benchmark
+                )
+                db_resultdata.save()
+
+
 
         # ToDo: not implemented yet. DO NOT REMOVE
         #for result in test_results['test']:

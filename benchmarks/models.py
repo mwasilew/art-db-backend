@@ -4,6 +4,9 @@ import xml.etree.ElementTree as ET
 from django.db import models
 from django.conf import settings
 
+from jobs.models import TestJob
+
+
 class Configuration(models.Model):
     name = models.CharField(max_length=256)
 
@@ -15,7 +18,11 @@ class BoardConfiguration(models.Model):
 class Board(models.Model):
     displayname = models.CharField(max_length=32)
     display = models.CharField(max_length=32)
-    configuration = models.ForeignKey(BoardConfiguration, related_name="boards")
+    configuration = models.ForeignKey(
+        BoardConfiguration,
+        null=True,
+        blank=True,
+        related_name="boards")
 
 
 class Benchmark(models.Model):
@@ -63,13 +70,14 @@ class Result(models.Model):
     branch = models.ForeignKey(Branch, related_name="results")
     revision = models.CharField(max_length=32, null=True, blank=True)
     configuration = models.ForeignKey(Configuration, blank=True, null=True)  # is it needed ?
-    timestamp = models.DateTimeField(null=True)
+    timestamp = models.DateTimeField(null=True, auto_now_add=True)
     gerrit_change_number = models.IntegerField(blank=True, null=True)
     gerrit_patchset_number = models.IntegerField(blank=True, null=True)
     gerrit_change_url = models.URLField(blank=True, null=True)
     gerrit_change_id = models.CharField(max_length=42, blank=True, null=True)
     build_url = models.URLField(null=True, blank=True)
     manifest = models.ForeignKey(Manifest, related_name="results", null=True)
+    test_job = models.ForeignKey(TestJob, related_name="results", null=True)
 
     def __unicode__(self):
         return "%s - %s" % (self.pk, self.build_url)
@@ -79,7 +87,7 @@ class ResultData(models.Model):
     name = models.CharField(max_length=256)
     benchmark = models.ForeignKey(Benchmark, related_name="data")
     measurement = models.FloatField()
-    timestamp = models.DateTimeField(null=True)
+    timestamp = models.DateTimeField(null=True, auto_now_add=True)
     result = models.ForeignKey(Result, related_name="data")
 
     def __unicode__(self):
