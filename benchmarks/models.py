@@ -49,6 +49,8 @@ class Result(models.Model):
     board = models.ForeignKey(Board, related_name="results", null=True)
     manifest = models.ForeignKey(Manifest, related_name="results", null=True)
 
+    name = models.CharField(max_length=128)
+
     branch_name = models.CharField(max_length=128, blank=True)
     build_url = models.URLField()
 
