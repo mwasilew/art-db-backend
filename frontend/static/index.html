@@ -23,7 +23,7 @@
   </head>
 
   <body ng-app="art" ng-cloak>
-    
+
     <nav ng-controller="Toolbar" class="navbar navbar-default">
       <div class="container">
 	<div class="navbar-header">
@@ -31,13 +31,18 @@
 	    <span class="glyphicon glyphicon-cloud-upload" aria-hidden="true"></span>
 	    Art
 	  </a>
-	  
 	</div>
+
+	<ul class="nav navbar-nav">
+          <li ng-class="{active: viewName == 'BuildList'}"><a href="#/">Builds</a></li>
+	  <li ng-class="{active: viewName == 'Stats'}"><a href="#/stats/">Stats</a></li>
+	</ul>
+
 	<p class="navbar-text pull-right">{{ auth.username }} / {{ auth.key }}</p>
       </div>
     </nav>
 
     <div class="container" ng-view></div>
-    
+
   </body>
 </html>

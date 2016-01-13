@@ -1,9 +1,15 @@
 var app = angular.module('art', ['ngRoute']);
 
-app.controller('Toolbar', ['$scope', '$http', function($scope, $http) {
+app.controller('Toolbar', ['$scope', '$http', '$rootScope', function($scope, $http, $rootScope) {
+
+    $rootScope.$on( "$routeChangeSuccess", function(event, next, current) {
+        $scope.viewName = next.$$route.controller;
+    });
+
     $http.get('/api/token/').then(function(response) {
         $scope.auth = response.data;
     });
+
 }]);
 
 app.config(['$routeProvider', function($routeProvider) {
@@ -22,8 +28,11 @@ app.config(['$routeProvider', function($routeProvider) {
         });
 }]);
 
+// app.controller('main', ['$route', function($route) {
+//     debugger
+// });
 
-app.controller('BuildList', ['$scope', '$http', function($scope, $http) {
+app.controller('BuildList', ['$scope', '$http', '$route', function($scope, $http, $route) {
 
     $http.get('/api/build/', {cache: false}).then(function(response) {
         $scope.builds = response.data;
