@@ -47,15 +47,6 @@ class BenchmarkSerializer(serializers.ModelSerializer):
         return benchmark
 
 
-class BranchSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = benchmarks_models.Branch
-
-    def create(self, validated_data):
-        branch, created = benchmarks_models.Branch.objects.get_or_create(**validated_data)
-        return branch
-
-
 class ReducedManifestSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
     class Meta:
         model = benchmarks_models.Manifest

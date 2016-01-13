@@ -169,15 +169,15 @@ class CompareTests(APITestCase):
 
         benchmark = G(benchmarks_models.Benchmark, name="cpu")
 
-        branch_1 = G(benchmarks_models.Branch)
-        branch_2 = G(benchmarks_models.Branch)
+        branch_1_name = "test1"
+        branch_2_name = "test2"
 
         branch_1_result = G(benchmarks_models.Result,
-                            branch=branch_1,
+                            branch_name=branch_1_name,
                             manifest=G(benchmarks_models.Manifest, manifest=MINIMAL_XML))
 
         branch_2_result = G(benchmarks_models.Result,
-                            branch=branch_2,
+                            branch_name=branch_2_name,
                             manifest=G(benchmarks_models.Manifest, manifest=MINIMAL_XML))
 
         G(benchmarks_models.ResultData,
@@ -193,8 +193,8 @@ class CompareTests(APITestCase):
           measurement=2)
 
         response = self.client.get('/api/compare/branch/', {
-            'branch_1': branch_1.name,
-            'branch_2': branch_2.name
+            'branch_1': branch_1_name,
+            'branch_2': branch_2_name
         })
 
         self.assertEqual(response.status_code, 200)

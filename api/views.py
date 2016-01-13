@@ -65,14 +65,6 @@ class BenchmarkViewSet(viewsets.ModelViewSet):
     filter_fields = ('id', 'name')
 
 
-# branch
-class BranchViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
-    queryset = benchmarks_models.Branch.objects.all()
-    serializer_class = serializers.BranchSerializer
-    filter_fields = ('id', 'name')
-
-
 # result
 class ResultViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
@@ -277,13 +269,9 @@ class CompareResults(viewsets.ViewSet):
         if not (branch_1 and branch_2):
             return response.Response([])
 
-        base_query = (benchmarks_models.ResultData.objects
-                      .filter(result__branch__name=branch_1)
-                      .select_related('benchmark'))
+        base_query = benchmarks_models.ResultData.objects.filter(result__branch_name=branch_1)
 
-        target_query = (benchmarks_models.ResultData.objects
-                        .filter(result__branch__name=branch_2)
-                        .select_related('benchmark'))
+        target_query = benchmarks_models.ResultData.objects.filter(result__branch_name=branch_2)
 
         data = self.compare_query(base_query, target_query)
 
