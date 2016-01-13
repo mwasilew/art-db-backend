@@ -9,7 +9,6 @@ router.register(r'token', views.TokenViewSet)
 router.register(r'manifest', views.ManifestViewSet)
 router.register(r'result', views.ResultViewSet)
 router.register(r'resultdata', views.ResultDataViewSet)
-router.register(r'branch', views.BranchViewSet)
 router.register(r'board', views.BoardViewSet)
 router.register(r'benchmark', views.BenchmarkViewSet)
 

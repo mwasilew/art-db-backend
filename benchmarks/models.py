@@ -12,20 +12,6 @@ class Board(models.Model):
     display = models.CharField(max_length=32)
 
 
-class Benchmark(models.Model):
-    name = models.CharField(max_length=64)
-
-    def __unicode__(self):
-        return self.name
-
-
-class Branch(models.Model):
-    name = models.CharField(max_length=1024)
-
-    def __unicode__(self):
-        return self.name
-
-
 class Manifest(models.Model):
     manifest_hash = models.CharField(max_length=40, editable=False)
     # sha1 for selected projects in manifest
@@ -54,7 +40,7 @@ class Manifest(models.Model):
 
 class Result(models.Model):
     board = models.ForeignKey(Board, related_name="results")
-    branch = models.ForeignKey(Branch, related_name="results")
+    branch_name = models.CharField(max_length=128, blank=True)
     revision = models.CharField(max_length=32, blank=True, default="")
     timestamp = models.DateTimeField(null=True, auto_now_add=True)
     gerrit_change_number = models.IntegerField(blank=True, null=True)

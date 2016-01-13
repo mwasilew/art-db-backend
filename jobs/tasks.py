@@ -3,7 +3,6 @@ import traceback
 import urlparse
 
 from benchmarks.models import (
-    Branch,
     Benchmark,
     Board,
     Manifest,
@@ -79,7 +78,6 @@ def dig_test(self, tester, test_job):
         test_job.save()
 
         db_manifest, created = Manifest.objects.get_or_create(manifest=test_job.build_job.manifest)
-        db_branch, created = Branch.objects.get_or_create(name=test_job.build_job.branch_name)
         test_results = tester.get_test_job_results(test_job_id)
         for benchmark in test_results:
             # {'subscore': [{'name': u'LongRotateLeft_32', 'measurement': 812.58}, {'name': u'IntegerRotateRight_32', 'measurement': 115.13}, {'name': u'IntegerRotateLeft_32', 'measurement': 116.78}, {'name': u'LongRotateRight_32', 'measurement': 813.57}, {'name': u'SHA1DigestProcessBlock_32', 'measurement': 768.09}], 'board_config': u'mn-nexus9-02', 'board': u'mn-nexus9-02', 'benchmark_name': u'BitfieldRotate'}
@@ -92,7 +90,7 @@ def dig_test(self, tester, test_job):
             )
             db_result, created = Result.objects.get_or_create(
                 board=db_board,
-                branch=db_branch,
+                branch_name=test_job.build_job.branch_name,
                 build_url=test_job.build_job.url,
                 manifest=db_manifest
             )
