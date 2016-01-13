@@ -29,11 +29,6 @@ class DynamicFieldsMixin(object):
                 self.fields.pop(field_name)
 
 
-class ConfigurationSerializer(serializers.ModelSerializer, DynamicFieldsMixin):
-    class Meta:
-        model = benchmarks_models.Configuration
-
-
 class BoardSerializer(serializers.ModelSerializer):
     class Meta:
         model = benchmarks_models.Board
