@@ -9,6 +9,8 @@ db_password: art-reports
 db_host: 127.0.0.1
 db_port: 5432
 
+email: "art-reports@linaro.org"
+
 apache_modules:
   - ssl
   - wsgi
