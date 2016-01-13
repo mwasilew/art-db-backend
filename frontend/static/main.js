@@ -28,10 +28,6 @@ app.config(['$routeProvider', function($routeProvider) {
         });
 }]);
 
-// app.controller('main', ['$route', function($route) {
-//     debugger
-// });
-
 app.controller('BuildList', ['$scope', '$http', '$route', function($scope, $http, $route) {
 
     $http.get('/api/build/', {cache: false}).then(function(response) {
