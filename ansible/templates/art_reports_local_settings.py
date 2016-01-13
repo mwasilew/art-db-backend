@@ -3,6 +3,8 @@ import sys
 from . import *
 
 
+DEFAULT_FROM_EMAIL = "{{ email }}"
+
 AUTH_CROWD_ALWAYS_UPDATE_USER = False
 AUTH_CROWD_ALWAYS_UPDATE_GROUPS = False
 AUTH_CROWD_APPLICATION_USER = '{{crowd_user}}'
