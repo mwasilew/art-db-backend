@@ -43,15 +43,6 @@ class BoardSerializer(serializers.ModelSerializer):
         return board
 
 
-class BoardConfigurationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = benchmarks_models.BoardConfiguration
-
-    def create(self, validated_data):
-        boardconfig, created = benchmarks_models.BoardConfiguration.objects.get_or_create(**validated_data)
-        return boardconfig
-
-
 class BenchmarkSerializer(serializers.ModelSerializer):
     class Meta:
         model = benchmarks_models.Benchmark

@@ -3,7 +3,6 @@ from django.contrib import admin
 from .models import (
     Branch,
     Board,
-    BoardConfiguration,
     Manifest,
     Result,
     ResultData
@@ -15,7 +14,6 @@ class ManifestAdmin(admin.ModelAdmin):
 
 admin.site.register(Branch)
 admin.site.register(Board)
-admin.site.register(BoardConfiguration)
 admin.site.register(Manifest, ManifestAdmin)
 admin.site.register(Result)
 admin.site.register(ResultData)
