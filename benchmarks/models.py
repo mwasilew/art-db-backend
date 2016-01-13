@@ -46,7 +46,7 @@ class Manifest(models.Model):
 class Result(models.Model):
     id = models.CharField(primary_key=True, max_length=99)
 
-    board = models.ForeignKey(Board, related_name="results")
+    board = models.ForeignKey(Board, related_name="results", null=True)
     manifest = models.ForeignKey(Manifest, related_name="results", null=True)
 
     branch_name = models.CharField(max_length=128, blank=True)
