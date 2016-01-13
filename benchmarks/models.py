@@ -52,7 +52,6 @@ class Result(models.Model):
 
     branch_name = models.CharField(max_length=128, blank=True)
     build_url = models.URLField(null=True, blank=True)
-    revision = models.CharField(max_length=32, blank=True, default="")
 
     gerrit_change_number = models.IntegerField(blank=True, null=True)
     gerrit_patchset_number = models.IntegerField(blank=True, null=True)
