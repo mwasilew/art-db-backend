@@ -11,18 +11,9 @@ class Configuration(models.Model):
     name = models.CharField(max_length=256)
 
 
-class BoardConfiguration(models.Model):
-    name = models.CharField(max_length=256)
-
-
 class Board(models.Model):
     displayname = models.CharField(max_length=32)
     display = models.CharField(max_length=32)
-    configuration = models.ForeignKey(
-        BoardConfiguration,
-        null=True,
-        blank=True,
-        related_name="boards")
 
 
 class Benchmark(models.Model):

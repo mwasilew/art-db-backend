@@ -57,14 +57,6 @@ class BoardViewSet(viewsets.ModelViewSet):
     filter_fields = ('id', 'displayname')
 
 
-# board configuration ?
-class BoardConfigurationViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
-    queryset = benchmarks_models.BoardConfiguration.objects.all()
-    serializer_class = serializers.BoardConfigurationSerializer
-    filter_fields = ('id', 'name')
-
-
 # benchmark
 class BenchmarkViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
