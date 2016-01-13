@@ -1,36 +1,37 @@
+<div id="build-list">
+  <form>
+    <div class="form-group">
+      <input type="text" ng-change="search()" ng-model="searchQuery" class="form-control" placeholder="search query">
+    </div>
+  </form>
 
-<form>
-  <div class="form-group">
-    <input type="text" ng-change="search()" ng-model="searchQuery" class="form-control" placeholder="search query">
-  </div>
-</form>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+	<th style="width: 10%;">#</th>
+	<th style="width: 40%;">build name</th>
+	<th style="width: 35%;">LAVA jobs</th>
+	<th style="width: 15%;">created at</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="build in builds">
 
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th style="width: 10%;">#</th>
-      <th style="width: 40%;">build name</th>
-      <th style="width: 35%;">LAVA jobs</th>
-      <th style="width: 15%;">created at</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr ng-repeat="build in builds">
+	<td><a ng-href="#/build/{{ build.id }}">#{{ build.id }}</a></td>
 
-      <td><a ng-href="#/build/{{ build.id }}">#{{ build.id }}</a></td>
+	<td>
+	  <a ng-href="#/build/{{ build.id }}">{{ build.name }}</a> <br/>
+	  <a style="color:#999" href="{{ build.url }}">{{ build.url }}</a>
+	</td>
 
-      <td>
-	<a ng-href="#/build/{{ build.id }}">{{ build.name }}</a> <br/>
-	<a style="color:#999" href="{{ build.url }}">{{ build.url }}</a>
-      </td>
-
-      <td>
+	<td>
 	  <span ng-repeat="test in build.test_jobs">
-          (<a href="{{ test.url }}">#{{ test.id }}</a><ng-include src="'/static/templates/_test_job_status.html'"></ng-include>)
+            (<a href="{{ test.url }}">#{{ test.id }}</a><ng-include src="'/static/templates/_test_job_status.html'"></ng-include>)
 	  </span>
-      </td>
+	</td>
 
-      <td>{{ build.created_at }}</td>
-    </tr>
-  </tbody>
-</table>
+	<td>{{ build.created_at }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
