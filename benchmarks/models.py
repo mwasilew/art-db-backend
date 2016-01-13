@@ -4,8 +4,6 @@ import xml.etree.ElementTree as ET
 from django.db import models
 from django.conf import settings
 
-from jobs.models import TestJob
-
 
 class Board(models.Model):
     displayname = models.CharField(max_length=32)
@@ -61,6 +59,24 @@ class Result(models.Model):
 
     def __unicode__(self):
         return "%s - %s" % (self.pk, self.build_url)
+
+
+class TestJob(models.Model):
+    result = models.ForeignKey('Result', related_name="test_jobs")
+
+    id = models.CharField(primary_key=True, max_length=100)
+
+    url = models.URLField(blank=True, null=True)
+    completed = models.BooleanField(default=False)
+    status = models.CharField(blank=True, default="", max_length=16)
+    created_at = models.DateTimeField(auto_now_add=True)
+    definition = models.TextField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return '%s %s' % (self.id, self.build_job)
 
 
 class ResultData(models.Model):
