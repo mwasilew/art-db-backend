@@ -50,7 +50,7 @@ class Result(models.Model):
     manifest = models.ForeignKey(Manifest, related_name="results", null=True)
 
     branch_name = models.CharField(max_length=128, blank=True)
-    build_url = models.URLField(null=True, blank=True)
+    build_url = models.URLField()
 
     gerrit_change_number = models.IntegerField(blank=True, null=True)
     gerrit_patchset_number = models.IntegerField(blank=True, null=True)
