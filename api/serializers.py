@@ -66,12 +66,10 @@ class ManifestSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
 class ResultDataSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
     class Meta:
         model = benchmarks_models.ResultData
-        #depth = 1
-        #fields = ('id', 'name', 'benchmark', 'measurement', 'timestamp', 'result')
 
     def create(self, validated_data):
         defaults = {
-            "timestamp": datetime.now()
+            "created_at": datetime.now()
         }
         resultdata, created = benchmarks_models.ResultData.objects.get_or_create(defaults=defaults, **validated_data)
         return resultdata
@@ -83,7 +81,7 @@ class ResultSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
 
     def create(self, validated_data):
         defaults = {
-            "timestamp": datetime.now()
+            "created_at": datetime.now()
         }
         result, created = benchmarks_models.Result.objects.get_or_create(defaults=defaults, **validated_data)
         return result

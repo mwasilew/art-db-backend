@@ -73,7 +73,7 @@ class ResultViewSet(viewsets.ModelViewSet):
     filter_fields = ('id',
         'board',
         'branch',
-        'timestamp',
+        'created_at',
         'gerrit_change_number',
         'gerrit_patchset_number',
         'gerrit_change_url',
@@ -91,7 +91,7 @@ class ResultDataViewSet(viewsets.ModelViewSet):
     filter_fields = ('id',
         'benchmark',
         'result',
-        'timestamp')
+        'created_at')
 
 
 class ResultDataForManifest(views.APIView):

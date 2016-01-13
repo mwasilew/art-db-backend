@@ -49,7 +49,6 @@ class Result(models.Model):
     board = models.ForeignKey(Board, related_name="results")
     branch_name = models.CharField(max_length=128, blank=True)
     revision = models.CharField(max_length=32, blank=True, default="")
-    timestamp = models.DateTimeField(null=True, auto_now_add=True)
     gerrit_change_number = models.IntegerField(blank=True, null=True)
     gerrit_patchset_number = models.IntegerField(blank=True, null=True)
     gerrit_change_url = models.URLField(blank=True, null=True)
@@ -57,6 +56,8 @@ class Result(models.Model):
     build_url = models.URLField(null=True, blank=True)
     manifest = models.ForeignKey(Manifest, related_name="results", null=True)
     test_job = models.ForeignKey(TestJob, related_name="results", null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
         return "%s - %s" % (self.pk, self.build_url)
@@ -66,8 +67,9 @@ class ResultData(models.Model):
     name = models.CharField(max_length=256)
     benchmark = models.ForeignKey(Benchmark, related_name="data")
     measurement = models.FloatField()
-    timestamp = models.DateTimeField(null=True, auto_now_add=True)
     result = models.ForeignKey(Result, related_name="data")
+
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
         return "{0} - {1}".format(self.benchmark, self.name)
