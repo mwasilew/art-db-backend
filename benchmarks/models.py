@@ -7,10 +7,6 @@ from django.conf import settings
 from jobs.models import TestJob
 
 
-class Configuration(models.Model):
-    name = models.CharField(max_length=256)
-
-
 class Board(models.Model):
     displayname = models.CharField(max_length=32)
     display = models.CharField(max_length=32)
@@ -60,7 +56,6 @@ class Result(models.Model):
     board = models.ForeignKey(Board, related_name="results")
     branch = models.ForeignKey(Branch, related_name="results")
     revision = models.CharField(max_length=32, blank=True, default="")
-    configuration = models.ForeignKey(Configuration, blank=True, null=True)  # is it needed ?
     timestamp = models.DateTimeField(null=True, auto_now_add=True)
     gerrit_change_number = models.IntegerField(blank=True, null=True)
     gerrit_patchset_number = models.IntegerField(blank=True, null=True)
