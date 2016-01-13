@@ -13,12 +13,9 @@ from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from rest_framework.decorators import list_route, detail_route
 
 from benchmarks import models as benchmarks_models
-from jobs import models as jobs_models
-from jobs import tasks
+from benchmarks import tasks
 
 from . import serializers
-from . import permissions
-from . import filters
 
 
 class TokenViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -67,20 +64,45 @@ class BenchmarkViewSet(viewsets.ModelViewSet):
 
 # result
 class ResultViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    permission_classes = [DjangoModelPermissions]
     queryset = benchmarks_models.Result.objects.all()
     serializer_class = serializers.ResultSerializer
+
     filter_fields = ('id',
-        'board',
-        'branch',
-        'created_at',
-        'gerrit_change_number',
-        'gerrit_patchset_number',
-        'gerrit_change_url',
-        'gerrit_change_id',
-        'build_url',
-        'manifest',
-        'manifest__reduced_hash')
+                     'board',
+                     'branch_name',
+                     'created_at',
+                     'gerrit_change_number',
+                     'gerrit_patchset_number',
+                     'gerrit_change_url',
+                     'gerrit_change_id',
+                     'build_url',
+                     'manifest',
+                     'manifest__reduced_hash')
+
+
+    def create(self, request, *args, **kwargs):
+        test_jobs = []
+        if 'test_jobs' in request.data:
+            test_jobs = map(lambda x: x.strip(),
+                            request.data.get('test_jobs', '').split(","))
+
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        obj = serializer.save()
+
+        for test_job_id in test_jobs:
+            if not benchmarks_models.TestJob.objects.filter(id=test_job_id).exists():
+
+                db_test_job, created = benchmarks_models.TestJob.objects.get_or_create(
+                    id=test_job_id,
+                    result=obj,
+                )
+                config = tasks.TestConfig()
+                tasks.download_test_results.delay(config, db_test_job)
+
+        return response.Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 # result data
@@ -298,36 +320,7 @@ class CompareResults(viewsets.ViewSet):
         return response.Response(data)
 
 
-class BuildJobViewSet(viewsets.ModelViewSet):
-    permission_classes = [DjangoModelPermissions]
-    queryset = jobs_models.BuildJob.objects.prefetch_related('test_jobs')
-    serializer_class = serializers.BuildJob
-    filter_class = filters.BuildJobFilter
-
-    def create(self, request, *args, **kwargs):
-        test_jobs = []
-        if 'test_jobs' in request.data:
-            test_jobs = map(lambda x: x.strip(),
-                            request.data.get('test_jobs', '').split(","))
-
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        obj = serializer.save()
-
-        for test_job_id in test_jobs:
-            if not jobs_models.TestJob.objects.filter(id=test_job_id).exists():
-
-                db_test_job, created = jobs_models.TestJob.objects.get_or_create(
-                    id=test_job_id,
-                    build_job=obj,
-                )
-                config = tasks.TestConfig()
-                tasks.download_test_results.delay(config, db_test_job)
-
-        return response.Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
 class TestJobViewSet(viewsets.ModelViewSet):
     permission_classes = [DjangoModelPermissions]
-    queryset = jobs_models.TestJob.objects.all()
+    queryset = benchmarks_models.TestJob.objects.all()
     serializer_class = serializers.TestJob

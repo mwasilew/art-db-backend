@@ -56,7 +56,6 @@ INSTALLED_APPS = (
 
     # local apps
     'benchmarks',
-    'jobs',
     'api',
     'userprofile',
     'frontend'

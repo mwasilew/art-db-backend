@@ -1,11 +1,7 @@
-from datetime import datetime
-
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 
 from benchmarks import models as benchmarks_models
-from jobs import models as jobs_models
-
 
 
 class DynamicFieldsMixin(object):
@@ -64,40 +60,43 @@ class ManifestSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
 
 
 class ResultDataSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
+    board = serializers.CharField()
+
     class Meta:
         model = benchmarks_models.ResultData
 
-    def create(self, validated_data):
-        defaults = {
-            "created_at": datetime.now()
-        }
-        resultdata, created = benchmarks_models.ResultData.objects.get_or_create(defaults=defaults, **validated_data)
-        return resultdata
 
 class ResultSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
+
     class Meta:
         model = benchmarks_models.Result
-        #depth = 1
+
 
     def create(self, validated_data):
-        defaults = {
-            "created_at": datetime.now()
-        }
-        result, created = benchmarks_models.Result.objects.get_or_create(defaults=defaults, **validated_data)
-        return result
 
+        if 'board' in validated_data:
+            board_name = validated_data['board']
+            board, _ = benchmarks_models.Board.objects.get_or_create(
+                displayname=board_name,
+                display=board_name
+            )
+            validated_data['board'] = board
+        else:
+            validated_data['board'] = None
+
+        if 'manifest' in validated_data:
+            manifest_content = validated_data['manifest']
+            manifest = benchmarks_models.Manifest.create(manifest=manifest_content)
+            validated_data['manifest'] = manifest
+        else:
+            validated_data['manifest'] = None
+
+        return benchmarks_models.Result.objects.create(**validated_data)
 
 
 class TestJob(serializers.ModelSerializer):
     class Meta:
-        model = jobs_models.TestJob
-
-
-class BuildJob(serializers.ModelSerializer):
-    test_jobs = TestJob(many=True, read_only=True)
-
-    class Meta:
-        model = jobs_models.BuildJob
+        model = benchmarks_models.TestJob
 
 
 class TokenSerializer(serializers.ModelSerializer):

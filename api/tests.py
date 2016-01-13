@@ -7,60 +7,61 @@ from django.contrib.auth.models import User
 from rest_framework.test import APITestCase
 
 from benchmarks import models as benchmarks_models
-from jobs import models as jobs_models
 
 
 MINIMAL_XML = '<?xml version="1.0" encoding="UTF-8"?><body></body>'
 
 
-class BuildJobTests(APITestCase):
+class ResultTests(APITestCase):
 
     def setUp(self):
         user = User.objects.create_superuser('test', 'email@test.com', 'test')
         self.client.force_authenticate(user=user)
 
     def test_get_1(self):
-        response = self.client.get('/api/build/')
+        response = self.client.get('/api/result/')
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, [])
 
     def test_get_2(self):
-        G(jobs_models.BuildJob, id='123')
+        manifest = G(benchmarks_models.Manifest, manifest=MINIMAL_XML)
+        G(benchmarks_models.Result, id=123, manifest=manifest)
 
-        response = self.client.get('/api/build/123/')
+        response = self.client.get('/api/result/123/')
 
         self.assertEqual(response.status_code, 200)
-
         self.assertEqual(response.data['id'], '123')
 
     def test_post_1(self):
 
         data = {
+            'build_url': 'http://linaro.org',
             'name': u'linaro-art-stable-m-build-juno',
             'url': u'http://dynamicfixture1.com',
             'id': u'123'
         }
 
-        response = self.client.post('/api/build/', data=data)
+        response = self.client.post('/api/result/', data=data)
         self.assertEqual(response.status_code, 201)
 
-    @mock.patch("jobs.tasks.lava_scheduler_job_status", lambda x: 'Completed')
+    @mock.patch("benchmarks.tasks.lava_scheduler_job_status", lambda x: 'Completed')
     def test_post_2(self):
 
         data = {
+            'build_url': 'http://linaro.org',
             'name': u'linaro-art-stable-m-build-juno',
             'url': u'http://dynamicfixture1.com',
             'id': u'123',
             'test_jobs': '655839.0, 655838.0'
         }
 
-        response = self.client.post('/api/build/', data=data)
+        response = self.client.post('/api/result/', data=data)
         self.assertEqual(response.status_code, 201)
 
-        self.assertEqual(jobs_models.TestJob.objects.count(), 2)
+        self.assertEqual(benchmarks_models.TestJob.objects.count(), 2)
 
-        items = jobs_models.TestJob.objects.values_list('id', flat=True)
+        items = benchmarks_models.TestJob.objects.values_list('id', flat=True)
         self.assertIn('655839.0', items)
         self.assertIn('655838.0', items)
 
