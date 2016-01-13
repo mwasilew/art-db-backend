@@ -48,7 +48,6 @@ class Manifest(models.Model):
 class Result(models.Model):
     board = models.ForeignKey(Board, related_name="results")
     manifest = models.ForeignKey(Manifest, related_name="results", null=True)
-    test_job = models.ForeignKey(TestJob, related_name="results", null=True)
 
     branch_name = models.CharField(max_length=128, blank=True)
     build_url = models.URLField(null=True, blank=True)
