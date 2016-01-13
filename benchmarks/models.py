@@ -44,6 +44,8 @@ class Manifest(models.Model):
 
 
 class Result(models.Model):
+    id = models.CharField(primary_key=True, max_length=99)
+
     board = models.ForeignKey(Board, related_name="results")
     manifest = models.ForeignKey(Manifest, related_name="results", null=True)
 
