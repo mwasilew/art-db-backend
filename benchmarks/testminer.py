@@ -482,15 +482,23 @@ class ArtMicrobenchmarksTestResults(LavaTestSystem):
         result_bundle = self.call_xmlrpc('dashboard.get', sha1)
         bundle = json.loads(result_bundle['content'])
 
-        target = (t for t in bundle['test_runs'] if t['test_id'] == 'multinode-target').next()
-        host   = (t for t in bundle['test_runs'] if t['test_id'] == 'art-microbenchmarks').next()
+        target = [t for t in bundle['test_runs'] if t['test_id'] == 'multinode-target']
+        if target:
+            target = iter(target).next()
+        else:
+            return test_result_list
+        host = [t for t in bundle['test_runs'] if t['test_id'] == 'art-microbenchmarks']
+        if host:
+            host = iter(host).next()
+        else:
+            return test_result_list
         src = (s for s in host['software_context']['sources'] if 'test_params' in s).next()
         # This is an art-microbenchmarks test
         # The test name and test results are in the attachmented pkl file
         # get test results for the attachment
-        test_mode        = ast.literal_eval(src['test_params'])['MODE']
-        json_content      = (a['content'] for a in host['attachments'] if a['pathname'].endswith('json')).next()
-        json_text         = base64.b64decode(json_content)
+        test_mode = ast.literal_eval(src['test_params'])['MODE']
+        json_content = (a['content'] for a in host['attachments'] if a['pathname'].endswith('json')).next()
+        json_text = base64.b64decode(json_content)
         # save json file locally
         #with open(self.result_file_name + "_" + str(test_mode) + ".json", "w") as json_file:
         #    json_file.write(json_text)
@@ -501,13 +509,13 @@ class ArtMicrobenchmarksTestResults(LavaTestSystem):
         benchmark_list   = list(set(test_result_keys))
         for benchmark in benchmark_list:
             test_result = {}
-            test_result['board']        = target['attributes']['target']
+            test_result['board'] = target['attributes']['target']
             test_result['board_config'] = target['attributes']['target']
             # benchmark iteration
             test_result['benchmark_name'] = benchmark
             test_result['subscore'] = []
             key_word = "/%s." % benchmark
-            tests    = ((k, test_result_dict[k]) for k in test_result_dict.keys() if k.find(key_word) > 0)
+            tests = ((k, test_result_dict[k]) for k in test_result_dict.keys() if k.find(key_word) > 0)
             for test in tests:
                 # subscore iteration
                 subscore = "%s_%s" % (test[0].split('.')[-1], test_mode)
