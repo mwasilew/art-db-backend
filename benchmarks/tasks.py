@@ -5,8 +5,6 @@ import urlparse
 from benchmarks.models import (
     Benchmark,
     Board,
-    Manifest,
-    Result,
     ResultData
 )
 from crayonbox import celery_app
@@ -14,36 +12,10 @@ from celery.utils.log import get_task_logger
 
 from django.conf import settings
 
-from . import models, testminer
+from . import testminer
 
 
 logger = get_task_logger(__name__)
-
-
-def lava_scheduler_job_status(job_id):
-    source = "validation.linaro.org"
-
-    credentials = settings.LAVA_CREDENTIALS[source]
-    server = xmlrpclib.ServerProxy("http://%s:%s@%s/RPC2" % (
-        credentials[0], credentials[1], source))
-
-    try:
-        data = server.scheduler.job_status(job_id)
-    except xmlrpclib.Error as e:
-        logger.error(e.faultString)
-        return None
-
-    job_status = data['job_status']
-    logger.info("TestJob %s status:%s" % (job_id, job_status))
-    return job_status
-
-
-@celery_app.task
-def update_incopleted_testjobs():
-
-    for test_job in models.TestJob.objects.filter(status=None):
-        test_job.status = lava_scheduler_job_status(test_job.id)
-        test_job.save()
 
 
 class TestConfig(object):

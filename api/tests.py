@@ -1,4 +1,3 @@
-import mock
 import hashlib
 
 from django_dynamic_fixture import G
@@ -48,7 +47,6 @@ class ResultTests(APITestCase):
         self.assertEqual(benchmarks_models.Manifest.objects.count(), 1)
         self.assertEqual(response.status_code, 201)
 
-    @mock.patch("benchmarks.tasks.lava_scheduler_job_status", lambda x: 'Completed')
     def test_post_2(self):
 
         data = {
