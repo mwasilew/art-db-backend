@@ -39,10 +39,13 @@ class ResultTests(APITestCase):
             'build_url': 'http://linaro.org',
             'name': u'linaro-art-stable-m-build-juno',
             'url': u'http://dynamicfixture1.com',
-            'id': u'123'
+            'id': u'123',
+            'manifest': MINIMAL_XML
         }
 
         response = self.client.post('/api/result/', data=data)
+
+        self.assertEqual(benchmarks_models.Manifest.objects.count(), 1)
         self.assertEqual(response.status_code, 201)
 
     @mock.patch("benchmarks.tasks.lava_scheduler_job_status", lambda x: 'Completed')
@@ -53,12 +56,13 @@ class ResultTests(APITestCase):
             'name': u'linaro-art-stable-m-build-juno',
             'url': u'http://dynamicfixture1.com',
             'id': u'123',
-            'test_jobs': '655839.0, 655838.0'
+            'test_jobs': '655839.0, 655838.0',
+            'manifest': MINIMAL_XML
         }
 
         response = self.client.post('/api/result/', data=data)
         self.assertEqual(response.status_code, 201)
-
+        self.assertEqual(benchmarks_models.Manifest.objects.count(), 1)
         self.assertEqual(benchmarks_models.TestJob.objects.count(), 2)
 
         items = benchmarks_models.TestJob.objects.values_list('id', flat=True)
