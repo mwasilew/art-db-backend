@@ -93,7 +93,7 @@ class ResultSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
 
         if 'manifest' in validated_data:
             manifest_content = validated_data['manifest']
-            manifest = benchmarks_models.Manifest.objects.create(
+            manifest, _ = benchmarks_models.Manifest.objects.get_or_create(
                 manifest=manifest_content)
             validated_data['manifest'] = manifest
         else:

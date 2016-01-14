@@ -67,6 +67,29 @@ class ResultTests(APITestCase):
         self.assertIn('655839.0', items)
         self.assertIn('655838.0', items)
 
+    def test_post_3(self):
+
+        data_1 = {
+            'build_url': 'http://linaro.org',
+            'name': u'linaro-art-stable-m-build-juno',
+            'url': u'http://dynamicfixture1.com',
+            'id': u'123',
+            'manifest': MINIMAL_XML
+        }
+
+        data_2 = {
+            'build_url': 'http://linaro.org',
+            'name': u'linaro-art-stable-m-build-juno',
+            'url': u'http://dynamicfixture1.com',
+            'id': u'125',
+            'manifest': MINIMAL_XML
+        }
+
+        self.assertEqual(self.client.post('/api/result/', data=data_1).status_code, 201)
+        self.assertEqual(self.client.post('/api/result/', data=data_2).status_code, 201)
+
+        self.assertEqual(benchmarks_models.Manifest.objects.count(), 1)
+
 
 class ManifestTests(APITestCase):
 
