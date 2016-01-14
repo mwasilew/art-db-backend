@@ -7,10 +7,9 @@ from rest_framework import viewsets
 from rest_framework import response
 from rest_framework import mixins
 from rest_framework import status
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
-from rest_framework.decorators import list_route, detail_route
+from rest_framework.decorators import list_route
 
 from benchmarks import models as benchmarks_models
 from benchmarks import tasks
@@ -207,9 +206,6 @@ class ResultDataForManifest(views.APIView):
 
 
 class CompareResults(viewsets.ViewSet):
-
-    #authentication_classes = (TokenAuthentication,)
-    #permission_classes = (permissions.IsAdminGroup,)
 
     # no statistics module in Python 2
     def mean(self, data):
