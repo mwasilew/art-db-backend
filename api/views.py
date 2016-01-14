@@ -105,6 +105,11 @@ class ResultViewSet(viewsets.ModelViewSet):
         return response.Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
+class TestJobViewSet(viewsets.ModelViewSet):
+    permission_classes = [DjangoModelPermissions]
+    queryset = benchmarks_models.TestJob.objects.all()
+    serializer_class = serializers.TestJobSerializer
+
 # result data
 class ResultDataViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
@@ -318,9 +323,3 @@ class CompareResults(viewsets.ViewSet):
         data = self.compare_query(base_query, target_query)
 
         return response.Response(data)
-
-
-class TestJobViewSet(viewsets.ModelViewSet):
-    permission_classes = [DjangoModelPermissions]
-    queryset = benchmarks_models.TestJob.objects.all()
-    serializer_class = serializers.TestJob

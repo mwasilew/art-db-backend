@@ -66,8 +66,14 @@ class ResultDataSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
         model = benchmarks_models.ResultData
 
 
+class TestJobSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = benchmarks_models.TestJob
+
+
 class ResultSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
     manifest =  serializers.CharField()
+    test_jobs = TestJobSerializer(many=True, read_only=True)
 
     class Meta:
         model = benchmarks_models.Result
@@ -94,11 +100,6 @@ class ResultSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
             validated_data['manifest'] = None
 
         return benchmarks_models.Result.objects.create(**validated_data)
-
-
-class TestJob(serializers.ModelSerializer):
-    class Meta:
-        model = benchmarks_models.TestJob
 
 
 class TokenSerializer(serializers.ModelSerializer):
