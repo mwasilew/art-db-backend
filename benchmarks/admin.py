@@ -4,7 +4,8 @@ from .models import (
     Board,
     Manifest,
     Result,
-    ResultData
+    ResultData,
+    TestJob
 )
 
 
@@ -15,3 +16,4 @@ admin.site.register(Board)
 admin.site.register(Manifest, ManifestAdmin)
 admin.site.register(Result)
 admin.site.register(ResultData)
+admin.site.register(TestJob)

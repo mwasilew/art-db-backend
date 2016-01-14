@@ -77,7 +77,6 @@ def dig_test(self, tester, test_job):
         test_job.url = tester.get_job_url(test_job_id)
         test_job.save()
 
-        db_manifest, created = Manifest.objects.get_or_create(manifest=test_job.build_job.manifest)
         test_results = tester.get_test_job_results(test_job_id)
         if not test_results:
             test_job.status = "Results Missing"
@@ -91,31 +90,15 @@ def dig_test(self, tester, test_job):
             db_benchmark, created = Benchmark.objects.get_or_create(
                 name=benchmark['benchmark_name']
             )
-            db_result, created = Result.objects.get_or_create(
-                board=db_board,
-                branch_name=test_job.build_job.branch_name,
-                build_url=test_job.build_job.url,
-                manifest=db_manifest
-            )
 
-            if test_job.build_job.gerrit_change_number:
-                db_result.gerrit_change_number=test_job.build_job.gerrit_change_number
-
-            if test_job.build_job.gerrit_change_id:
-                db_result.gerrit_change_id=test_job.build_job.gerrit_change_id
-
-            if test_job.build_job.gerrit_change_url:
-                db_result.gerrit_change_url=test_job.build_job.gerrit_change_url
-
-            if test_job.build_job.gerrit_patchset_number:
-                db_result.gerrit_patchset_number=test_job.build_job.gerrit_patchset_number
-            db_result.save()
+            test_job.result.board = db_board
+            test_job.result.save()
 
             for subscore in benchmark['subscore']:
                 db_resultdata = ResultData(
                     name=subscore['name'],
                     measurement=subscore['measurement'],
-                    result=db_result,
+                    result=test_job.result,
                     benchmark=db_benchmark
                 )
                 db_resultdata.save()
