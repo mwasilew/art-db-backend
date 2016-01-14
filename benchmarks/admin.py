@@ -4,7 +4,8 @@ from .models import (
     Board,
     Manifest,
     Result,
-    ResultData
+    ResultData,
+    TestJob
 )
 
 
@@ -14,4 +15,5 @@ class ManifestAdmin(admin.ModelAdmin):
 admin.site.register(Board)
 admin.site.register(Manifest, ManifestAdmin)
 admin.site.register(Result)
+admin.site.register(TestJob)
 admin.site.register(ResultData)
