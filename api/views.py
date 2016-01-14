@@ -27,16 +27,13 @@ class TokenViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         serializer = self.serializer_class(Token.objects.get(user=request.user))
         return response.Response(serializer.data)
 
-# manifest
-class ManifestViewSet(viewsets.ModelViewSet):
-    """
-    Authentication is needed for this methods
-    """
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
-    queryset = benchmarks_models.Manifest.objects.all()
+
+class ManifestViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [DjangoModelPermissions]
+    queryset = benchmarks_models.Manifest.objects.prefetch_related("results")
+
     serializer_class = serializers.ManifestSerializer
-    filter_fields = ('id', 'manifest_hash', 'reduced_hash', 'manifest')
-    ordering_fields = ('id',)
+    filter_fields = ('id', 'manifest_hash', 'reduced_hash')
 
 
 class ReducedManifestViewSet(viewsets.ModelViewSet):

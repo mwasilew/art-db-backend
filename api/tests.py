@@ -114,24 +114,6 @@ class ManifestTests(APITestCase):
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['manifest_hash'], manifest_hash)
 
-    def test_post(self):
-
-        response = self.client.post('/api/manifest/',
-                                    data={'manifest': MINIMAL_XML})
-
-        self.assertEqual(response.data['manifest_hash'],
-                         hashlib.sha1(MINIMAL_XML).hexdigest())
-
-        self.assertEqual(benchmarks_models.Manifest.objects.count(), 1)
-
-        response = self.client.post('/api/manifest/',
-                                    data={'manifest': MINIMAL_XML})
-
-        self.assertEqual(response.data['manifest_hash'],
-                         hashlib.sha1(MINIMAL_XML).hexdigest())
-
-        self.assertEqual(benchmarks_models.Manifest.objects.count(), 1)
-
 
 class CompareTests(APITestCase):
 

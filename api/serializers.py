@@ -50,15 +50,6 @@ class ReducedManifestSerializer(DynamicFieldsMixin, serializers.ModelSerializer)
         depth = 2
 
 
-class ManifestSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
-    class Meta:
-        model = benchmarks_models.Manifest
-
-    def create(self, validated_data):
-        manifest, _ = benchmarks_models.Manifest.objects.get_or_create(**validated_data)
-        return manifest
-
-
 class ResultDataSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
     board = serializers.CharField()
 
@@ -71,7 +62,7 @@ class TestJobSerializer(serializers.ModelSerializer):
         model = benchmarks_models.TestJob
 
 
-class ResultSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
+class ResultSerializer(serializers.ModelSerializer):
     manifest =  serializers.CharField()
     test_jobs = TestJobSerializer(many=True, read_only=True)
 
@@ -100,6 +91,13 @@ class ResultSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
             validated_data['manifest'] = None
 
         return benchmarks_models.Result.objects.create(**validated_data)
+
+
+class ManifestSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
+    results = ResultSerializer(many=True, read_only=True)
+    class Meta:
+        fields = ("id", "manifest_hash", "reduced_hash", "results")
+        model = benchmarks_models.Manifest
 
 
 class TokenSerializer(serializers.ModelSerializer):

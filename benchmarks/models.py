@@ -24,6 +24,9 @@ class Manifest(models.Model):
     reduced_hash = models.CharField(max_length=40, editable=False, default=None)
     manifest = models.TextField()
 
+    class Meta:
+        ordering = ['-id']
+
     def __unicode__(self):
         return self.manifest_hash
 
