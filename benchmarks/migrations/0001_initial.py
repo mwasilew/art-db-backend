@@ -26,47 +26,27 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='BoardConfiguration',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('name', models.CharField(max_length=256)),
-            ],
-        ),
-        migrations.CreateModel(
-            name='Branch',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('name', models.CharField(max_length=1024)),
-            ],
-        ),
-        migrations.CreateModel(
-            name='Configuration',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('name', models.CharField(max_length=256)),
-            ],
-        ),
-        migrations.CreateModel(
             name='Manifest',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('manifest_hash', models.CharField(max_length=40, editable=False)),
+                ('reduced_hash', models.CharField(default=None, max_length=40, editable=False)),
                 ('manifest', models.TextField()),
             ],
         ),
         migrations.CreateModel(
             name='Result',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('revision', models.CharField(max_length=32, null=True, blank=True)),
-                ('timestamp', models.DateTimeField(null=True)),
-                ('gerrit_change_number', models.DecimalField(null=True, max_digits=9, decimal_places=2, blank=True)),
-                ('gerrit_patchset_number', models.DecimalField(null=True, max_digits=9, decimal_places=2, blank=True)),
+                ('id', models.CharField(max_length=99, serialize=False, primary_key=True)),
+                ('name', models.CharField(max_length=128)),
+                ('branch_name', models.CharField(max_length=128, blank=True)),
+                ('build_url', models.URLField()),
+                ('gerrit_change_number', models.IntegerField(null=True, blank=True)),
+                ('gerrit_patchset_number', models.IntegerField(null=True, blank=True)),
                 ('gerrit_change_url', models.URLField(null=True, blank=True)),
-                ('gerrit_change_id', models.CharField(max_length=42, null=True, blank=True)),
-                ('build_url', models.URLField(null=True, blank=True)),
-                ('board', models.ForeignKey(related_name='results', to='benchmarks.Board')),
-                ('branch', models.ForeignKey(related_name='results', to='benchmarks.Branch')),
-                ('configuration', models.ForeignKey(blank=True, to='benchmarks.Configuration', null=True)),
+                ('gerrit_change_id', models.CharField(default=b'', max_length=42, blank=True)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('board', models.ForeignKey(related_name='results', to='benchmarks.Board', null=True)),
                 ('manifest', models.ForeignKey(related_name='results', to='benchmarks.Manifest', null=True)),
             ],
         ),
@@ -76,14 +56,24 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('name', models.CharField(max_length=256)),
                 ('measurement', models.FloatField()),
-                ('timestamp', models.DateTimeField(null=True)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('benchmark', models.ForeignKey(related_name='data', to='benchmarks.Benchmark')),
                 ('result', models.ForeignKey(related_name='data', to='benchmarks.Result')),
             ],
         ),
-        migrations.AddField(
-            model_name='board',
-            name='configuration',
-            field=models.ForeignKey(related_name='boards', to='benchmarks.BoardConfiguration'),
+        migrations.CreateModel(
+            name='TestJob',
+            fields=[
+                ('id', models.CharField(max_length=100, serialize=False, primary_key=True)),
+                ('url', models.URLField(null=True, blank=True)),
+                ('completed', models.BooleanField(default=False)),
+                ('status', models.CharField(default=b'', max_length=16, blank=True)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('definition', models.TextField(null=True, blank=True)),
+                ('result', models.ForeignKey(related_name='test_jobs', to='benchmarks.Result')),
+            ],
+            options={
+                'ordering': ['-created_at'],
+            },
         ),
     ]
