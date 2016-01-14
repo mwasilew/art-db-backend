@@ -79,6 +79,9 @@ def dig_test(self, tester, test_job):
 
         db_manifest, created = Manifest.objects.get_or_create(manifest=test_job.build_job.manifest)
         test_results = tester.get_test_job_results(test_job_id)
+        if not test_results:
+            test_job.status = "Results Missing"
+            test_job.save()
         for benchmark in test_results:
             # {'subscore': [{'name': u'LongRotateLeft_32', 'measurement': 812.58}, {'name': u'IntegerRotateRight_32', 'measurement': 115.13}, {'name': u'IntegerRotateLeft_32', 'measurement': 116.78}, {'name': u'LongRotateRight_32', 'measurement': 813.57}, {'name': u'SHA1DigestProcessBlock_32', 'measurement': 768.09}], 'board_config': u'mn-nexus9-02', 'board': u'mn-nexus9-02', 'benchmark_name': u'BitfieldRotate'}
             db_board, created = Board.objects.get_or_create(
