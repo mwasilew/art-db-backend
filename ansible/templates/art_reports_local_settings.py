@@ -16,7 +16,7 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
-LAVA_CREDENTIALS = {
+CREDENTIALS = {
     'validation.linaro.org': ('{{lava_user}}', '{{lava_key}}')
 }
 
