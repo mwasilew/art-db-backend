@@ -14,8 +14,6 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 import os
 import djcelery
 
-from datetime import timedelta
-
 djcelery.setup_loader()
 
 BASE_DIR = os.path.abspath(
