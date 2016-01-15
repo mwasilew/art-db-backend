@@ -4,3 +4,4 @@
 <span ng-if="test.status === 'Running'" class="label label-primary">{{ test.status }}</span>
 <span ng-if="test.status === 'Incomplete'" class="label label-warning">{{ test.status }}</span>
 <span ng-if="test.status === 'Canceling' || test.status === 'Canceled'" class="label label-danger">{{ test.status }}</span>
+<span ng-if="test.status === 'Results Missing'" class="label label-default">{{ test.status }}</span>
