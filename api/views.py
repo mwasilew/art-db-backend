@@ -39,7 +39,6 @@ class ReducedManifestViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
     queryset = benchmarks_models.Manifest.objects.all()
     serializer_class = serializers.ReducedManifestSerializer
-    filter_fields = ('id', 'manifest_hash', 'reduced_hash', 'manifest')
 
 
 # board

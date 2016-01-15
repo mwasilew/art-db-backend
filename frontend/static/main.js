@@ -14,20 +14,35 @@ app.controller('Toolbar', ['$scope', '$http', '$rootScope', function($scope, $ht
 
 app.config(['$routeProvider', function($routeProvider) {
     $routeProvider
-        .when('/', {
+        .when('/builds/', {
             templateUrl: '/static/templates/build_list.html',
             controller: 'BuildList'
+        })
+        .when('/build/:buildId', {
+            templateUrl: '/static/templates/build_detail.html',
+            controller: 'BuildDetail'
+        })
+        .when('/manifests/', {
+            templateUrl: '/static/templates/manifest_list.html',
+            controller: 'ManifestList'
         })
         .when('/stats/', {
             templateUrl: '/static/templates/stats.html',
             controller: 'Stats'
         })
-        .when('/build/:buildId', {
-            templateUrl: '/static/templates/build_detail.html',
-            controller: 'BuildDetail'
+        .otherwise({
+            redirectTo: '/manifests/'
         });
 }]);
 
+
+app.controller('ManifestList', ['$scope', '$http', function($scope, $http) {
+
+    $http.get('/api/manifest/', {cache: false}).then(function(response) {
+        $scope.items = response.data;
+    });
+
+}]);
 
 app.controller('BuildList', ['$scope', '$http', function($scope, $http) {
 
