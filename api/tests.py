@@ -21,7 +21,7 @@ class ResultTests(APITestCase):
         response = self.client.get('/api/result/')
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, [])
+        self.assertEqual(response.data['count'], 0)
 
     def test_get_2(self):
         manifest = G(benchmarks_models.Manifest, manifest=MINIMAL_XML)
@@ -101,7 +101,7 @@ class ManifestTests(APITestCase):
         response = self.client.get('/api/manifest/')
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, [])
+        self.assertEqual(response.data['count'], 0)
 
     def test_get_2(self):
         manifest_hash = hashlib.sha1(MINIMAL_XML).hexdigest()
@@ -111,8 +111,8 @@ class ManifestTests(APITestCase):
         response = self.client.get('/api/manifest/')
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]['manifest_hash'], manifest_hash)
+        self.assertEqual(response.data['count'], 1)
+        self.assertEqual(response.data['results'][0]['manifest_hash'], manifest_hash)
 
 
 class CompareTests(APITestCase):
