@@ -2,11 +2,7 @@ from xmlrpclib import Error
 import traceback
 import urlparse
 
-from benchmarks.models import (
-    Benchmark,
-    Board,
-    ResultData
-)
+from benchmarks.models import Benchmark, ResultData
 from crayonbox import celery_app
 from celery.utils.log import get_task_logger
 
@@ -54,26 +50,20 @@ def dig_test(self, tester, test_job):
                 test_job.save()
             for benchmark in test_results:
                 # {'subscore': [{'name': u'LongRotateLeft_32', 'measurement': 812.58}, {'name': u'IntegerRotateRight_32', 'measurement': 115.13}, {'name': u'IntegerRotateLeft_32', 'measurement': 116.78}, {'name': u'LongRotateRight_32', 'measurement': 813.57}, {'name': u'SHA1DigestProcessBlock_32', 'measurement': 768.09}], 'board_config': u'mn-nexus9-02', 'board': u'mn-nexus9-02', 'benchmark_name': u'BitfieldRotate'}
-                db_board, created = Board.objects.get_or_create(
-                    displayname=benchmark['board'],
-                    display=benchmark['board']
-                )
+
                 db_benchmark, created = Benchmark.objects.get_or_create(
                     name=benchmark['benchmark_name']
                 )
-
-                test_job.result.board = db_board
-                test_job.result.save()
 
                 for subscore in benchmark['subscore']:
                     db_resultdata = ResultData(
                         name=subscore['name'],
                         measurement=subscore['measurement'],
+                        board = benchmark['board'],
                         result=test_job.result,
                         benchmark=db_benchmark
                     )
                     db_resultdata.save()
-
 
 
             # ToDo: not implemented yet. DO NOT REMOVE

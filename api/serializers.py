@@ -25,15 +25,6 @@ class DynamicFieldsMixin(object):
                 self.fields.pop(field_name)
 
 
-class BoardSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = benchmarks_models.Board
-
-    def create(self, validated_data):
-        board, created = benchmarks_models.Board.objects.get_or_create(**validated_data)
-        return board
-
-
 class BenchmarkSerializer(serializers.ModelSerializer):
     class Meta:
         model = benchmarks_models.Benchmark
@@ -71,16 +62,6 @@ class ResultSerializer(serializers.ModelSerializer):
 
 
     def create(self, validated_data):
-
-        if 'board' in validated_data:
-            board_name = validated_data['board']
-            board, _ = benchmarks_models.Board.objects.get_or_create(
-                displayname=board_name,
-                display=board_name
-            )
-            validated_data['board'] = board
-        else:
-            validated_data['board'] = None
 
         if 'manifest' in validated_data:
             manifest_content = validated_data['manifest']

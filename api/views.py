@@ -37,14 +37,6 @@ class ManifestViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ('id', 'manifest_hash', 'reduced_hash')
 
 
-# board
-class BoardViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
-    queryset = benchmarks_models.Board.objects.all()
-    serializer_class = serializers.BoardSerializer
-    filter_fields = ('id', 'displayname')
-
-
 # benchmark
 class BenchmarkViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, DjangoModelPermissions)

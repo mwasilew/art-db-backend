@@ -5,11 +5,6 @@ from django.db import models
 from django.conf import settings
 
 
-class Board(models.Model):
-    displayname = models.CharField(max_length=32)
-    display = models.CharField(max_length=32)
-
-
 class Benchmark(models.Model):
     name = models.CharField(max_length=64)
 
@@ -49,7 +44,6 @@ class Manifest(models.Model):
 class Result(models.Model):
     id = models.CharField(primary_key=True, max_length=99)
 
-    board = models.ForeignKey(Board, related_name="results", null=True)
     manifest = models.ForeignKey(Manifest, related_name="results", null=True)
 
     name = models.CharField(max_length=128)
@@ -79,6 +73,7 @@ class TestJob(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     definition = models.TextField(blank=True, null=True)
 
+
     class Meta:
         ordering = ['-created_at']
 
@@ -91,6 +86,7 @@ class ResultData(models.Model):
     benchmark = models.ForeignKey(Benchmark, related_name="data")
     measurement = models.FloatField()
     result = models.ForeignKey(Result, related_name="data")
+    board = models.CharField(default="default", max_length=128)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
