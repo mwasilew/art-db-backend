@@ -3,7 +3,7 @@ var app = angular.module('art', ['ngRoute']);
 app.controller('Toolbar', ['$scope', '$http', '$rootScope', function($scope, $http, $rootScope) {
 
     $rootScope.$on( "$routeChangeSuccess", function(event, next, current) {
-        $scope.viewName = next.$$route.controller;
+        $scope.viewName = next.$$route ? next.$$route.controller : '';
     });
 
     $http.get('/api/token/').then(function(response) {
