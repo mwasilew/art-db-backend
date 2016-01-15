@@ -42,6 +42,13 @@ app.controller('ManifestList', ['$scope', '$http', function($scope, $http) {
         $scope.items = response.data;
     });
 
+    $scope.search = function() {
+        $http.get('/api/manifest/', {params: {'search': $scope.searchQuery }})
+            .then(function(response) {
+                $scope.items = response.data;
+            });
+    };
+
 }]);
 
 app.controller('BuildList', ['$scope', '$http', function($scope, $http) {
@@ -51,7 +58,7 @@ app.controller('BuildList', ['$scope', '$http', function($scope, $http) {
     });
 
     $scope.search = function() {
-        $http.get('/api/result/', {params: {'name': $scope.searchQuery }})
+        $http.get('/api/result/', {params: {'search': $scope.searchQuery }})
             .then(function(response) {
                 $scope.builds = response.data;
             });

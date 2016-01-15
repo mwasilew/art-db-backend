@@ -7,6 +7,7 @@ from rest_framework import viewsets
 from rest_framework import response
 from rest_framework import mixins
 from rest_framework import status
+from rest_framework import filters
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from rest_framework.decorators import list_route
@@ -32,7 +33,8 @@ class ManifestViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = benchmarks_models.Manifest.objects.prefetch_related("results")
 
     serializer_class = serializers.ManifestSerializer
-    filter_fields = ('id', 'manifest_hash', 'reduced_hash')
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('id', 'manifest_hash', 'reduced_hash')
 
 
 class ReducedManifestViewSet(viewsets.ModelViewSet):
@@ -63,16 +65,14 @@ class ResultViewSet(viewsets.ModelViewSet):
     queryset = benchmarks_models.Result.objects.all()
     serializer_class = serializers.ResultSerializer
 
-    filter_fields = ('id',
-                     'board',
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('id',
                      'branch_name',
-                     'created_at',
                      'gerrit_change_number',
                      'gerrit_patchset_number',
                      'gerrit_change_url',
                      'gerrit_change_id',
-                     'build_url',
-                     'manifest',
+                     'manifest__manifest_hash',
                      'manifest__reduced_hash')
 
 
