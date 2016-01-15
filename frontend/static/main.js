@@ -36,31 +36,34 @@ app.config(['$routeProvider', function($routeProvider) {
 }]);
 
 
-app.controller('ManifestList', ['$scope', '$http', function($scope, $http) {
+app.controller('ManifestList', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
+    var page = $routeParams.page || 1;
 
-    $http.get('/api/manifest/', {cache: false}).then(function(response) {
-        $scope.items = response.data;
-    });
+    $http.get('/api/manifest/', {cache: false, params: {page: page}})
+        .then(function(response) {
+            $scope.page = response.data;
+        });
 
     $scope.search = function() {
-        $http.get('/api/manifest/', {params: {'search': $scope.searchQuery }})
+        $http.get('/api/manifest/', {params: {'search': $scope.searchQuery, page: page}})
             .then(function(response) {
-                $scope.items = response.data;
+                $scope.page = response.data;
             });
     };
 
 }]);
 
-app.controller('BuildList', ['$scope', '$http', function($scope, $http) {
+app.controller('BuildList', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
+    var page = $routeParams.page || 1;
 
-    $http.get('/api/result/', {cache: false}).then(function(response) {
-        $scope.builds = response.data;
+    $http.get('/api/result/', {cache: false, params: {page: page}}).then(function(response) {
+        $scope.page = response.data;
     });
 
     $scope.search = function() {
-        $http.get('/api/result/', {params: {'search': $scope.searchQuery }})
+        $http.get('/api/result/', {params: {'search': $scope.searchQuery, page: page}})
             .then(function(response) {
-                $scope.builds = response.data;
+                $scope.page = response.data;
             });
     };
 }]);

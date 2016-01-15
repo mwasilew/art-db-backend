@@ -8,7 +8,7 @@
 
   <table class="table table-striped">
     <tbody>
-      <tr ng-repeat-start="item in items">
+      <tr ng-repeat-start="item in page.results">
 	<td>{{ item.manifest_hash }}<br/><small>{{ item.reduced_hash }}</small></td>
       </tr>
       <tr ng-repeat-end ng-show="item.results.length">
@@ -28,4 +28,7 @@
       </tr>
     </tbody>
   </table>
+
+  <ng-include src="'/static/templates/_pagination.html'">
+    
 </div>

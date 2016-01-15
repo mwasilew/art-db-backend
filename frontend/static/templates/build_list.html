@@ -15,7 +15,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr ng-repeat="build in builds">
+      <tr ng-repeat="build in page.results">
 
 	<td><a ng-href="#/build/{{ build.id }}">#{{ build.id }}</a></td>
 
@@ -26,7 +26,7 @@
 
 	<td>
 	  <span ng-repeat="test in build.test_jobs">
-            (<a href="{{ test.url }}">#{{ test.id }}</a><ng-include src="'/static/templates/_test_job_status.html'"></ng-include>)
+            (<a href="{{ test.url }}">#{{ test.id }}</a> <ng-include src="'/static/templates/_test_job_status.html'"></ng-include>)
 	  </span>
 	</td>
 
@@ -34,4 +34,7 @@
       </tr>
     </tbody>
   </table>
+
+  <ng-include src="'/static/templates/_pagination.html'">
+  
 </div>
