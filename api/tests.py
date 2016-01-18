@@ -36,6 +36,7 @@ class ResultTests(APITestCase):
 
         data = {
             'build_url': 'http://linaro.org',
+            'build_number': 200,
             'name': u'linaro-art-stable-m-build-juno',
             'url': u'http://dynamicfixture1.com',
             'id': u'123',
@@ -54,6 +55,7 @@ class ResultTests(APITestCase):
             'name': u'linaro-art-stable-m-build-juno',
             'url': u'http://dynamicfixture1.com',
             'id': u'123',
+            'build_number': 200,
             'test_jobs': '655839.0, 655838.0',
             'manifest': MINIMAL_XML
         }
@@ -74,7 +76,8 @@ class ResultTests(APITestCase):
             'name': u'linaro-art-stable-m-build-juno',
             'url': u'http://dynamicfixture1.com',
             'id': u'123',
-            'manifest': MINIMAL_XML
+            'manifest': MINIMAL_XML,
+            'build_number': 200
         }
 
         data_2 = {
@@ -82,7 +85,8 @@ class ResultTests(APITestCase):
             'name': u'linaro-art-stable-m-build-juno',
             'url': u'http://dynamicfixture1.com',
             'id': u'125',
-            'manifest': MINIMAL_XML
+            'manifest': MINIMAL_XML,
+            'build_number': 201
         }
 
         self.assertEqual(self.client.post('/api/result/', data=data_1).status_code, 201)
