@@ -473,12 +473,15 @@ class LavaTestSystem(TestSystem):
 
 class ArtMicrobenchmarksTestResults(LavaTestSystem):
     def get_test_job_results(self, test_job_id):
-        # extract json file with results
-        test_result_list = []
+
         status = self.call_xmlrpc('scheduler.job_status', test_job_id)
-        sha1 = None
-        if 'bundle_sha1' in status:
-            sha1 = status['bundle_sha1']
+
+        if not ('bundle_sha1' in status and status['bundle_sha1']):
+            return []
+
+        test_result_list = []
+
+        sha1 = status['bundle_sha1']
         result_bundle = self.call_xmlrpc('dashboard.get', sha1)
         bundle = json.loads(result_bundle['content'])
 
@@ -497,8 +500,12 @@ class ArtMicrobenchmarksTestResults(LavaTestSystem):
         # The test name and test results are in the attachmented pkl file
         # get test results for the attachment
         test_mode = ast.literal_eval(src['test_params'])['MODE']
-        json_content = (a['content'] for a in host['attachments'] if a['pathname'].endswith('json')).next()
-        json_text = base64.b64decode(json_content)
+        json_attachments = [a['content'] for a in host['attachments'] if a['pathname'].endswith('json')]
+
+        if not json_attachments:
+            return []
+
+        json_text = base64.b64decode(json_attachments[0])
         # save json file locally
         #with open(self.result_file_name + "_" + str(test_mode) + ".json", "w") as json_file:
         #    json_file.write(json_text)
