@@ -36,12 +36,12 @@ def dig_test(self, tester, test_job):
             test_status,
             tester.get_job_url(test_job_id)))
         test_job.status = test_status
+        test_job.url = tester.get_job_url(test_job_id)
         test_job.save()
 
         if tester.test_results_available(test_job_id):
             test_metadata = tester.get_test_job_details(test_job_id)
             test_job.definition = test_metadata['definition']
-            test_job.url = tester.get_job_url(test_job_id)
             test_job.save()
 
             test_results = tester.get_test_job_results(test_job_id)
