@@ -17,7 +17,7 @@ import djcelery
 djcelery.setup_loader()
 
 BASE_DIR = os.path.abspath(
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'very-secret-password'
