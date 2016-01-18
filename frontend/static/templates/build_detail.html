@@ -41,7 +41,7 @@
     <tbody>
       <tr ng-repeat="test in build.test_jobs">
 
-    <td><a href="{{ test.url }}">{{ test.id }}</a></td>
+    <td><a href="{{ test.url }}" target="_blank">{{ test.id }}</a></td>
 	<td>
 
 	  <ng-include src="'/static/templates/_test_job_status.html'"></ng-include>
