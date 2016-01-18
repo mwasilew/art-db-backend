@@ -42,15 +42,15 @@ class Manifest(models.Model):
 
 
 class Result(models.Model):
-    id = models.CharField(primary_key=True, max_length=99)
-
     manifest = models.ForeignKey(Manifest, related_name="results", null=True)
 
     name = models.CharField(max_length=128)
 
     branch_name = models.CharField(max_length=128, blank=True)
+
     build_url = models.URLField()
     build_number = models.IntegerField()
+    build_id  = models.IntegerField()
 
     gerrit_change_number = models.IntegerField(blank=True, null=True)
     gerrit_patchset_number = models.IntegerField(blank=True, null=True)
