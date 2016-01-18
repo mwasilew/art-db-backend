@@ -74,6 +74,7 @@ class TestJob(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     definition = models.TextField(blank=True, null=True)
 
+    data = models.TextField(blank=True)
 
     class Meta:
         ordering = ['-created_at']
