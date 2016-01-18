@@ -1,12 +1,13 @@
-from xmlrpclib import Error
-import traceback
 import urlparse
 
-from benchmarks.models import Benchmark, ResultData
+from xmlrpclib import Error
+
 from crayonbox import celery_app
-from celery.utils.log import get_task_logger
+from benchmarks.models import Benchmark, ResultData
 
 from django.conf import settings
+from celery.utils.log import get_task_logger
+
 
 from . import testminer
 
@@ -94,14 +95,7 @@ def dig_test(self, tester, test_job):
 
 @celery_app.task(bind=True)
 def download_test_results(self, config, test_job):
-    username, password = get_credentials(
-        urlparse.urlsplit(config.testrunnerurl).netloc
-    )
-    tester = getattr(testminer, config.testrunnerclass)(
-        config.testrunnerurl,
-        username,
-        password,
-        self.request.id
-    )
+    username, password = get_credentials(urlparse.urlsplit(config.testrunnerurl).netloc)
+    tester = getattr(testminer, config.testrunnerclass)(config.testrunnerurl, username, password)
     dig_test.delay(tester, test_job)
     return True
