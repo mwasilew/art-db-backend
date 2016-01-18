@@ -5,7 +5,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.box = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
   config.vm.hostname = "art-reports.linaro.org"
-  config.vm.network "private_network", ip: "10.0.0.100"
+  config.vm.network "private_network", ip:  ENV['VAGRANT_IP'] || "10.0.0.100"
   config.vm.define "art-reports.linaro.org" do |artreports|
   end
 
