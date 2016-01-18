@@ -6,10 +6,10 @@
 
 <div id="build-detail" ng-show="build">
   
-  <h1 class="md-display-1"> <small>{{ build.created_at }}</small><br/>#{{ build.id }} {{ build.name }}</h1>
+  <h1 class="md-display-1"> <small>{{ build.created_at }}</small><br/>#{{ build.build_id }} {{ build.name }}</h1>
   <hr/>
 
-  <a ng-href="{{ build.url }}">{{ build.url }}</a>
+  <a ng-href="{{ build.url }}">{{ build.build_url }}</a>
 
   <hr/>
   
