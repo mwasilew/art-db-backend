@@ -94,8 +94,7 @@ class ResultViewSet(viewsets.ModelViewSet):
                     id=testjob_id,
                 )
 
-                # tasks.download_test_results.delay(testjob)
-                tasks._set_testjob_results(testjob)
+                tasks.set_testjob_results.delay(testjob)
 
         return response.Response(serializer.data, status=status.HTTP_201_CREATED)
 
