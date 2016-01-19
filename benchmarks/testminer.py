@@ -503,7 +503,32 @@ class ArtMicrobenchmarksTestResults(LavaTestSystem):
         json_attachments = [a['content'] for a in host['attachments'] if a['pathname'].endswith('json')]
 
         if not json_attachments:
-            return []
+            #fixme retrieve test results from LAVA results
+            if 'test_results' not in host.keys():
+                return []
+            test_result_dict = {}
+            for test in host['test_results']:
+                if 'measurement' in test.keys():
+                    benchmark, test_case_name = test['test_case_id'].split("-", 1)
+                    if benchmark in test_result_dict.keys():
+                        test_result = test_result_dict[benchmark]
+                        test_result['subscore'].append(
+                                {"name": test_case_name,
+                                 "measurement": test['measurement']
+                                })
+                    else:
+                        test_result = {}
+                        test_result['board'] = target['attributes']['target']
+                        test_result['board_config'] = target['attributes']['target']
+                        # benchmark iteration
+                        test_result['benchmark_name'] = benchmark
+                        test_result['subscore'] = [
+                                {"name": test_case_name,
+                                 "measurement": test['measurement']
+                                }]
+                        test_result_dict[benchmark] = test_result
+            return [value for key, value in test_result_dict.iteritems()]
+
 
         json_text = base64.b64decode(json_attachments[0])
         # save json file locally
