@@ -91,7 +91,7 @@ class LavaTestSystem(TestSystem):
         return False
 
     def get_job_url(self, job_id):
-        return self.url + LavaTestSystem.JOB + "/" + job_id
+        return "%s%s/%s" % (self.url, LavaTestSystem.JOB, job_id)
 
     def get_test_job_status(self, job_id):
         result = self.call_xmlrpc("scheduler.job_status", job_id)

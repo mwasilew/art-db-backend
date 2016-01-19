@@ -84,7 +84,7 @@ class ResultViewSet(viewsets.ModelViewSet):
         obj = serializer.save()
 
         # FixME
-        test_jobs = [609159.0, 612894.0]
+        test_jobs = ['609159.0', '612894.0']
 
         for testjob_id in test_jobs:
             if not benchmarks_models.TestJob.objects.filter(id=testjob_id).exists():
