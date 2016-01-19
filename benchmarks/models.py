@@ -4,14 +4,6 @@ import xml.etree.ElementTree as ET
 from django.db import models
 from django.conf import settings
 
-
-class Benchmark(models.Model):
-    name = models.CharField(max_length=64)
-
-    def __unicode__(self):
-        return self.name
-
-
 class Manifest(models.Model):
     manifest_hash = models.CharField(max_length=40, editable=False)
     # sha1 for selected projects in manifest
@@ -81,6 +73,13 @@ class TestJob(models.Model):
 
     def __str__(self):
         return '%s %s' % (self.id, self.result)
+
+
+class Benchmark(models.Model):
+    name = models.CharField(max_length=64)
+
+    def __unicode__(self):
+        return self.name
 
 
 class ResultData(models.Model):
