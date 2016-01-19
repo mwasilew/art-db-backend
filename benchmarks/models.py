@@ -83,11 +83,12 @@ class Benchmark(models.Model):
 
 
 class ResultData(models.Model):
-    name = models.CharField(max_length=256)
+    testjob = models.ForeignKey(TestJob, related_name="benchmarks")
     benchmark = models.ForeignKey(Benchmark, related_name="data")
-    measurement = models.FloatField()
-    result = models.ForeignKey(Result, related_name="data")
+
+    name = models.CharField(max_length=256)
     board = models.CharField(default="default", max_length=128)
+    measurement = models.FloatField()
 
     created_at = models.DateTimeField(auto_now_add=True)
 
