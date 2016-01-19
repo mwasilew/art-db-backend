@@ -5,16 +5,14 @@
 </div>
 
 <div id="build-detail" ng-show="build">
-  
+
   <h1 class="md-display-1"> <small>{{ build.created_at }}</small><br/>#{{ build.build_id }} {{ build.name }}</h1>
-  <hr/>
 
+  <hr/>
   <a ng-href="{{ build.url }}">{{ build.build_url }}</a>
-
   <hr/>
-  
+
   <dl class="dl-horizontal">
-    
     <dt>Branch</dt>
     <dd>{{ build.branch_name || "not set"}}</dd>
 
@@ -26,10 +24,11 @@
 
     <dt>Gerrit Patchset Number</dt>
     <dd>{{ build.gerrit_patchset_number || "not set" }}</dd>
-
   </dl>
 
-  <hr/ ng-show="build.test_jobs.length">
+  <hr ng-show="build.test_jobs.length">
+  
+  <h3>TestJob</h3>
 
   <table class="table table-striped" ng-show="build.test_jobs.length">
     <thead>
@@ -41,15 +40,34 @@
     <tbody>
       <tr ng-repeat="test in build.test_jobs">
 
-    <td><a href="{{ test.url }}" target="_blank">{{ test.id }}</a></td>
 	<td>
-
-	  <ng-include src="'/static/templates/_test_job_status.html'"></ng-include>
-
+	  <a href="{{ test.url }}" target="_blank">{{ test.id }}</a></td>
+	<td>
+	  <ng-include src="'/static/templates/_test_job_status.html'" />
 	</td>
-	
       </tr>
     </tbody>
   </table>
 
+  <hr>
+  
+  <h3>Benchmarks</h3>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+	<th style="width: 30%;">benchmark</th>
+	<th style="width: 40%;">name</th>
+	<th style="width: 40%;">value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="item in benchmarks">
+	<td>{{ item.benchmark.name }}</td>
+	<td>{{ item.name }}</td>
+	<td>{{ item.measurement }}</td>
+      </tr>
+    </tbody>
+  </table>
+  
 </div>

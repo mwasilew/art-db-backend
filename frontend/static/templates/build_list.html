@@ -26,7 +26,8 @@
 
 	<td>
 	  <span ng-repeat="test in build.test_jobs">
-            (<a href="{{ test.url }}" target="_blank">#{{ test.id }}</a> <ng-include src="'/static/templates/_test_job_status.html'"></ng-include>)
+            (<a href="{{ test.url }}" target="_blank">#{{ test.id }}</a>
+	    <ng-include src="'/static/templates/_test_job_status.html'"></ng-include>)
 	  </span>
 	</td>
 
@@ -35,6 +36,6 @@
     </tbody>
   </table>
 
-  <ng-include src="'/static/templates/_pagination.html'">
+  <ng-include src="'/static/templates/_pagination.html'"/>
   
 </div>

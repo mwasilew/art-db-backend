@@ -8,6 +8,7 @@ from rest_framework import response
 from rest_framework import mixins
 from rest_framework import status
 from rest_framework import filters
+from rest_framework.decorators import detail_route
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from rest_framework.decorators import list_route
@@ -61,6 +62,15 @@ class ResultViewSet(viewsets.ModelViewSet):
                      'manifest__manifest_hash',
                      'manifest__reduced_hash')
 
+    @detail_route()
+    def benchmarks(self, request, pk=None):
+        result = self.get_object()
+        benchmarks = (benchmarks_models.ResultData.objects
+                      .filter(testjob__result=result)
+                      .select_related("benchmark"))
+
+        serializer = serializers.ResultDataSerializer(benchmarks, many=True)
+        return response.Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
         test_jobs = []
@@ -73,15 +83,19 @@ class ResultViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         obj = serializer.save()
 
-        for test_job_id in test_jobs:
-            if not benchmarks_models.TestJob.objects.filter(id=test_job_id).exists():
+        # FixME
+        test_jobs = [609159.0, 612894.0]
 
-                db_test_job, created = benchmarks_models.TestJob.objects.get_or_create(
-                    id=test_job_id,
+        for testjob_id in test_jobs:
+            if not benchmarks_models.TestJob.objects.filter(id=testjob_id).exists():
+
+                testjob, _ = benchmarks_models.TestJob.objects.get_or_create(
                     result=obj,
+                    id=testjob_id,
                 )
-                config = tasks.TestConfig()
-                tasks.download_test_results.delay(config, db_test_job)
+
+                # tasks.download_test_results.delay(testjob)
+                tasks._set_testjob_results(testjob)
 
         return response.Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -90,6 +104,9 @@ class TestJobViewSet(viewsets.ModelViewSet):
     permission_classes = [DjangoModelPermissions]
     queryset = benchmarks_models.TestJob.objects.all()
     serializer_class = serializers.TestJobSerializer
+
+    lookup_value_regex = "[^/]+" # LAVA ids are 000.0
+
 
 # result data
 class ResultDataViewSet(viewsets.ModelViewSet):

@@ -61,12 +61,12 @@ class TestJob(models.Model):
     id = models.CharField(primary_key=True, max_length=100)
 
     url = models.URLField(blank=True, null=True)
-    completed = models.BooleanField(default=False)
     status = models.CharField(blank=True, default="", max_length=16)
-    created_at = models.DateTimeField(auto_now_add=True)
     definition = models.TextField(blank=True, null=True)
-
+    completed = models.BooleanField(default=False)
     data = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['-created_at']
@@ -93,4 +93,4 @@ class ResultData(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
-        return "{0} - {1}".format(self.benchmark, self.name)
+        return "%s - %s: %s" % (self.benchmark, self.name, self.measurement)

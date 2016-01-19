@@ -1,3 +1,5 @@
+import json
+
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 
@@ -29,10 +31,6 @@ class BenchmarkSerializer(serializers.ModelSerializer):
     class Meta:
         model = benchmarks_models.Benchmark
 
-    def create(self, validated_data):
-        benchmark, created = benchmarks_models.Benchmark.objects.get_or_create(**validated_data)
-        return benchmark
-
 
 class ReducedManifestSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
     class Meta:
@@ -41,14 +39,15 @@ class ReducedManifestSerializer(DynamicFieldsMixin, serializers.ModelSerializer)
         depth = 2
 
 
-class ResultDataSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
-    board = serializers.CharField()
+class ResultDataSerializer(serializers.ModelSerializer):
+    benchmark = BenchmarkSerializer()
 
     class Meta:
         model = benchmarks_models.ResultData
 
 
 class TestJobSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = benchmarks_models.TestJob
 
@@ -59,7 +58,6 @@ class ResultSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = benchmarks_models.Result
-
 
     def create(self, validated_data):
 

@@ -72,7 +72,13 @@ app.controller('BuildDetail', ['$scope', '$http', '$routeParams', function($scop
 
     $http.get('/api/result/' + $routeParams.buildId + '/', {cache: false}).then(function(response) {
         $scope.build = response.data;
+
+        $http.get('/api/result/' + $routeParams.buildId + '/benchmarks/').then(function(response) {
+            $scope.benchmarks = response.data;
+        });
     });
+
+
 
 }]);
 
