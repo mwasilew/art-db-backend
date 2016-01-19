@@ -55,6 +55,7 @@ class ResultViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('id',
                      'branch_name',
+                     'name',
                      'build_number',
                      'build_id',
                      'gerrit_change_number',
