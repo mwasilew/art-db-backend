@@ -32,70 +32,91 @@ class ResultTests(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['id'], 123)
 
-    # def test_post_1(self):
+    def test_post_1(self):
 
-    #     data = {
-    #         'build_url': 'http://linaro.org',
-    #         'build_number': 200,
-    #         'build_id': 20,
-    #         'name': u'linaro-art-stable-m-build-juno',
-    #         'url': u'http://dynamicfixture1.com',
-    #         'id': u'123',
-    #         'manifest': MINIMAL_XML
-    #     }
+        data = {
+            'build_url': 'http://linaro.org',
+            'build_number': 200,
+            'build_id': 20,
+            'name': u'linaro-art-stable-m-build-juno',
+            'url': u'http://dynamicfixture1.com',
+            'id': u'123',
+            'manifest': MINIMAL_XML
+        }
 
-    #     response = self.client.post('/api/result/', data=data)
+        response = self.client.post('/api/result/', data=data)
 
-    #     self.assertEqual(benchmarks_models.Manifest.objects.count(), 1)
-    #     self.assertEqual(response.status_code, 201)
+        self.assertEqual(benchmarks_models.Manifest.objects.count(), 1)
+        self.assertEqual(response.status_code, 201)
 
-    # def test_post_2(self):
+    def test_post_2(self):
 
-    #     data = {
-    #         'build_url': 'http://linaro.org',
-    #         'name': u'linaro-art-stable-m-build-juno',
-    #         'url': u'http://dynamicfixture1.com',
-    #         'id': u'123',
-    #         'build_number': 200,
-    #         'build_id': 20,
-    #         'test_jobs': '655839.0, 655838.0',
-    #         'manifest': MINIMAL_XML
-    #     }
+        data = {
+            'build_url': 'http://linaro.org',
+            'name': u'linaro-art-stable-m-build-juno',
+            'url': u'http://dynamicfixture1.com',
+            'id': u'123',
+            'build_number': 200,
+            'build_id': 20,
+            'test_jobs': '655839.0, 655838.0',
+            'manifest': MINIMAL_XML
+        }
 
-    #     response = self.client.post('/api/result/', data=data)
+        response = self.client.post('/api/result/', data=data)
 
-    #     self.assertEqual(response.status_code, 201)
-    #     self.assertEqual(benchmarks_models.Manifest.objects.count(), 1)
-    #     self.assertEqual(benchmarks_models.TestJob.objects.count(), 2)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(benchmarks_models.Manifest.objects.count(), 1)
+        self.assertEqual(benchmarks_models.TestJob.objects.count(), 2)
 
-    #     items = benchmarks_models.TestJob.objects.values_list('id', flat=True)
-    #     self.assertIn('655839.0', items)
-    #     self.assertIn('655838.0', items)
+        items = benchmarks_models.TestJob.objects.values_list('id', flat=True)
+        self.assertIn('655839.0', items)
+        self.assertIn('655838.0', items)
 
-    # def test_post_3(self):
+    def test_post_3(self):
 
-    #     data_1 = {
-    #         'build_url': 'http://linaro.org',
-    #         'name': u'linaro-art-stable-m-build-juno',
-    #         'url': u'http://dynamicfixture1.com',
-    #         'manifest': MINIMAL_XML,
-    #         'build_number': 200,
-    #         'build_id': 20
-    #     }
+        data_1 = {
+            'build_url': 'http://linaro.org',
+            'name': u'linaro-art-stable-m-build-juno',
+            'url': u'http://dynamicfixture1.com',
+            'manifest': MINIMAL_XML,
+            'build_number': 200,
+            'build_id': 20
+        }
 
-    #     data_2 = {
-    #         'build_url': 'http://linaro.org',
-    #         'name': u'linaro-art-stable-m-build-juno',
-    #         'url': u'http://dynamicfixture1.com',
-    #         'manifest': MINIMAL_XML,
-    #         'build_number': 201,
-    #         'build_id': 20
-    #     }
+        data_2 = {
+            'build_url': 'http://linaro.org',
+            'name': u'linaro-art-stable-m-build-juno',
+            'url': u'http://dynamicfixture1.com',
+            'manifest': MINIMAL_XML,
+            'build_number': 201,
+            'build_id': 20
+        }
 
-    #     self.assertEqual(self.client.post('/api/result/', data=data_1).status_code, 201)
-    #     self.assertEqual(self.client.post('/api/result/', data=data_2).status_code, 201)
+        response_1 = self.client.post('/api/result/', data=data_1)
+        response_2 = self.client.post('/api/result/', data=data_2)
 
-    #     self.assertEqual(benchmarks_models.Manifest.objects.count(), 1)
+        self.assertEqual(response_1.status_code, 201)
+        self.assertEqual(response_2.status_code, 201)
+
+        self.assertEqual(benchmarks_models.Manifest.objects.count(), 1)
+
+    def test_post_4(self):
+
+        data = {
+            'build_url': 'http://linaro.org',
+            'name': u'linaro-art-stable-m-build-juno',
+            'url': u'http://dynamicfixture1.com',
+            'build_number': 200,
+            'build_id': 20,
+            'manifest': MINIMAL_XML,
+            'created_at': '2016-01-06 09:00:01'
+        }
+
+        response = self.client.post('/api/result/', data=data)
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(benchmarks_models.Manifest.objects.count(), 1)
+        self.assertEqual(response.data['created_at'], '2016-01-06 09:00:01')
 
 
 class ManifestTests(APITestCase):
@@ -142,21 +163,19 @@ class CompareTests(APITestCase):
         manifest_1 = G(benchmarks_models.Manifest, manifest=MINIMAL_XML)
         manifest_2 = G(benchmarks_models.Manifest, manifest=MINIMAL_XML)
 
-        manifest_1_result = G(benchmarks_models.Result, manifest=manifest_1)
-        manifest_2_result = G(benchmarks_models.Result, manifest=manifest_2)
+        manifest_1_testjob = G(benchmarks_models.TestJob, result__manifest=manifest_1)
+        manifest_2_testjob = G(benchmarks_models.TestJob, result__manifest=manifest_2)
 
         G(benchmarks_models.ResultData,
-            result=manifest_1_result,
-            benchmark=benchmark,
-            name="load",
-
-            measurement=10)
-
-        G(benchmarks_models.ResultData,
-          result=manifest_2_result,
+          testjob=manifest_1_testjob,
           benchmark=benchmark,
           name="load",
+          measurement=10)
 
+        G(benchmarks_models.ResultData,
+          testjob=manifest_2_testjob,
+          benchmark=benchmark,
+          name="load",
           measurement=2)
 
         response = self.client.get('/api/compare/manifest/', {
@@ -187,22 +206,24 @@ class CompareTests(APITestCase):
         branch_1_name = "test1"
         branch_2_name = "test2"
 
-        branch_1_result = G(benchmarks_models.Result,
-                            branch_name=branch_1_name,
-                            manifest=G(benchmarks_models.Manifest, manifest=MINIMAL_XML))
+        branch_1_testjob = G(benchmarks_models.TestJob,
+                             result=G(benchmarks_models.Result,
+                                      branch_name=branch_1_name,
+                                      manifest=G(benchmarks_models.Manifest, manifest=MINIMAL_XML)))
 
-        branch_2_result = G(benchmarks_models.Result,
-                            branch_name=branch_2_name,
-                            manifest=G(benchmarks_models.Manifest, manifest=MINIMAL_XML))
+        branch_2_testjob = G(benchmarks_models.TestJob,
+                             result=G(benchmarks_models.Result,
+                                      branch_name=branch_2_name,
+                                      manifest=G(benchmarks_models.Manifest, manifest=MINIMAL_XML)))
 
         G(benchmarks_models.ResultData,
-          result=branch_1_result,
+          testjob=branch_1_testjob,
           benchmark=benchmark,
           name="load",
           measurement=10)
 
         G(benchmarks_models.ResultData,
-          result=branch_2_result,
+          testjob=branch_2_testjob,
           benchmark=benchmark,
           name="load",
           measurement=2)
@@ -230,13 +251,12 @@ class CompareTests(APITestCase):
         manifest_1 = G(benchmarks_models.Manifest, manifest=MINIMAL_XML)
         manifest_2 = G(benchmarks_models.Manifest, manifest=MINIMAL_XML)
 
-        manifest_1_result = G(benchmarks_models.Result, manifest=manifest_1)
+        manifest_1_testjob = G(benchmarks_models.TestJob, result__manifest=manifest_1)
 
         G(benchmarks_models.ResultData,
-          result=manifest_1_result,
+          testjob=manifest_1_testjob,
           benchmark=benchmark,
           name="load",
-
           measurement=10)
 
         response = self.client.get('/api/compare/manifest/', {
