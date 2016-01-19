@@ -21,11 +21,6 @@ class TestConfig(object):
         self.testrunnerclass = "ArtMicrobenchmarksTestResults"
 
 
-def get_credentials(netloc):
-    username, password = settings.CREDENTIALS[netloc]
-    return (username, password)
-
-
 @celery_app.task(bind=True)
 def dig_test(self, tester, test_job):
 
@@ -36,6 +31,7 @@ def dig_test(self, tester, test_job):
             test_job_id,
             test_status,
             tester.get_job_url(test_job_id)))
+
         test_job.status = test_status
         test_job.url = tester.get_job_url(test_job_id)
         test_job.save()
@@ -50,7 +46,6 @@ def dig_test(self, tester, test_job):
                 test_job.status = "Results Missing"
                 test_job.save()
             for benchmark in test_results:
-                # {'subscore': [{'name': u'LongRotateLeft_32', 'measurement': 812.58}, {'name': u'IntegerRotateRight_32', 'measurement': 115.13}, {'name': u'IntegerRotateLeft_32', 'measurement': 116.78}, {'name': u'LongRotateRight_32', 'measurement': 813.57}, {'name': u'SHA1DigestProcessBlock_32', 'measurement': 768.09}], 'board_config': u'mn-nexus9-02', 'board': u'mn-nexus9-02', 'benchmark_name': u'BitfieldRotate'}
 
                 db_benchmark, created = Benchmark.objects.get_or_create(
                     name=benchmark['benchmark_name']
@@ -95,7 +90,12 @@ def dig_test(self, tester, test_job):
 
 @celery_app.task(bind=True)
 def download_test_results(self, config, test_job):
-    username, password = get_credentials(urlparse.urlsplit(config.testrunnerurl).netloc)
+    netloc = urlparse.urlsplit(config.testrunnerurl).netloc
+
+    username, password = settings.CREDENTIALS[netloc]
+
     tester = getattr(testminer, config.testrunnerclass)(config.testrunnerurl, username, password)
+
     dig_test.delay(tester, test_job)
+
     return True
