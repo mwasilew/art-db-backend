@@ -53,6 +53,9 @@ class Result(models.Model):
 
     created_at = models.DateTimeField(default=timezone.now)
 
+    class Meta:
+        ordering = ['-created_at']
+
     def __unicode__(self):
         return "%s - %s" % (self.pk, self.build_url)
 
@@ -93,6 +96,9 @@ class ResultData(models.Model):
     measurement = models.FloatField()
 
     created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ['-created_at']
 
     def __unicode__(self):
         return "%s - %s: %s" % (self.benchmark, self.name, self.measurement)
