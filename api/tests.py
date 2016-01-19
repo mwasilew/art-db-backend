@@ -92,10 +92,31 @@ class ResultTests(APITestCase):
             'build_id': 20
         }
 
-        self.assertEqual(self.client.post('/api/result/', data=data_1).status_code, 201)
-        self.assertEqual(self.client.post('/api/result/', data=data_2).status_code, 201)
+        response_1 = self.client.post('/api/result/', data=data_1)
+        response_2 = self.client.post('/api/result/', data=data_2)
+
+        self.assertEqual(response_1.status_code, 201)
+        self.assertEqual(response_2.status_code, 201)
 
         self.assertEqual(benchmarks_models.Manifest.objects.count(), 1)
+
+    def test_post_4(self):
+
+        data = {
+            'build_url': 'http://linaro.org',
+            'name': u'linaro-art-stable-m-build-juno',
+            'url': u'http://dynamicfixture1.com',
+            'build_number': 200,
+            'build_id': 20,
+            'manifest': MINIMAL_XML,
+            'created_at': '2016-01-06 09:00:01'
+        }
+
+        response = self.client.post('/api/result/', data=data)
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(benchmarks_models.Manifest.objects.count(), 1)
+        self.assertEqual(response.data['created_at'], '2016-01-06 09:00:01')
 
 
 class ManifestTests(APITestCase):

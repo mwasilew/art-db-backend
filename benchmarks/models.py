@@ -3,6 +3,8 @@ import xml.etree.ElementTree as ET
 
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
+
 
 class Manifest(models.Model):
     manifest_hash = models.CharField(max_length=40, editable=False)
@@ -49,7 +51,7 @@ class Result(models.Model):
     gerrit_change_url = models.URLField(blank=True, null=True)
     gerrit_change_id = models.CharField(max_length=42, blank=True, default="")
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
 
     def __unicode__(self):
         return "%s - %s" % (self.pk, self.build_url)
@@ -66,7 +68,7 @@ class TestJob(models.Model):
     completed = models.BooleanField(default=False)
     data = models.TextField(blank=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         ordering = ['-created_at']
@@ -90,7 +92,7 @@ class ResultData(models.Model):
     board = models.CharField(default="default", max_length=128)
     measurement = models.FloatField()
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
 
     def __unicode__(self):
         return "%s - %s: %s" % (self.benchmark, self.name, self.measurement)
