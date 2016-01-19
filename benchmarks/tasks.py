@@ -28,15 +28,16 @@ def _set_testjob_results(testjob):
     testjob.status = tester.get_test_job_status(testjob.id)
     testjob.url = tester.get_job_url(testjob.id)
 
-    if not tester.test_results_available(testjob.id):
+    if testjob.status not in ["Complete", "Incomplete", "Canceled"]:
         testjob.save()
         return
 
+    testjob.definition = tester.get_test_job_details(testjob.id)['definition']
+    testjob.completed = True
     test_results = tester.get_test_job_results(testjob.id)
 
     if not test_results:
         testjob.status = "Results Missing"
-        testjob.completed = True
         testjob.save()
         return
 
@@ -56,10 +57,7 @@ def _set_testjob_results(testjob):
                 benchmark=benchmark
             )
 
-    testjob.definition = tester.get_test_job_details(testjob.id)['definition']
-    testjob.completed = True
     testjob.save()
-
     tester.cleanup()
 
     # ToDo: not implemented yet. DO NOT REMOVE

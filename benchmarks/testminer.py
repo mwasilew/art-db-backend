@@ -81,14 +81,8 @@ class LavaTestSystem(TestSystem):
             shutil.rmtree(self.repo_home)
 
     def test_results_available(self, job_id):
-        status = self.get_test_job_status(job_id)
-        if status in ["Canceled", "Incomplete"]:
-            return True
-        if status in ["Complete"]:
-            status = self.call_xmlrpc('scheduler.job_status', job_id)
-            if 'bundle_sha1' in status and len(status['bundle_sha1']) > 0:
-                return True
-        return False
+        status = self.call_xmlrpc('scheduler.job_status', job_id)
+        return 'bundle_sha1' in status and len(status['bundle_sha1']) > 0
 
     def get_job_url(self, job_id):
         return "%s%s/%s" % (self.url, LavaTestSystem.JOB, job_id)
