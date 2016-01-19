@@ -2,11 +2,14 @@ import json
 import urlparse
 
 from crayonbox import celery_app
+from django.conf import settings
+from celery.utils.log import get_task_logger
 from benchmarks.models import Benchmark, ResultData
 
-from django.conf import settings
-
 from . import testminer
+
+
+logger = get_task_logger(__name__)
 
 
 class TestConfig(object):
@@ -81,6 +84,8 @@ def _set_testjob_results(testjob):
 def set_testjob_results(self, testjob):
 
     _set_testjob_results(testjob)
+
+    logger.info(testjob)
 
     if not testjob.completed:
         set_testjob_results.apply_async(args=[testjob], countdown=300)

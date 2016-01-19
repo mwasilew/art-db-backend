@@ -73,7 +73,7 @@ class TestJob(models.Model):
     class Meta:
         ordering = ['-created_at']
 
-    def __str__(self):
+    def __unicode__(self):
         return '%s %s' % (self.id, self.result)
 
 
