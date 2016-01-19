@@ -287,9 +287,9 @@ class CompareResults(viewsets.ViewSet):
         if not (branch_1 and branch_2):
             return response.Response([])
 
-        base_query = benchmarks_models.ResultData.objects.filter(result__branch_name=branch_1)
+        base_query = benchmarks_models.ResultData.objects.filter(testjob__result__branch_name=branch_1)
 
-        target_query = benchmarks_models.ResultData.objects.filter(result__branch_name=branch_2)
+        target_query = benchmarks_models.ResultData.objects.filter(testjob__result__branch_name=branch_2)
 
         data = self.compare_query(base_query, target_query)
 
@@ -304,11 +304,11 @@ class CompareResults(viewsets.ViewSet):
             return response.Response([])
 
         base_query = (benchmarks_models.ResultData.objects
-                      .filter(result__manifest__manifest_hash=manifest_1)
+                      .filter(testjob__result__manifest__manifest_hash=manifest_1)
                       .select_related('benchmark'))
 
         target_query = (benchmarks_models.ResultData.objects
-                        .filter(result__manifest__manifest_hash=manifest_2)
+                        .filter(testjob__result__manifest__manifest_hash=manifest_2)
                         .select_related('benchmark'))
 
         data = self.compare_query(base_query, target_query)
