@@ -54,6 +54,28 @@ class BuildViewSet(viewsets.ModelViewSet):
     pagination_class = None
 
 
+class BranchViewSet(viewsets.ModelViewSet):
+    permission_classes = [DjangoModelPermissions]
+    queryset = benchmarks_models.Result.objects.order_by('branch_name').distinct('branch_name')
+    serializer_class = serializers.BranchSerializer
+    pagination_class = None
+
+
+class StatsViewSet(viewsets.ModelViewSet):
+    queryset = (benchmarks_models.ResultData.objects
+                .select_related("testjob__result", "benchmark")
+                .order_by('-testjob__result__created_at'))
+
+    permission_classes = [DjangoModelPermissions]
+    serializer_class = serializers.StatsSerializer
+    pagination_class = None
+
+    def get_queryset(self):
+        benchmarks = self.request.query_params.getlist('benchmark')
+        if benchmarks:
+            return self.queryset.filter(benchmark__name__in=benchmarks)
+        return self.queryset.none()
+
 # result
 class ResultViewSet(viewsets.ModelViewSet):
     permission_classes = [DjangoModelPermissions]

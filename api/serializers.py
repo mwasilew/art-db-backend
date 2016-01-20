@@ -91,3 +91,19 @@ class BuildSerializer(serializers.ModelSerializer):
     class Meta:
         model = benchmarks_models.Result
         fields = ('name',)
+
+
+class BranchSerializer(serializers.ModelSerializer):
+    branch_name = serializers.CharField()
+    class Meta:
+        model = benchmarks_models.Result
+        fields = ('branch_name',)
+
+
+class StatsSerializer(serializers.ModelSerializer):
+    created_at = serializers.CharField(source='testjob.result.created_at', read_only=True)
+    benchmark = serializers.CharField(source='benchmark.name', read_only=True)
+
+    class Meta:
+        model = benchmarks_models.ResultData
+        fields = ('name', 'benchmark', 'created_at', 'measurement')
