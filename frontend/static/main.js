@@ -96,7 +96,9 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', fu
             var series = _.map(_.groupBy(response.data, "name"), function(data, name) {
                 return {
                     name: name,
-                    data: _.map(data, "measurement")
+                    data: _.map(data, function(data) {
+                        return [Date.parse(data.created_at), data.measurement];
+                    })
                 };
             });
 
@@ -104,6 +106,16 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', fu
                 document.getElementById('charts'), {
                     title: {
                         text: 'Benchmark results for branch: ' + $scope.branch.branch_name
+                    },
+                    xAxis: {
+                        type: 'datetime',
+                        dateTimeLabelFormats: {
+                            month: '%e. %b',
+                            year: '%b'
+                        },
+                        title: {
+                            text: 'Date'
+                        }
                     },
                     series: series
                 });
