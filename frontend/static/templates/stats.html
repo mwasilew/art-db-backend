@@ -5,7 +5,7 @@
     <form>
 
       <div class="form-group">
-	<select ng-model="branch" class="form-control"
+	<select ng-model="branch" class="form-control" ng-change="redrawChart()"
 		ng-options="item.branch_name for item in branchList">
 	</select>
       </div>
