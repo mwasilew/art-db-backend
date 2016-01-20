@@ -68,8 +68,11 @@ class TestJob(models.Model):
     url = models.URLField(blank=True, null=True)
     status = models.CharField(blank=True, default="", max_length=16)
     definition = models.TextField(blank=True, null=True)
+    initialized = models.BooleanField(default=False)
     completed = models.BooleanField(default=False)
     data = models.TextField(blank=True)
+    testrunnerclass = models.CharField(blank=True, default="GenericLavaTestSystem", max_length=128)
+    testrunnerurl = models.CharField(blank=True, default="https://validation.linaro.org/", max_length=256)
 
     created_at = models.DateTimeField(default=timezone.now)
 

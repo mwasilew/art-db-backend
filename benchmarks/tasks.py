@@ -12,21 +12,19 @@ from . import testminer
 logger = get_task_logger(__name__)
 
 
-class TestConfig(object):
-    def __init__(self):
-        self.testrunnerurl = "https://validation.linaro.org/"
-        self.testrunnerclass = "ArtMicrobenchmarksTestResults"
-
-
 def _set_testjob_results(testjob):
 
-    config = TestConfig()
-    netloc = urlparse.urlsplit(config.testrunnerurl).netloc
+    netloc = urlparse.urlsplit(testjob.testrunnerurl).netloc
     username, password = settings.CREDENTIALS[netloc]
-    tester = getattr(testminer, config.testrunnerclass)(config.testrunnerurl, username, password)
+    tester = getattr(testminer, testjob.testrunnerclass)(testjob.testrunnerurl, username, password)
 
     testjob.status = tester.get_test_job_status(testjob.id)
     testjob.url = tester.get_job_url(testjob.id)
+
+    if not testjob.initialized:
+        testjob.testrunnerclass = tester.get_result_class_name(testjob.id)
+        testjob.initialized = True
+        testjob.save()
 
     if testjob.status not in ["Complete", "Incomplete", "Canceled"]:
         testjob.save()

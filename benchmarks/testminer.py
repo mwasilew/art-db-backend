@@ -42,9 +42,13 @@ class TestSystem(object):
     def cleanup(self):
         return None
 
+    def get_result_class_name(self, job_id):
+        return None
+
     @staticmethod
     def reduce_test_results(test_result_list):
         return None
+
 
 class LavaServerException(Exception):
     def __init__(self, name):
@@ -54,11 +58,10 @@ class LavaServerException(Exception):
         return repr(self.name)
 
 
-class LavaTestSystem(TestSystem):
+class GenericLavaTestSystem(TestSystem):
     XMLRPC = 'RPC2/'
     BUNDLESTREAMS = 'dashboard/streams'
     JOB = 'scheduler/job'
-    REPO_HOME = "/tmp/repos" # change it to cofigurable parameter
     def __init__(self, base_url, username=None, password=None, repo_prefix=None):
         self.url = base_url
         self.username = username # API username
@@ -66,19 +69,6 @@ class LavaTestSystem(TestSystem):
         self.xmlrpc_url = base_url + LavaTestSystem.XMLRPC
         self.stream_url = base_url + LavaTestSystem.BUNDLESTREAMS
         self._url = base_url + LavaTestSystem.JOB
-        self.repo_prefix = repo_prefix
-        self.repo_dirs = set([])
-        #self.repo_home = os.path.join(os.getcwd(), LavaTestSystem.REPO_HOME)
-        self.repo_home = LavaTestSystem.REPO_HOME
-        if repo_prefix:
-            self.repo_home = os.path.join(
-                LavaTestSystem.REPO_HOME + "/" + repo_prefix)
-
-    def cleanup(self):
-        for repo_dir in self.repo_dirs:
-            shutil.rmtree(repo_dir)
-        if self.repo_prefix and os.path.exists(self.repo_home):
-            shutil.rmtree(self.repo_home)
 
     def test_results_available(self, job_id):
         status = self.call_xmlrpc('scheduler.job_status', job_id)
@@ -90,6 +80,78 @@ class LavaTestSystem(TestSystem):
     def get_test_job_status(self, job_id):
         result = self.call_xmlrpc("scheduler.job_status", job_id)
         return result['job_status']
+
+    def get_test_job_details(self, job_id):
+        """
+        returns test job metadata, for example device type
+        the tests were run on
+        """
+        details = dict(testertype="lava")
+        status = self.call_xmlrpc('scheduler.job_status', job_id)
+        if 'bundle_sha1' in status:
+            details.update({"bundle": status['bundle_sha1']})
+        content = self.call_xmlrpc('scheduler.job_details', job_id)
+        import pprint
+        pprint.pprint(content)
+        definition = json.loads(content['definition'])
+        if content['multinode_definition']:
+            definition = json.loads(content['multinode_definition'])
+        details.update({"definition": str(json.dumps(definition))})
+        for action in definition['actions']:
+            if action['command'].startswith("submit_results"):
+                if 'stream' in action['parameters'].keys():
+                    details.update({"bundlestream": action['parameters']['stream']})
+            if 'metadata' in action.keys():
+                details.update(action['metadata'])
+        return details
+
+    def get_result_class_name(self, job_id):
+        content = self.call_xmlrpc('scheduler.job_details', job_id)
+        definition = json.loads(content['definition'])
+        for action in definition['actions']:
+            if action['command'] == "lava_test_shell":
+                if 'testdef_repos' in action['parameters'].keys():
+                    for test_repo in action['parameters']['testdef_repos'])
+                        if test_repo['testdef'].endswith("art-microbenchmarks.yaml"):
+                            return "ArtMicrobenchmarksTestResults"
+                        if test_repo['testdef'].endswith("wa2host.yaml"):
+                            return "ArtWATestResults"
+        return "GenericLavaTestSystem"
+
+    def call_xmlrpc(self, method_name, *method_params):
+        payload = xmlrpclib.dumps((method_params), method_name)
+
+        response = requests.request('POST', self.xmlrpc_url,
+                                    data = payload,
+                                    headers = {'Content-Type': 'application/xml'},
+                                    auth = (self.username, self.password),
+                                    timeout = 100,
+                                    stream = False)
+
+        if response.status_code == 200:
+            result = xmlrpclib.loads(response.content)[0][0]
+            return result
+        else:
+            raise LavaServerException(response.status_code)
+
+
+class LavaTestSystem(GenericLavaTestSystem):
+    REPO_HOME = "/tmp/repos" # change it to cofigurable parameter
+    def __init__(self, base_url, username=None, password=None, repo_prefix=None)
+        self.repo_prefix = repo_prefix
+        self.repo_dirs = set([])
+        #self.repo_home = os.path.join(os.getcwd(), LavaTestSystem.REPO_HOME)
+        self.repo_home = LavaTestSystem.REPO_HOME
+        if repo_prefix:
+            self.repo_home = os.path.join(
+                LavaTestSystem.REPO_HOME + "/" + repo_prefix)
+        super(LavaTestSystem, self).__init__(base_url, username, password)
+
+    def cleanup(self):
+        for repo_dir in self.repo_dirs:
+            shutil.rmtree(repo_dir)
+        if self.repo_prefix and os.path.exists(self.repo_home):
+            shutil.rmtree(self.repo_home)
 
     def get_test_job_results(self, job_id):
         return results
@@ -252,29 +314,6 @@ class LavaTestSystem(TestSystem):
             lava_results[result['test_case_id']] = result
         self.assign_indexed_result(defined_tests, test_shell_index, lava_results)
 
-    def get_test_job_details(self, job_id):
-        """
-        returns test job metadata, for example device type
-        the tests were run on
-        """
-        details = dict(testertype="lava")
-        status = self.call_xmlrpc('scheduler.job_status', job_id)
-        if 'bundle_sha1' in status:
-            details.update({"bundle": status['bundle_sha1']})
-        content = self.call_xmlrpc('scheduler.job_details', job_id)
-        import pprint
-        pprint.pprint(content)
-        definition = json.loads(content['definition'])
-        if content['multinode_definition']:
-            definition = json.loads(content['multinode_definition'])
-        details.update({"definition": str(json.dumps(definition))})
-        for action in definition['actions']:
-            if action['command'].startswith("submit_results"):
-                if 'stream' in action['parameters'].keys():
-                    details.update({"bundlestream": action['parameters']['stream']})
-            if 'metadata' in action.keys():
-                details.update(action['metadata'])
-        return details
 
     def get_test_job_results(self, job_id):
         """
@@ -432,22 +471,6 @@ class LavaTestSystem(TestSystem):
                 test['fail_count'] = tests_fail
 
         return all_tests
-
-    def call_xmlrpc(self, method_name, *method_params):
-        payload = xmlrpclib.dumps((method_params), method_name)
-
-        response = requests.request('POST', self.xmlrpc_url,
-                                    data = payload,
-                                    headers = {'Content-Type': 'application/xml'},
-                                    auth = (self.username, self.password),
-                                    timeout = 100,
-                                    stream = False) # maybe setting this to True would allow to avoid out of memory?
-
-        if response.status_code == 200:
-            result = xmlrpclib.loads(response.content)[0][0]
-            return result
-        else:
-            raise LavaServerException(response.status_code)
 
     @staticmethod
     def reduce_test_results(test_result_list):
