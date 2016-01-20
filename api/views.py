@@ -44,6 +44,7 @@ class BenchmarkViewSet(viewsets.ModelViewSet):
     queryset = benchmarks_models.Benchmark.objects.all()
     serializer_class = serializers.BenchmarkSerializer
     filter_fields = ('id', 'name')
+    pagination_class = None
 
 
 # result
