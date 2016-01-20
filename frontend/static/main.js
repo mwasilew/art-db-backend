@@ -84,6 +84,14 @@ app.controller('BuildDetail', ['$scope', '$http', '$routeParams', function($scop
 
 app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', function($scope, $http, $routeParams, $timeout) {
 
+    $http.get('/api/benchmark/').then(function(response) {
+        $scope.benchmarks = response.data;
+    });
+
+    $http.get('/api/build/').then(function(response) {
+        $scope.builds = response.data;
+    });
+
     $timeout(function() {
         Highcharts.chart(
             document.getElementById('charts'), {

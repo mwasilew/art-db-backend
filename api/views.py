@@ -47,6 +47,13 @@ class BenchmarkViewSet(viewsets.ModelViewSet):
     pagination_class = None
 
 
+class BuildViewSet(viewsets.ModelViewSet):
+    permission_classes = [DjangoModelPermissions]
+    queryset = benchmarks_models.Result.objects.order_by('name').distinct('name')
+    serializer_class = serializers.BuildSerializer
+    pagination_class = None
+
+
 # result
 class ResultViewSet(viewsets.ModelViewSet):
     permission_classes = [DjangoModelPermissions]

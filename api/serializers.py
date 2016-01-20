@@ -84,3 +84,10 @@ class TokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = Token
         fields = ('key', 'username')
+
+
+class BuildSerializer(serializers.ModelSerializer):
+    name = serializers.CharField()
+    class Meta:
+        model = benchmarks_models.Result
+        fields = ('name',)
