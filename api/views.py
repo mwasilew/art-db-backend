@@ -49,7 +49,9 @@ class BenchmarkViewSet(viewsets.ModelViewSet):
 # result
 class ResultViewSet(viewsets.ModelViewSet):
     permission_classes = [DjangoModelPermissions]
-    queryset = benchmarks_models.Result.objects.all()
+    queryset = (benchmarks_models.Result.objects
+                .select_related('manifest')
+                .prefetch_related('test_jobs'))
     serializer_class = serializers.ResultSerializer
 
     filter_backends = (filters.SearchFilter,)
