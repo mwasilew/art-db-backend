@@ -86,6 +86,7 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', fu
 
     $scope.redrawChart = function() {
 
+        $scope.disabled = true;
         var options = {params: {
             branch: $scope.branch.branch_name,
             benchmark: _.map(_.filter($scope.benchmarkList, "selected"), "name")
@@ -101,6 +102,7 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', fu
                     })
                 };
             });
+
 
             Highcharts.chart(
                 document.getElementById('charts'), {
@@ -119,6 +121,8 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', fu
                     },
                     series: series
                 });
+
+            $scope.disabled = false;
         });
     };
 

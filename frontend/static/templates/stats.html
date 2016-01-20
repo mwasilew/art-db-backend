@@ -5,14 +5,14 @@
     <form>
 
       <div class="form-group">
-	<select ng-model="branch" class="form-control" ng-change="redrawChart()"
+	<select ng-disabled="disabled" ng-model="branch" class="form-control" ng-change="redrawChart()"
 		ng-options="item.branch_name for item in branchList">
 	</select>
       </div>
 
       <div class="form-group">
 	<label class="checkbox" ng-repeat="benchmark in benchmarkList">
-	  <input ng-change="redrawChart()" type="checkbox" ng-model="benchmark.selected" value="benchmark.id">
+	  <input ng-disabled="disabled" ng-change="redrawChart()" type="checkbox" ng-model="benchmark.selected" value="benchmark.id">
 	  <span>{{ benchmark.name }}</span>
 	</label>
       </div>
