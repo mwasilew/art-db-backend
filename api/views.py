@@ -69,6 +69,7 @@ class StatsViewSet(viewsets.ModelViewSet):
     permission_classes = [DjangoModelPermissions]
     serializer_class = serializers.StatsSerializer
     pagination_class = None
+    filter_fields = ('testjob__result__branch_name', )
 
     def get_queryset(self):
         benchmarks = self.request.query_params.getlist('benchmark')
