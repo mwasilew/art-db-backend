@@ -104,7 +104,6 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', fu
                 document.getElementById('charts'), {
                     title: {
                         text: 'Benchmark results for branch: ' + $scope.branch.branch_name
-                        // x: -20 //center
                     },
                     series: series
                 });
