@@ -4,6 +4,7 @@ from . import *
 
 
 DEFAULT_FROM_EMAIL = "{{ email }}"
+CELERY_DEFAULT_QUEUE = "{{ hostname }}"
 
 AUTH_CROWD_ALWAYS_UPDATE_USER = False
 AUTH_CROWD_ALWAYS_UPDATE_GROUPS = False
@@ -82,3 +83,4 @@ LOGGING = {
 }
 
 DEBUG=True
+
