@@ -101,7 +101,7 @@ class BranchSerializer(serializers.ModelSerializer):
 
 
 class StatsSerializer(serializers.ModelSerializer):
-    created_at = serializers.CharField(source='testjob.result.created_at', read_only=True)
+    created_at = serializers.CharField(source='result.created_at', read_only=True)
     benchmark = serializers.CharField(source='benchmark.name', read_only=True)
 
     class Meta:

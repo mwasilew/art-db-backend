@@ -63,8 +63,8 @@ class BranchViewSet(viewsets.ModelViewSet):
 
 class StatsViewSet(viewsets.ModelViewSet):
     queryset = (benchmarks_models.ResultData.objects
-                .select_related("testjob__result", "benchmark")
-                .order_by('-testjob__result__created_at'))
+                .select_related("result", "benchmark")
+                .order_by('-result__created_at'))
 
     permission_classes = [DjangoModelPermissions]
     serializer_class = serializers.StatsSerializer
@@ -78,7 +78,7 @@ class StatsViewSet(viewsets.ModelViewSet):
             return self.queryset.none()
 
         return self.queryset.filter(benchmark__name__in=benchmarks,
-                                    testjob__result__branch_name=branch)
+                                    result__branch_name=branch)
 
 # result
 class ResultViewSet(viewsets.ModelViewSet):
@@ -105,7 +105,7 @@ class ResultViewSet(viewsets.ModelViewSet):
     def benchmarks(self, request, pk=None):
         result = self.get_object()
         benchmarks = (benchmarks_models.ResultData.objects
-                      .filter(testjob__result=result)
+                      .filter(result=result)
                       .select_related("benchmark"))
 
         serializer = serializers.ResultDataSerializer(benchmarks, many=True)
@@ -326,9 +326,9 @@ class CompareResults(viewsets.ViewSet):
         if not (branch_1 and branch_2):
             return response.Response([])
 
-        base_query = benchmarks_models.ResultData.objects.filter(testjob__result__branch_name=branch_1)
+        base_query = benchmarks_models.ResultData.objects.filter(result__branch_name=branch_1)
 
-        target_query = benchmarks_models.ResultData.objects.filter(testjob__result__branch_name=branch_2)
+        target_query = benchmarks_models.ResultData.objects.filter(result__branch_name=branch_2)
 
         data = self.compare_query(base_query, target_query)
 
@@ -343,11 +343,11 @@ class CompareResults(viewsets.ViewSet):
             return response.Response([])
 
         base_query = (benchmarks_models.ResultData.objects
-                      .filter(testjob__result__manifest__manifest_hash=manifest_1)
+                      .filter(result__manifest__manifest_hash=manifest_1)
                       .select_related('benchmark'))
 
         target_query = (benchmarks_models.ResultData.objects
-                        .filter(testjob__result__manifest__manifest_hash=manifest_2)
+                        .filter(result__manifest__manifest_hash=manifest_2)
                         .select_related('benchmark'))
 
         data = self.compare_query(base_query, target_query)

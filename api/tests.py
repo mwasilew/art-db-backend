@@ -163,17 +163,17 @@ class CompareTests(APITestCase):
         manifest_1 = G(benchmarks_models.Manifest, manifest=MINIMAL_XML)
         manifest_2 = G(benchmarks_models.Manifest, manifest=MINIMAL_XML)
 
-        manifest_1_testjob = G(benchmarks_models.TestJob, result__manifest=manifest_1)
-        manifest_2_testjob = G(benchmarks_models.TestJob, result__manifest=manifest_2)
+        manifest_1_result = G(benchmarks_models.Result, manifest=manifest_1)
+        manifest_2_result = G(benchmarks_models.Result, manifest=manifest_2)
 
         G(benchmarks_models.ResultData,
-          testjob=manifest_1_testjob,
+          result=manifest_1_result,
           benchmark=benchmark,
           name="load",
           measurement=10)
 
         G(benchmarks_models.ResultData,
-          testjob=manifest_2_testjob,
+          result=manifest_2_result,
           benchmark=benchmark,
           name="load",
           measurement=2)
@@ -206,24 +206,22 @@ class CompareTests(APITestCase):
         branch_1_name = "test1"
         branch_2_name = "test2"
 
-        branch_1_testjob = G(benchmarks_models.TestJob,
-                             result=G(benchmarks_models.Result,
-                                      branch_name=branch_1_name,
-                                      manifest=G(benchmarks_models.Manifest, manifest=MINIMAL_XML)))
+        branch_1_result = G(benchmarks_models.Result,
+                             branch_name=branch_1_name,
+                             manifest=G(benchmarks_models.Manifest, manifest=MINIMAL_XML))
 
-        branch_2_testjob = G(benchmarks_models.TestJob,
-                             result=G(benchmarks_models.Result,
-                                      branch_name=branch_2_name,
-                                      manifest=G(benchmarks_models.Manifest, manifest=MINIMAL_XML)))
+        branch_2_result = G(benchmarks_models.Result,
+                             branch_name=branch_2_name,
+                             manifest=G(benchmarks_models.Manifest, manifest=MINIMAL_XML))
 
         G(benchmarks_models.ResultData,
-          testjob=branch_1_testjob,
+          result=branch_1_result,
           benchmark=benchmark,
           name="load",
           measurement=10)
 
         G(benchmarks_models.ResultData,
-          testjob=branch_2_testjob,
+          result=branch_2_result,
           benchmark=benchmark,
           name="load",
           measurement=2)
@@ -251,10 +249,10 @@ class CompareTests(APITestCase):
         manifest_1 = G(benchmarks_models.Manifest, manifest=MINIMAL_XML)
         manifest_2 = G(benchmarks_models.Manifest, manifest=MINIMAL_XML)
 
-        manifest_1_testjob = G(benchmarks_models.TestJob, result__manifest=manifest_1)
+        manifest_1_result = G(benchmarks_models.Result, manifest=manifest_1)
 
         G(benchmarks_models.ResultData,
-          testjob=manifest_1_testjob,
+          result=manifest_1_result,
           benchmark=benchmark,
           name="load",
           measurement=10)

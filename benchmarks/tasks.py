@@ -41,7 +41,7 @@ def _set_testjob_results(testjob):
         testjob.save()
         return
 
-    ResultData.objects.filter(testjob=testjob).delete()
+    ResultData.objects.filter(result=testjob.result).delete()
 
     for result in test_results:
         benchmark, _ = Benchmark.objects.get_or_create(
@@ -53,7 +53,7 @@ def _set_testjob_results(testjob):
                 name=subscore['name'],
                 measurement=subscore['measurement'],
                 board=result['board'],
-                testjob=testjob,
+                result=testjob.result,
                 benchmark=benchmark
             )
 

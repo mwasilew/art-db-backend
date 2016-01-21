@@ -88,7 +88,7 @@ class Benchmark(models.Model):
 
 
 class ResultData(models.Model):
-    testjob = models.ForeignKey(TestJob, related_name="benchmarks")
+    result = models.ForeignKey(Result, related_name="data")
     benchmark = models.ForeignKey(Benchmark, related_name="data")
 
     name = models.CharField(max_length=256)
