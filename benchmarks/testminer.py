@@ -45,6 +45,9 @@ class TestSystem(object):
     def get_result_class_name(self, job_id):
         return None
 
+    def get_result_data(self, job_id):
+        return None
+
     @staticmethod
     def reduce_test_results(test_result_list):
         return None
@@ -69,6 +72,7 @@ class GenericLavaTestSystem(TestSystem):
         self.xmlrpc_url = base_url + LavaTestSystem.XMLRPC
         self.stream_url = base_url + LavaTestSystem.BUNDLESTREAMS
         self._url = base_url + LavaTestSystem.JOB
+        self.result_data = None
 
     def test_results_available(self, job_id):
         status = self.call_xmlrpc('scheduler.job_status', job_id)
@@ -111,7 +115,7 @@ class GenericLavaTestSystem(TestSystem):
         for action in definition['actions']:
             if action['command'] == "lava_test_shell":
                 if 'testdef_repos' in action['parameters'].keys():
-                    for test_repo in action['parameters']['testdef_repos'])
+                    for test_repo in action['parameters']['testdef_repos']:
                         if test_repo['testdef'].endswith("art-microbenchmarks.yaml"):
                             return "ArtMicrobenchmarksTestResults"
                         if test_repo['testdef'].endswith("wa2host.yaml"):
@@ -137,7 +141,7 @@ class GenericLavaTestSystem(TestSystem):
 
 class LavaTestSystem(GenericLavaTestSystem):
     REPO_HOME = "/tmp/repos" # change it to cofigurable parameter
-    def __init__(self, base_url, username=None, password=None, repo_prefix=None)
+    def __init__(self, base_url, username=None, password=None, repo_prefix=None):
         self.repo_prefix = repo_prefix
         self.repo_dirs = set([])
         #self.repo_home = os.path.join(os.getcwd(), LavaTestSystem.REPO_HOME)
@@ -552,6 +556,8 @@ class ArtMicrobenchmarksTestResults(LavaTestSystem):
         #with open(self.result_file_name + "_" + str(test_mode) + ".json", "w") as json_file:
         #    json_file.write(json_text)
         test_result_dict = json.loads(json_text)
+        if 'benchmarks' in test_result_dict.keys():
+            test_result_dict = test_result_dict['benchmarks']
         # Key Format: benchmarks/micro/<BENCHMARK_NAME>.<SUBSCORE>
         # Extract and unique them to form a benchmark name list
         test_result_keys = list(bn.split('/')[-1].split('.')[0] for bn in test_result_dict.keys())
@@ -575,6 +581,40 @@ class ArtMicrobenchmarksTestResults(LavaTestSystem):
 
             test_result_list.append(test_result)
         return test_result_list
+
+    def get_result_data(self, test_job_id):
+        status = self.call_xmlrpc('scheduler.job_status', test_job_id)
+
+        if not ('bundle_sha1' in status and status['bundle_sha1']):
+            return []
+
+        test_result_list = []
+
+        sha1 = status['bundle_sha1']
+        result_bundle = self.call_xmlrpc('dashboard.get', sha1)
+        bundle = json.loads(result_bundle['content'])
+
+        target = [t for t in bundle['test_runs'] if t['test_id'] == 'multinode-target']
+        if target:
+            target = iter(target).next()
+        else:
+            return test_result_list
+        host = [t for t in bundle['test_runs'] if t['test_id'] == 'art-microbenchmarks']
+        if host:
+            host = iter(host).next()
+        else:
+            return test_result_list
+        src = (s for s in host['software_context']['sources'] if 'test_params' in s).next()
+        # This is an art-microbenchmarks test
+        # The test name and test results are in the attachmented pkl file
+        # get test results for the attachment
+        test_mode = ast.literal_eval(src['test_params'])['MODE']
+        json_attachments = [a['content'] for a in host['attachments'] if a['pathname'].endswith('json')]
+
+        if not json_attachments:
+            return None
+        return base64.b64decode(json_attachments[0])
+ 
 
 class ArtWATestResults(LavaTestSystem):
     def get_test_job_results(self, test_job_id):

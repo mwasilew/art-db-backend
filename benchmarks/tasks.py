@@ -25,6 +25,7 @@ def _set_testjob_results(testjob):
         testjob.testrunnerclass = tester.get_result_class_name(testjob.id)
         testjob.initialized = True
         testjob.save()
+        tester = getattr(testminer, testjob.testrunnerclass)(testjob.testrunnerurl, username, password)
 
     if testjob.status not in ["Complete", "Incomplete", "Canceled"]:
         testjob.save()
@@ -40,6 +41,9 @@ def _set_testjob_results(testjob):
         return
 
     ResultData.objects.filter(testjob=testjob).delete()
+
+    testjob.data = tester.get_result_data(testjob.id)
+    testjob.save()
 
     for result in test_results:
         benchmark, _ = Benchmark.objects.get_or_create(
