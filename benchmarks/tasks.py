@@ -45,6 +45,9 @@ def _set_testjob_results(testjob):
     testjob.data = tester.get_result_data(testjob.id)
     testjob.save()
 
+    testjob.data = tester.get_result_data(testjob.id)
+    testjob.save()
+
     for result in test_results:
         benchmark, _ = Benchmark.objects.get_or_create(
             name=result['benchmark_name']
