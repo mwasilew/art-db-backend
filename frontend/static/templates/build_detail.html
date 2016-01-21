@@ -26,48 +26,52 @@
     <dd>{{ build.gerrit_patchset_number || "not set" }}</dd>
   </dl>
 
-  <hr ng-show="build.test_jobs.length">
-  
-  <h3>TestJob</h3>
+  <div ng-show="build.test_jobs.length">
+    <hr>
+    <h3>TestJob</h3>
 
-  <table class="table table-striped" ng-show="build.test_jobs.length">
-    <thead>
-      <tr>
-	<th style="width: 10%;">#</th>
-	<th style="width: 90%;">status</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr ng-repeat="test in build.test_jobs">
+    <table class="table table-striped" ng-show="build.test_jobs.length">
+      <thead>
+	<tr>
+	  <th style="width: 10%;">#</th>
+	  <th style="width: 90%;">status</th>
+	</tr>
+      </thead>
+      <tbody>
+	<tr ng-repeat="test in build.test_jobs">
 
-	<td>
-	  <a href="{{ test.url }}" target="_blank">{{ test.id }}</a></td>
-	<td>
-	  <ng-include src="'/static/templates/_test_job_status.html'" />
-	</td>
-      </tr>
-    </tbody>
-  </table>
+	  <td>
+	    <a href="{{ test.url }}" target="_blank">{{ test.id }}</a></td>
+	  <td>
+	    <ng-include src="'/static/templates/_test_job_status.html'" />
+	  </td>
+	</tr>
+      </tbody>
+    </table>
+  </div>
 
-  <hr>
-  
-  <h3>Benchmarks</h3>
 
-  <table class="table table-striped">
-    <thead>
-      <tr>
-	<th style="width: 30%;">benchmark</th>
-	<th style="width: 40%;">name</th>
-	<th style="width: 40%;">value</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr ng-repeat="item in benchmarks">
-	<td>{{ item.benchmark.name }}</td>
-	<td>{{ item.name }}</td>
-	<td>{{ item.measurement }}</td>
-      </tr>
-    </tbody>
-  </table>
+  <div ng-if="benchmarks.length">
+    <hr>
+    
+    <h3>Benchmarks</h3>
+
+    <table class="table table-striped">
+      <thead>
+	<tr>
+	  <th style="width: 60%">name</th>
+	  <th class="text-right">measurement</th>
+	  <th class="text-right">stddev</th>
+	</tr>
+      </thead>
+      <tbody>
+	<tr ng-repeat="item in benchmarks">
+	  <td>{{ item.name }}</td>
+	  <td class="text-right">{{ item.mean.toFixed(2)}}</td>
+	  <td class="text-right">{{ item.stddev.toFixed(2) }}</td>
+	</tr>
+      </tbody>
+    </table>
+  </div>
   
 </div>

@@ -19,6 +19,27 @@ from benchmarks import tasks
 from . import serializers
 
 
+# no statistics module in Python 2
+def mean(data):
+    n = len(data)
+    if n < 1:
+        return 0
+    return sum(data)/float(n)
+
+def _ss(data):
+    c = mean(data)
+    ss = sum((x-c)**2 for x in data)
+    return ss
+
+def stddev(data):
+    n = len(data)
+    if n < 2:
+        return 0
+    ss = _ss(data)
+    pvar = ss/n
+    return pvar**0.5
+
+
 class TokenViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     permission_classes = (IsAuthenticated, )
     queryset = Token.objects.all()
@@ -109,7 +130,17 @@ class ResultViewSet(viewsets.ModelViewSet):
                       .select_related("benchmark"))
 
         serializer = serializers.ResultDataSerializer(benchmarks, many=True)
-        return response.Response(serializer.data)
+
+        data = {}
+        for item in serializer.data:
+            name = "%s/%s" % (item['benchmark']['name'], item['name'])
+            if name in data:
+                data[name].append(item['measurement'])
+            else:
+                data[name] = [item['measurement']]
+
+        return response.Response(sorted([{"name": n, "mean": mean(v), "stddev": stddev(v)}
+                                         for n, v in data.items()], key=lambda x:x['name']))
 
     def create(self, request, *args, **kwargs):
         test_jobs = []
@@ -244,26 +275,6 @@ class ResultDataForManifest(views.APIView):
 
 class CompareResults(viewsets.ViewSet):
 
-    # no statistics module in Python 2
-    def mean(self, data):
-        n = len(data)
-        if n < 1:
-            return 0
-        return sum(data)/float(n)
-
-    def _ss(self, data):
-        c = self.mean(data)
-        ss = sum((x-c)**2 for x in data)
-        return ss
-
-    def stddev(self, data):
-        n = len(data)
-        if n < 2:
-            return 0
-        ss = self._ss(data)
-        pvar = ss/n
-        return pvar**0.5
-
     def group_resuls(self, query):
         # magic
         return {
@@ -288,13 +299,13 @@ class CompareResults(viewsets.ViewSet):
 
             for scorename, values in results.items():
 
-                base_avg = self.mean(values)
-                base_stddev = self.stddev(values)
+                base_avg = mean(values)
+                base_stddev = stddev(values)
 
                 if target and scorename in target:
                     target_items = target[scorename]
-                    target_avg = self.mean(target_items)
-                    target_stddev = self.stddev(target_items)
+                    target_avg = mean(target_items)
+                    target_stddev = stddev(target_items)
                     diff_avg = base_avg - target_avg
                     diff_stddev = base_stddev - target_stddev
                 else:
