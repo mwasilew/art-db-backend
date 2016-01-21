@@ -35,7 +35,7 @@ DATABASES = {
 SECRET_KEY = '{{secret_key}}'
 
 STATIC_ROOT = '/var/www/{{hostname}}/static/'
-
+MEDIA_ROOT = '{{media_base}}'
 LOG_LEVEL = 'DEBUG'
 
 

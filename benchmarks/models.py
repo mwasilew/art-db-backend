@@ -70,7 +70,7 @@ class TestJob(models.Model):
     definition = models.TextField(blank=True, null=True)
     initialized = models.BooleanField(default=False)
     completed = models.BooleanField(default=False)
-    data = models.TextField(blank=True)
+    data = models.FileField(null=True)
     testrunnerclass = models.CharField(blank=True, default="GenericLavaTestSystem", max_length=128)
     testrunnerurl = models.CharField(blank=True, default="https://validation.linaro.org/", max_length=256)
 

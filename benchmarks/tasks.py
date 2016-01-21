@@ -3,6 +3,7 @@ import urlparse
 
 from crayonbox import celery_app
 from django.conf import settings
+from django.core.files.base import ContentFile
 from celery.utils.log import get_task_logger
 from benchmarks.models import Benchmark, ResultData
 
@@ -42,10 +43,9 @@ def _set_testjob_results(testjob):
 
     ResultData.objects.filter(result=testjob.result).delete()
 
-    testjob.data = tester.get_result_data(testjob.id)
-    testjob.save()
+    datafile = ContentFile(tester.get_result_data(testjob.id))
 
-    testjob.data = tester.get_result_data(testjob.id)
+    testjob.data.save('attachment.json', datafile, save=False)
     testjob.save()
 
     for result in test_results:

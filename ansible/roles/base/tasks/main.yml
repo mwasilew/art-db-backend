@@ -21,3 +21,10 @@
         group={{apache_user}}
         mode=0755
         state=directory
+
+- name: directory - media
+  file: path={{media_base}}
+        owner={{apache_user}}
+        group={{apache_user}}
+        mode=0755
+        state=directory
