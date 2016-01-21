@@ -28,10 +28,10 @@ django_settings: crayonbox.settings.private
 django_local_settings: templates/art_reports_local_settings.py
 django_local_wsgi: templates/art_reports_index.wsgi
 
-supervisord_conf: "{{install_base}}/supervisord.conf"
-supervisord_bin: "{{install_base}}/.virtualenv/bin/supervisord"
-supervisorctl_bin: "{{install_base}}/.virtualenv/bin/supervisorctl"
-supervisor_config_dir: "{{install_base}}/supervisor.conf.d"
+supervisord_conf: "/srv/supervisord.conf"
+supervisord_bin: "/usr/local/bin/supervisord"
+supervisorctl_bin: "/usr/local/bin/supervisorctl"
+supervisor_config_dir: "/srv/supervisor.conf.d"
 
 ssl_key: /etc/ssl/private/wildcard.linaro.org.key
 ssl_cert: /etc/ssl/certs/wildcard.linaro.org.crt

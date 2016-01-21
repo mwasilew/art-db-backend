@@ -1,4 +1,10 @@
 ---
+- name: Install Supervisor
+  pip: name=supervisor
+  tags:
+    - install
+    - update
+
 - name: Copy supervisord.conf
   sudo_user: "{{apache_user}}"
   when: supervisord_conf is defined
@@ -23,8 +29,8 @@
             dest={{item.dest}}
             owner={{apache_user}} group={{apache_user}} mode=0755
   with_items:
-    - { src: 'templates/supervisor.celerycam.conf', dest: '{{supervisor_config_dir}}/supervisor.celerycam.conf' }
-    - { src: 'templates/supervisor.celeryd.conf', dest: '{{supervisor_config_dir}}/supervisor.celeryd.conf' }
+    - { src: 'templates/supervisor.celerycam.conf', dest: '{{supervisor_config_dir}}/{{hostname}}.celerycam.conf' }
+    - { src: 'templates/supervisor.celeryd.conf', dest: '{{supervisor_config_dir}}/{{hostname}}.celeryd.conf' }
   tags:
     - install
     - update
@@ -45,6 +51,11 @@
     - update
     - celery
 
-- name: restart task
+- name: supervisor restart
   shell: "{{supervisorctl_bin}} -c {{supervisord_conf}} restart all"
   sudo_user: "{{apache_user}}"
+
+- name: supervisor update
+  shell: "{{supervisorctl_bin}} -c {{supervisord_conf}} update"
+  sudo_user: "{{apache_user}}"
+
