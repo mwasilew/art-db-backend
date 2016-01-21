@@ -43,9 +43,10 @@ def _set_testjob_results(testjob):
 
     ResultData.objects.filter(result=testjob.result).delete()
 
-    datafile = ContentFile(tester.get_result_data(testjob.id))
+    datafile_name, datafile_content = tester.get_result_data(testjob.id)
+    datafile = ContentFile(datafile_content)
 
-    testjob.data.save('attachment.json', datafile, save=False)
+    testjob.data.save(datafile_name, datafile, save=False)
     testjob.save()
 
     for result in test_results:

@@ -609,11 +609,11 @@ class ArtMicrobenchmarksTestResults(LavaTestSystem):
         # The test name and test results are in the attachmented pkl file
         # get test results for the attachment
         test_mode = ast.literal_eval(src['test_params'])['MODE']
-        json_attachments = [a['content'] for a in host['attachments'] if a['pathname'].endswith('json')]
+        json_attachments = [(a['pathname'], a['content']) for a in host['attachments'] if a['pathname'].endswith('json')]
 
         if not json_attachments:
             return None
-        return base64.b64decode(json_attachments[0])
+        return (json_attachment[0][0], base64.b64decode(json_attachments[0][1])
  
 
 class ArtWATestResults(LavaTestSystem):
