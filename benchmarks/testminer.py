@@ -95,8 +95,6 @@ class GenericLavaTestSystem(TestSystem):
         if 'bundle_sha1' in status:
             details.update({"bundle": status['bundle_sha1']})
         content = self.call_xmlrpc('scheduler.job_details', job_id)
-        import pprint
-        pprint.pprint(content)
         definition = json.loads(content['definition'])
         if content['multinode_definition']:
             definition = json.loads(content['multinode_definition'])
@@ -158,7 +156,7 @@ class LavaTestSystem(GenericLavaTestSystem):
             shutil.rmtree(self.repo_home)
 
     def get_test_job_results(self, job_id):
-        return results
+        return None
 
     def _extract_test_repos(self, testdef_repo_list):
         return_list = []
@@ -286,8 +284,6 @@ class LavaTestSystem(GenericLavaTestSystem):
                                 # looks like a match
                                 test_dict.update({'results': test_results})
                                 test_dict.update({'version': test_version})
-            if test_location_type.upper() == 'BZR':
-                print test_dict
 
     def assign_indexed_result(self, defined_tests, index, result):
         test_index = 0
@@ -602,7 +598,7 @@ class ArtMicrobenchmarksTestResults(LavaTestSystem):
 
         if not json_attachments:
             return (None, None)
-        return (json_attachment[0][0], base64.b64decode(json_attachments[0][1]))
+        return (json_attachments[0][0], base64.b64decode(json_attachments[0][1]))
 
 
 class ArtWATestResults(LavaTestSystem):
