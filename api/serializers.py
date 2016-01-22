@@ -59,17 +59,11 @@ class ResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = benchmarks_models.Result
 
-    def create(self, validated_data):
-
-        if 'manifest' in validated_data:
-            manifest_content = validated_data['manifest']
-            manifest, _ = benchmarks_models.Manifest.objects.get_or_create(
-                manifest=manifest_content)
-            validated_data['manifest'] = manifest
-        else:
-            validated_data['manifest'] = None
-
-        return benchmarks_models.Result.objects.create(**validated_data)
+    def validate_manifest(self, value):
+        manifest, _ = benchmarks_models.Manifest.objects.get_or_create(
+            manifest=value
+        )
+        return manifest
 
 
 class ManifestSerializer(DynamicFieldsMixin, serializers.ModelSerializer):

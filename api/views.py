@@ -143,27 +143,37 @@ class ResultViewSet(viewsets.ModelViewSet):
                                          for n, v in data.items()], key=lambda x:x['name']))
 
     def create(self, request, *args, **kwargs):
-        test_jobs = []
-        if 'test_jobs' in request.data:
-            test_jobs = map(lambda x: x.strip(),
-                            request.data.get('test_jobs', '').split(","))
-
-
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
+        try:
+            result = benchmarks_models.Result.objects.get(
+                build_id=serializer.data['build_id'],
+                build_number=serializer.data['build_number']
+            )
+
+            serializer = self.get_serializer(instance=result, data=request.data)
+            serializer.is_valid(raise_exception=True)
+
+            result.test_jobs.all().delete()
+            result.data.all().delete()
+
+        except benchmarks_models.Result.DoesNotExist:
+            pass
+
         result = serializer.save()
 
-        benchmarks_models.ResultData.objects.filter(result=result).delete()
+        if request.data.get('test_jobs'):
 
-        for testjob_id in test_jobs:
-            try:
-                testjob = benchmarks_models.TestJob.objects.get(pk=testjob_id)
-            except benchmarks_models.TestJob.DoesNotExist:
+            test_jobs = {item.strip() for item in request.data.get('test_jobs').split(",")}
+
+            for testjob_id in test_jobs:
+
                 testjob = benchmarks_models.TestJob.objects.create(
                     result=result,
-                    id=testjob_id)
-
-            tasks.set_testjob_results.delay(testjob)
+                    id=testjob_id
+                )
+                tasks.set_testjob_results.delay(testjob)
 
         return response.Response(serializer.data, status=status.HTTP_201_CREATED)
 

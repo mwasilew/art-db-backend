@@ -98,9 +98,42 @@ class ResultTests(APITestCase):
         self.assertEqual(response_1.status_code, 201)
         self.assertEqual(response_2.status_code, 201)
 
+        self.assertEqual(benchmarks_models.Result.objects.count(), 2)
         self.assertEqual(benchmarks_models.Manifest.objects.count(), 1)
 
     def test_post_4(self):
+        build_id = 200
+        build_number = 20
+
+        data_1 = {
+            'build_url': 'http://linaro.org',
+            'name': u'linaro-art-stable-m-build-juno',
+            'url': u'http://dynamicfixture1.com',
+            'manifest': MINIMAL_XML,
+            'build_number': build_number,
+            'build_id': build_id
+        }
+
+        data_2 = {
+            'build_url': 'http://linaro.org',
+            'name': u'linaro-art-stable-m-build-juno',
+            'url': u'http://linaro.org',
+            'manifest': MINIMAL_XML,
+            'build_number': build_number,
+            'build_id': build_id
+        }
+
+
+        response_1 = self.client.post('/api/result/', data=data_1)
+        response_2 = self.client.post('/api/result/', data=data_2)
+
+        self.assertEqual(response_1.status_code, 201)
+        self.assertEqual(response_2.status_code, 201)
+
+        self.assertEqual(benchmarks_models.Result.objects.count(), 1)
+        self.assertEqual(benchmarks_models.Manifest.objects.count(), 1)
+
+    def test_post_5(self):
 
         data = {
             'build_url': 'http://linaro.org',
@@ -109,13 +142,15 @@ class ResultTests(APITestCase):
             'build_number': 200,
             'build_id': 20,
             'manifest': MINIMAL_XML,
-            'created_at': '2016-01-06 09:00:01'
+            'created_at': '2016-01-06 09:00:01',
+            'test_jobs': " 111, 222 "
         }
 
         response = self.client.post('/api/result/', data=data)
 
         self.assertEqual(response.status_code, 201)
         self.assertEqual(benchmarks_models.Manifest.objects.count(), 1)
+        self.assertEqual(benchmarks_models.TestJob.objects.count(), 2)
         self.assertEqual(response.data['created_at'], '2016-01-06 09:00:01')
 
 
