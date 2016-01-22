@@ -41,8 +41,6 @@ def _set_testjob_results(testjob):
         testjob.save()
         return
 
-    ResultData.objects.filter(result=testjob.result).delete()
-
     datafile_name, datafile_content = tester.get_result_data(testjob.id)
     datafile = ContentFile(datafile_content)
 
@@ -87,9 +85,12 @@ def _set_testjob_results(testjob):
 @celery_app.task(bind=True)
 def set_testjob_results(self, testjob):
 
+    logger.info("Fetch benchmark results for %s" % testjob)
+
     _set_testjob_results(testjob)
 
-    logger.info(testjob)
-
     if not testjob.completed:
+        logger.info("Testjob for %s not completed, restarting" % testjob)
         set_testjob_results.apply_async(args=[testjob], countdown=300)
+    else:
+        logger.info("Testjob for %s completed" % testjob)

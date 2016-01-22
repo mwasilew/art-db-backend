@@ -151,17 +151,18 @@ class ResultViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        obj = serializer.save()
+        result = serializer.save()
+
+        benchmarks_models.ResultData.objects.filter(result=result).delete()
 
         for testjob_id in test_jobs:
-            if not benchmarks_models.TestJob.objects.filter(id=testjob_id).exists():
 
-                testjob, _ = benchmarks_models.TestJob.objects.get_or_create(
-                    result=obj,
-                    id=testjob_id,
-                )
+            testjob, _ = benchmarks_models.TestJob.objects.get_or_create(
+                result=result,
+                id=testjob_id,
+            )
 
-                tasks.set_testjob_results.delay(testjob)
+            tasks.set_testjob_results.delay(testjob)
 
         return response.Response(serializer.data, status=status.HTTP_201_CREATED)
 
