@@ -156,11 +156,12 @@ class ResultViewSet(viewsets.ModelViewSet):
         benchmarks_models.ResultData.objects.filter(result=result).delete()
 
         for testjob_id in test_jobs:
-
-            testjob, _ = benchmarks_models.TestJob.objects.get_or_create(
-                result=result,
-                id=testjob_id,
-            )
+            try:
+                testjob = benchmarks_models.TestJob.objects.get(pk=testjob_id)
+            except benchmarks_models.TestJob.DoesNotExist:
+                testjob = benchmarks_models.TestJob.objects.create(
+                    result=result,
+                    id=testjob_id)
 
             tasks.set_testjob_results.delay(testjob)
 

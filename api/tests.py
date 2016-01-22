@@ -58,7 +58,7 @@ class ResultTests(APITestCase):
             'id': u'123',
             'build_number': 200,
             'build_id': 20,
-            'test_jobs': '655839.0, 655838.0',
+            'test_jobs': '655839.0, 655838.0, 655838.0',
             'manifest': MINIMAL_XML
         }
 
