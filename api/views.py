@@ -85,10 +85,10 @@ class BranchViewSet(viewsets.ModelViewSet):
 class StatsViewSet(viewsets.ModelViewSet):
     queryset = (benchmarks_models.ResultData.objects
                 .select_related("result", "benchmark")
-                .order_by('-result__created_at'))
+                .order_by('created_at'))
 
     permission_classes = [DjangoModelPermissions]
-    serializer_class = serializers.StatsSerializer
+    serializer_class = serializers.ResultDataSerializer
     pagination_class = None
 
     def get_queryset(self):
@@ -130,17 +130,7 @@ class ResultViewSet(viewsets.ModelViewSet):
                       .select_related("benchmark"))
 
         serializer = serializers.ResultDataSerializer(benchmarks, many=True)
-
-        data = {}
-        for item in serializer.data:
-            name = "%s/%s" % (item['benchmark']['name'], item['name'])
-            if name in data:
-                data[name].append(item['measurement'])
-            else:
-                data[name] = [item['measurement']]
-
-        return response.Response(sorted([{"name": n, "mean": mean(v), "stddev": stddev(v)}
-                                         for n, v in data.items()], key=lambda x:x['name']))
+        return response.Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

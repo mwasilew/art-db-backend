@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ET
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from django.contrib.postgres.fields import ArrayField
 
 
 class Manifest(models.Model):
@@ -97,6 +98,8 @@ class ResultData(models.Model):
     name = models.CharField(max_length=256)
     board = models.CharField(default="default", max_length=128)
     measurement = models.FloatField()
+
+    values = ArrayField(models.FloatField(), default=list)
 
     created_at = models.DateTimeField(default=timezone.now)
 

@@ -61,14 +61,14 @@
 	<tr>
 	  <th style="width: 60%">name</th>
 	  <th class="text-right">measurement</th>
-	  <th class="text-right">stddev</th>
 	</tr>
       </thead>
       <tbody>
 	<tr ng-repeat="item in benchmarks">
 	  <td>{{ item.name }}</td>
-	  <td class="text-right">{{ item.mean.toFixed(2)}}</td>
-	  <td class="text-right">{{ item.stddev.toFixed(2) }}</td>
+	  <td class="text-right">
+	    {{ item.measurement.toFixed(2)}}
+	  </td>
 	</tr>
       </tbody>
     </table>

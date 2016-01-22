@@ -39,13 +39,6 @@ class ReducedManifestSerializer(DynamicFieldsMixin, serializers.ModelSerializer)
         depth = 2
 
 
-class ResultDataSerializer(serializers.ModelSerializer):
-    benchmark = BenchmarkSerializer()
-
-    class Meta:
-        model = benchmarks_models.ResultData
-
-
 class TestJobSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -94,10 +87,9 @@ class BranchSerializer(serializers.ModelSerializer):
         fields = ('branch_name',)
 
 
-class StatsSerializer(serializers.ModelSerializer):
-    created_at = serializers.CharField(source='result.created_at', read_only=True)
+class ResultDataSerializer(serializers.ModelSerializer):
     benchmark = serializers.CharField(source='benchmark.name', read_only=True)
 
     class Meta:
         model = benchmarks_models.ResultData
-        fields = ('name', 'benchmark', 'created_at', 'measurement')
+
