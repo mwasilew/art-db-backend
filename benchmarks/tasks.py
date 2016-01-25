@@ -3,13 +3,16 @@ import json
 import urlparse
 import subprocess
 
+from django.utils import timezone
+from datetime import timedelta
+
 from crayonbox import celery_app
 from django.conf import settings
 from django.core.files.base import ContentFile
 from celery.utils.log import get_task_logger
-from benchmarks.models import Benchmark, ResultData
+from benchmarks.models import Benchmark, ResultData, Result
 
-from . import testminer
+from . import testminer, mail
 
 
 logger = get_task_logger(__name__)
@@ -98,7 +101,6 @@ def set_testjob_results(self, testjob):
         logger.info("Testjob for %s completed" % testjob)
 
 
-
 def _sync_external_repos():
     base = settings.EXTERNAL_DIR['BASE']
     for name, address in settings.EXTERNAL_DIR['REPOSITORIES']:
@@ -115,3 +117,53 @@ def _sync_external_repos():
 @celery_app.task(bind=True)
 def sync_external_repos(self):
     _sync_external_repos()
+
+
+def _weekly_benchmark_progress():
+
+    reports = []
+
+    now = timezone.now() - timedelta(days=7)
+    then = now - timedelta(days=1)
+
+    branches = (Result.objects.order_by('branch_name')
+                .distinct("branch_name")
+                .values_list("branch_name", flat=True))
+
+    for branch_name in branches:
+        query = (Result.objects
+                 .order_by("-created_at")
+                 .filter(gerrit_change_number__isnull=True,
+                         branch_name=branch_name))
+
+        current = None
+        for item in query.filter(created_at__lte=now, created_at__gte=then):
+            if item.data.count():
+                current = item
+                break
+
+        previous = None
+        for item in query.filter(created_at__lte=then, created_at__gte=then):
+            if item.data.count():
+                previous = item
+                break
+
+        import pdb; pdb.set_trace()
+        # current = query.filter(created_at__lte=now).first()
+        # previous = query.filter(created_at__lte=then).first()
+
+        if current and previous:
+            reports.append({
+                "branch": branch_name,
+                "current": current,
+                "previous": previous
+            })
+        else:
+            pass # no items to generate report from
+
+    mail.weekly_benchmark_progress(reports)
+
+
+@celery_app.task(bind=True)
+def weekly_benchmark_progress(self):
+    _weekly_benchmark_progress()

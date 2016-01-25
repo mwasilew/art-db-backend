@@ -36,6 +36,56 @@ class Manifest(models.Model):
         return super(Manifest, self).save(*args, **kwargs)
 
 
+class ResultManager(models.Manager):
+    def compare(self, now, interval):
+
+        branches = (Result.objects.order_by('branch_name')
+                    .distinct("branch_name")
+                    .values_list("branch_name", flat=True))
+
+        results_by_branch = {}
+
+        for branch_name in branches:
+            query = (Result.objects
+                     .order_by("-created_at")
+                     .filter(gerrit_change_number__isnull=True,
+                             branch_name=branch_name))
+
+            current = None
+
+            for item in query.filter(created_at__range=(now - interval, now)):
+                if item.data.count():
+                    current = item
+                    break
+
+            previous = None
+            for item in query.filter(created_at__range=(now - interval - interval, now - interval)):
+                if item.data.count():
+                    previous = item
+                    break
+
+            measurement_previous =  {d.name: d.measurement for d in previous.data.all()}
+
+            results = []
+
+            for benchmark in current.data.order_by("name"):
+                current_value = benchmark.measurement
+                previous_value = measurement_previous.get(benchmark.name)
+                change = current_value / previous_value  if previous_value else None
+
+                results.append({
+                    "benchmark": benchmark.benchmark.name,
+                    "name": benchmark.name,
+                    "current_value": current_value,
+                    "previous_value": previous_value,
+                    "change": change
+                })
+
+            results_by_branch[branch_name] = results
+
+        return results_by_branch
+
+
 class Result(models.Model):
     manifest = models.ForeignKey(Manifest, related_name="results", null=True)
 
@@ -53,6 +103,8 @@ class Result(models.Model):
     gerrit_change_id = models.CharField(max_length=42, blank=True, default="")
 
     created_at = models.DateTimeField(default=timezone.now)
+
+    objects = ResultManager()
 
     class Meta:
         ordering = ['-created_at']
