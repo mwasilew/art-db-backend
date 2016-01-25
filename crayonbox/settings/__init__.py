@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 import djcelery
+from celery.schedules import crontab
 
 djcelery.setup_loader()
 
@@ -141,5 +142,12 @@ CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
 CELERY_ACCEPT_CONTENT = ['json', 'pickle']
 CELERYBEAT_SCHEDULE_FILENAME = "/tmp/celery-beat"
 
+
 CELERYBEAT_SCHEDULE = {
+    'Update External Repositories': {
+        'task': 'benchmarks.tasks.sync_external_repos',
+        'schedule': crontab(minute=0, hour='*/12'),
+    },
 }
+
+CELERY_TIMEZONE = 'UTC'

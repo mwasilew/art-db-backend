@@ -16,4 +16,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Testmanager.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import
+
+import os
+
+from django.conf import settings
 from .celery import app as celery_app
+
+
+def setup():
+    if not os.path.exists(settings.EXTERNAL_DIR['BASE']):
+        os.mkdir(settings.EXTERNAL_DIR['BASE'])
+
+setup()

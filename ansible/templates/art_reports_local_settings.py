@@ -84,3 +84,9 @@ LOGGING = {
 
 DEBUG=True
 
+
+EXTERNAL_DIR = {
+    "BASE": os.path.join('{{ext_base}}'),
+    "REPOSITORIES": [("art-testing", "https://android-review.linaro.org/linaro/art-testing")]
+}
+

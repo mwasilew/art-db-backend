@@ -1,5 +1,7 @@
+import os
 import json
 import urlparse
+import subprocess
 
 from crayonbox import celery_app
 from django.conf import settings
@@ -94,3 +96,22 @@ def set_testjob_results(self, testjob):
         set_testjob_results.apply_async(args=[testjob], countdown=300)
     else:
         logger.info("Testjob for %s completed" % testjob)
+
+
+
+def _sync_external_repos():
+    base = settings.EXTERNAL_DIR['BASE']
+    for name, address in settings.EXTERNAL_DIR['REPOSITORIES']:
+
+        logger.info("Repository: %s" % address)
+
+        repo_path = os.path.join(base, name)
+        if not os.path.exists(repo_path):
+            subprocess.check_call(['git', 'clone', address, repo_path], cwd=base)
+        else:
+            subprocess.check_call(['git', 'pull'], cwd=repo_path)
+
+
+@celery_app.task(bind=True)
+def sync_external_repos(self):
+    _sync_external_repos()
