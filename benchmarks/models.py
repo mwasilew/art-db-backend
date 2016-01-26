@@ -37,7 +37,15 @@ class Manifest(models.Model):
 
 
 class ResultManager(models.Manager):
+
+    def _get_first(self, query):
+        for item in query:
+            if item.data.count():
+                return item
+        return None
+
     def compare(self, now, interval):
+        then = now - interval
 
         branches = (Result.objects.order_by('branch_name')
                     .distinct("branch_name")
@@ -51,18 +59,11 @@ class ResultManager(models.Manager):
                      .filter(gerrit_change_number__isnull=True,
                              branch_name=branch_name))
 
-            current = None
+            current = self._get_first(query.filter(created_at__gt=then, created_at__lte=now))
+            previous = self._get_first(query.filter(created_at__gt=then - interval, created_at__lte=then))
 
-            for item in query.filter(created_at__range=(now - interval, now)):
-                if item.data.count():
-                    current = item
-                    break
-
-            previous = None
-            for item in query.filter(created_at__range=(now - interval - interval, now - interval)):
-                if item.data.count():
-                    previous = item
-                    break
+            if not (previous and current):
+                continue
 
             measurement_previous =  {d.name: d.measurement for d in previous.data.all()}
 
@@ -71,13 +72,13 @@ class ResultManager(models.Manager):
             for benchmark in current.data.order_by("name"):
                 current_value = benchmark.measurement
                 previous_value = measurement_previous.get(benchmark.name)
-                change = current_value / previous_value  if previous_value else None
+                change = current_value / previous_value * 100 if previous_value else None
 
                 results.append({
                     "benchmark": benchmark.benchmark.name,
                     "name": benchmark.name,
-                    "current_value": current_value,
-                    "previous_value": previous_value,
+                    "current": current_value,
+                    "previous": previous_value,
                     "change": change
                 })
 
