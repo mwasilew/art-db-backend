@@ -100,38 +100,28 @@
 			                            <br/>
 			                            <hr/>
 
-			                            <style>
-			                                .benchmarks-results {
-			                                border-collapse:collapse !important;
-			                                color:#000000 !important;
-			                                width:100% !important;
-			                                }
-			                                .benchmarks-results td {
-			                                border-bottom: 1px solid #ddd;
-			                                }
-			                                .benchmarks-results .numbers {
-			                                text-align: right;
-			                                }
-			                            </style>
+			                            {% for branch, result in results.items %}
 
-			                            {% for item in results %}
-
-			                            <h3>branch: {{ item.branch }}</h3>
+			                            <h3>branch: {{ branch }}</h3>
 
                                                     <table class="benchmarks-results">
 			                                <tr>
-			                                    <td style="width: 60%">benchmark name</td>
-			                                    <td class="numbers">then</td>
-				                            <td class="numbers">now</td>
-                                                            <td class="numbers">change</td>
+			                                    <td style="width: 80%">benchmark name</td>
+				                            <td style="text-align:right; width:100%">
+								Current
+							    </td>
+			                                    <td style="text-align:right">
+								Last
+							    </td>
+                                                            <td style="text-align:right">change</td>
 			                                </tr>
 
-
-			                                {% for benchmark in item.results %}
+			                                {% for benchmark in result %}
                                                         <tr>
-                                                            <td class="numbers">{{ benchmark.name }}</td>
-                                                            <td class="numbers">{{ benchmark.current_value }}</td>
-			                                    <td class="numbers">{{ benchmark.previous_value }}</td>
+                                                            <td style="width: 80%">{{ benchmark.benchmark }} / <b>{{ benchmark.name }}</b></td>
+                                                            <td align="right" style="text-align:right; width:100%">{{ benchmark.current }}</td>
+			                                    <td align="right" style="text-align:right; min-width: 100px;">{{ benchmark.previous }}</td>
+							    <td align="right" style="text-align:right; min-width: 100px;">{{ benchmark.change }}</td>
                                                         </tr>
                                                         {% endfor %}
 			                            </table>
@@ -143,8 +133,6 @@
                                     </td>
                                 </tr>
                             </table>
-                            <!-- Email Body : END -->
-			    
                         </div>
 	            </center>
                 </td>

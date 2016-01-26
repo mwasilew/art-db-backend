@@ -3,7 +3,6 @@ import sys
 from . import *
 
 
-DEFAULT_FROM_EMAIL = "{{ email }}"
 CELERY_DEFAULT_QUEUE = "{{ hostname }}"
 
 AUTH_CROWD_ALWAYS_UPDATE_USER = False
@@ -90,3 +89,9 @@ EXTERNAL_DIR = {
     "REPOSITORIES": [("art-testing", "https://android-review.linaro.org/linaro/art-testing")]
 }
 
+DEFAULT_FROM_EMAIL = "{{ email }}"
+
+EMAIL_REPORTS_TO = [
+    "sebastian.pawlus@linaro.org",
+    "milosz.wasilewski@linaro.org"
+]
