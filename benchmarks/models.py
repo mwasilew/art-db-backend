@@ -91,6 +91,57 @@ class Benchmark(models.Model):
         return self.name
 
 
+class ResultDataManager(models.Manager):
+
+    def _get_first(self, query):
+        for item in query:
+            if item.data.count():
+                return item
+        return None
+
+    def compare(self, now, interval):
+        then = now - interval
+
+        branches = (Result.objects.order_by('branch_name')
+                    .distinct("branch_name")
+                    .values_list("branch_name", flat=True))
+
+        results_by_branch = {}
+
+        for branch_name in branches:
+            query = (Result.objects
+                     .order_by("-created_at")
+                     .filter(gerrit_change_number__isnull=True,
+                             branch_name=branch_name))
+
+            current = self._get_first(query.filter(created_at__gt=then, created_at__lte=now))
+            previous = self._get_first(query.filter(created_at__gt=then - interval, created_at__lte=then))
+
+            if not (previous and current):
+                continue
+
+            measurement_previous =  {d.name: d.measurement for d in previous.data.all()}
+
+            results = []
+
+            for benchmark in current.data.order_by("name"):
+                current_value = benchmark.measurement
+                previous_value = measurement_previous.get(benchmark.name)
+                change = current_value / previous_value * 100 if previous_value else None
+
+                results.append({
+                    "benchmark": benchmark.benchmark.name,
+                    "name": benchmark.name,
+                    "current": current_value,
+                    "previous": previous_value,
+                    "change": change
+                })
+
+            results_by_branch[branch_name] = results
+
+        return results_by_branch
+
+
 class ResultData(models.Model):
     result = models.ForeignKey(Result, related_name="data")
     benchmark = models.ForeignKey(Benchmark, related_name="data")
@@ -102,6 +153,8 @@ class ResultData(models.Model):
     values = ArrayField(models.FloatField(), default=list)
 
     created_at = models.DateTimeField(default=timezone.now)
+
+    objects = ResultDataManager()
 
     def save(self, *args, **kwargs):
         if self.values:

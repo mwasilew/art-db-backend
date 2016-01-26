@@ -2,7 +2,6 @@ import hashlib
 
 from django_dynamic_fixture import G
 from django.contrib.auth.models import User
-
 from rest_framework.test import APITestCase
 
 from benchmarks import models as benchmarks_models

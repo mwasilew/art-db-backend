@@ -1,12 +1,18 @@
+import os
 import urlparse
+import subprocess
+
+from dateutil.relativedelta import relativedelta
+
+from django.conf import settings
+from django.utils import timezone
+from django.core.files.base import ContentFile
+
+from celery.utils.log import get_task_logger
 
 from crayonbox import celery_app
-from django.conf import settings
-from django.core.files.base import ContentFile
-from celery.utils.log import get_task_logger
-from benchmarks.models import Benchmark, ResultData
 
-from . import testminer
+from . import models, testminer, mail
 
 logger = get_task_logger("tasks")
 
@@ -46,7 +52,7 @@ def _set_testjob_results(testjob):
     testjob.save()
 
     for result in test_results:
-        benchmark, _ = Benchmark.objects.get_or_create(
+        benchmark, _ = models.Benchmark.objects.get_or_create(
             name=result['benchmark_name']
         )
 
@@ -58,7 +64,7 @@ def _set_testjob_results(testjob):
                 subscore_results[item['name']] = [item['measurement']]
 
         for name, values  in subscore_results.items():
-            ResultData.objects.create(
+            models.ResultData.objects.create(
                 name=name,
                 values=values,
                 board=result['board'],
@@ -99,3 +105,45 @@ def set_testjob_results(self, testjob):
         set_testjob_results.apply_async(args=[testjob], countdown=300)
     else:
         logger.info("Testjob for %s completed" % testjob)
+
+
+def _sync_external_repos():
+    base = settings.EXTERNAL_DIR['BASE']
+    for name, address in settings.EXTERNAL_DIR['REPOSITORIES']:
+
+        logger.info("Repository: %s" % address)
+
+        repo_path = os.path.join(base, name)
+        if not os.path.exists(repo_path):
+            subprocess.check_call(['git', 'clone', address, repo_path], cwd=base)
+        else:
+            subprocess.check_call(['git', 'pull'], cwd=repo_path)
+
+
+@celery_app.task(bind=True)
+def sync_external_repos(self):
+    _sync_external_repos()
+
+
+@celery_app.task(bind=True)
+def weekly_benchmark_progress(self):
+    now = timezone.now()
+    then = relativedelta(days=7)
+
+    results = _benchmark_progress(now, then)
+
+    mail.weekly_benchmark_progress(now, then, results)
+
+
+@celery_app.task(bind=True)
+def monthly_benchmark_progress(self):
+
+    now = timezone.now()
+    then = relativedelta(months=1)
+    results = _benchmark_progress(now, then)
+
+    mail.monthly_benchmark_progress(now, then, results)
+
+
+def _benchmark_progress(now, interval):
+    return models.ResultData.objects.compare(now, interval)
