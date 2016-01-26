@@ -95,16 +95,25 @@ def _set_testjob_results(testjob):
 
 @celery_app.task(bind=True)
 def set_testjob_results(self, testjob):
-
     logger.info("Fetch benchmark results for %s" % testjob)
 
     _set_testjob_results(testjob)
 
-    if not testjob.completed:
-        logger.info("Testjob for %s not completed, restarting" % testjob)
-        set_testjob_results.apply_async(args=[testjob], countdown=300)
-    else:
-        logger.info("Testjob for %s completed" % testjob)
+
+@celery_app.task(bind=True)
+def check_testjob_completeness(self):
+    incompleted = models.TestJob.objects.filter(completed=False)
+
+    logger.info("Fetch incomplete TestJobs results, count=%s" % incompleted.count())
+
+    for testjob in models.TestJob.objects.filter(completed=False):
+        set_testjob_results.apply_async(args=[testjob])
+
+
+@celery_app.task(bind=True)
+def check_result_completeness(self):
+    # put here all things when build done
+    pass
 
 
 def _sync_external_repos():

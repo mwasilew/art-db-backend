@@ -148,6 +148,14 @@ CELERYBEAT_SCHEDULE = {
         'task': 'benchmarks.tasks.sync_external_repos',
         'schedule': crontab(minute=0, hour='*/12'),
     },
+    'Check for incopleted TestJobs': {
+        'task': 'benchmarks.tasks.check_testjob_completeness',
+        'schedule': crontab(minute='*/5'),
+    },
+    'Check for copleted Build': {
+        'task': 'benchmarks.tasks.check_result_completeness',
+        'schedule': crontab(minute='*/5'),
+    },
 }
 
 CELERY_TIMEZONE = 'UTC'
