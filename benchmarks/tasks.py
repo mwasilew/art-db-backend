@@ -1,4 +1,3 @@
-import json
 import urlparse
 
 from crayonbox import celery_app
@@ -51,10 +50,17 @@ def _set_testjob_results(testjob):
             name=result['benchmark_name']
         )
 
-        for subscore in result['subscore']:
+        subscore_results = {}
+        for item in result['subscore']:
+            if item['name'] in subscore_results:
+                subscore_results[item['name']].append(item['measurement'])
+            else:
+                subscore_results[item['name']] = [item['measurement']]
+
+        for name, values  in subscore_results.items():
             ResultData.objects.create(
-                name=subscore['name'],
-                measurement=subscore['measurement'],
+                name=name,
+                values=values,
                 board=result['board'],
                 result=testjob.result,
                 benchmark=benchmark

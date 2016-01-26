@@ -103,6 +103,14 @@ class ResultData(models.Model):
 
     created_at = models.DateTimeField(default=timezone.now)
 
+    def save(self, *args, **kwargs):
+        if self.values:
+            self.measurement = sum(self.values)/float(len(self.values))
+        else:
+            self.measurement = 0
+
+        return super(ResultData, self).save(*args, **kwargs)
+
     class Meta:
         ordering = ['-created_at']
 
