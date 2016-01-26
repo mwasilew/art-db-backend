@@ -54,11 +54,11 @@ class TestSystem(object):
 
 
 class LavaServerException(Exception):
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, *args):
+        self.args = args
 
     def __str__(self):
-        return repr(self.name)
+        return self.args
 
 
 class GenericLavaTestSystem(TestSystem):
