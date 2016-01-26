@@ -205,13 +205,13 @@ class CompareTests(APITestCase):
           result=manifest_1_result,
           benchmark=benchmark,
           name="load",
-          measurement=10)
+          values=[10])
 
         G(benchmarks_models.ResultData,
           result=manifest_2_result,
           benchmark=benchmark,
           name="load",
-          measurement=2)
+          values=[2])
 
         response = self.client.get('/api/compare/manifest/', {
             'manifest_1': manifest_1.manifest_hash,
@@ -253,13 +253,13 @@ class CompareTests(APITestCase):
           result=branch_1_result,
           benchmark=benchmark,
           name="load",
-          measurement=10)
+          values=[10])
 
         G(benchmarks_models.ResultData,
           result=branch_2_result,
           benchmark=benchmark,
           name="load",
-          measurement=2)
+          values=[2])
 
         response = self.client.get('/api/compare/branch/', {
             'branch_1': branch_1_name,
@@ -290,7 +290,7 @@ class CompareTests(APITestCase):
           result=manifest_1_result,
           benchmark=benchmark,
           name="load",
-          measurement=10)
+          values=[10])
 
         response = self.client.get('/api/compare/manifest/', {
             'manifest_1': manifest_1.manifest_hash,
