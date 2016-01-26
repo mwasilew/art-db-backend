@@ -2,6 +2,7 @@ import sys
 
 from . import *
 
+BROKER_URL = '{{ broker_url }}'
 
 CELERY_DEFAULT_QUEUE = "{{ hostname }}"
 
