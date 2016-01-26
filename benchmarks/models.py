@@ -81,7 +81,7 @@ class TestJob(models.Model):
         ordering = ['-created_at']
 
     def __unicode__(self):
-        return '%s %s' % (self.id, self.result)
+        return '<%s %s#%s %s>' % (self.id, self.result.build_id, self.result.name, self.status)
 
 
 class Benchmark(models.Model):
