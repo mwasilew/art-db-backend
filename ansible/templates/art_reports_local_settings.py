@@ -89,4 +89,4 @@ DEFAULT_FROM_EMAIL = "{{ email }}"
 
 ALLOWED_HOSTS = ['{{ hostname }}']
 
-ADMINS = ['sebastian.pawlus@linaro.org']
+ADMINS = [("Sebastian Pawlus", 'sebastian.pawlus@linaro.org')]
