@@ -52,6 +52,10 @@ LOGGING = {
         },
     },
     'handlers': {
+        'mail_admins': {
+                'level': 'ERROR',
+                'class': 'django.utils.log.AdminEmailHandler'
+        },
         'file': {
             'level':'DEBUG',
             'class':'logging.handlers.TimedRotatingFileHandler',
@@ -70,12 +74,12 @@ LOGGING = {
     },
     'loggers': {
         'django.request': {
-            'handlers': ['file'],
+            'handlers': ['file', 'mail_admins'],
             'level': 'INFO',
             'propagate': True,
         },
-        'scripts': {
-            'handlers': ['console', 'file'],
+        'tasks': {
+            'handlers': ['mail_admins'],
             'level': 'INFO',
             'propagate': True,
         }

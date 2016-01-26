@@ -9,8 +9,7 @@ from benchmarks.models import Benchmark, ResultData
 
 from . import testminer
 
-
-logger = get_task_logger(__name__)
+logger = get_task_logger("tasks")
 
 
 def _set_testjob_results(testjob):
