@@ -1,5 +1,6 @@
 import os
 import urlparse
+import requests
 import subprocess
 
 from dateutil.relativedelta import relativedelta
@@ -113,9 +114,34 @@ def check_testjob_completeness(self):
 
 
 @celery_app.task(bind=True)
+def update_gerrit(self, result):
+    host = 'review.linaro.org'
+    username, password = settings.CREDENTIALS[host]
+    url = "https://%s/a/changes/%s/revisions/%s/review" % (
+        host,
+        result.gerrit_change_number,
+        result.gerrit_patchset_number
+    )
+
+    data = {
+        'message': 'It works!',
+        'labels': {'Code-Review': '+1'}
+    }
+
+    auth = requests.auth.HTTPDigestAuth(username, password)
+    response = requests.post(url, json=data, auth=auth, verify=True)
+
+    if response.status_code == 200:
+        logger.info("Gerrit updated for %s" % result)
+    else:
+        logger.error("Gerrit updated fail for %s: %s" % (result, response.text))
+
+
+@celery_app.task(bind=True)
 def check_result_completeness(self):
-    # put here all things when build done
-    pass
+    for result in models.Result.objects.filter(completed=True, reported=False):
+        result.reported = True
+        result.save()
 
 
 def _sync_external_repos():

@@ -18,7 +18,8 @@ AUTHENTICATION_BACKENDS = (
 )
 
 CREDENTIALS = {
-    'validation.linaro.org': ('{{lava_user}}', '{{lava_key}}')
+    'validation.linaro.org': ('{{lava_user}}', '{{lava_key}}'),
+    'review.linaro.org': ('{{gerrit_user}}', '{{gerrit_key}}')
 }
 
 

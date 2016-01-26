@@ -6,13 +6,35 @@ from django.utils import timezone
 
 from django_dynamic_fixture import G
 
-from benchmarks.models import Result, ResultData
+from benchmarks.models import Result, ResultData, TestJob
 
 
 MINIMAL_XML = '<?xml version="1.0" encoding="UTF-8"?><body></body>'
 
 
-class ResultDateTestCase(TestCase):
+class ResultTestCase(TestCase):
+
+    def test_complete_1(self):
+        result = G(Result, manifest__manifest=MINIMAL_XML)
+
+        self.assertEqual(result.completed, False)
+
+        G(TestJob, result=result, completed=True)
+        G(TestJob, result=result, completed=True)
+
+        self.assertEqual(result.completed, True)
+
+    def test_complete_2(self):
+        result = G(Result, manifest__manifest=MINIMAL_XML)
+
+        testjob = G(TestJob, result=result, completed=False)
+
+        self.assertEqual(result.completed, False)
+        testjob.completed = True
+        self.assertEqual(result.completed, False)
+
+
+class ResultDataTestCase(TestCase):
 
     def test_compare_1(self):
 

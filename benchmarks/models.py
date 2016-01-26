@@ -54,6 +54,9 @@ class Result(models.Model):
 
     created_at = models.DateTimeField(default=timezone.now)
 
+    completed = models.BooleanField(default=False)
+    reported = models.BooleanField(default=False)
+
     class Meta:
         ordering = ['-created_at']
 
@@ -76,6 +79,12 @@ class TestJob(models.Model):
     testrunnerurl = models.CharField(blank=True, default="https://validation.linaro.org/", max_length=256)
 
     created_at = models.DateTimeField(default=timezone.now)
+
+    def save(self, *args, **kwargs):
+        super(TestJob, self).save(*args, **kwargs)
+        test_jobs = self.result.test_jobs
+        self.result.completed = (test_jobs.count() == test_jobs.filter(completed=True).count())
+        self.result.save()
 
     class Meta:
         ordering = ['-created_at']
