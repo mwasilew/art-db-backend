@@ -46,9 +46,11 @@ def _set_testjob_results(testjob):
         return
 
     datafile_name, datafile_content = tester.get_result_data(testjob.id)
-    datafile = ContentFile(datafile_content)
 
-    testjob.data.save(datafile_name, datafile, save=False)
+    if datafile_name and datafile_content:
+        datafile = ContentFile(datafile_content)
+        testjob.data.save(datafile_name, datafile, save=False)
+
     testjob.save()
 
     for result in test_results:
