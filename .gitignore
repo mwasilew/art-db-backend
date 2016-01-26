@@ -6,3 +6,5 @@ crayonbox/settings/private.py
 .DS_Store
 *~
 *#
+ext/
+
