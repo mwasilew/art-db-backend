@@ -82,6 +82,11 @@ LOGGING = {
             'handlers': ['mail_admins'],
             'level': 'INFO',
             'propagate': True,
+        },
+        'celery': {
+            'handlers': ['mail_admins'],
+            'level': 'INFO',
+            'propagate': True,
         }
     }
 }
