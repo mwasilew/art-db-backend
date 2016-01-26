@@ -46,7 +46,7 @@ class TestSystem(object):
         return None
 
     def get_result_data(self, job_id):
-        return None
+        return None, None
 
     @staticmethod
     def reduce_test_results(test_result_list):
