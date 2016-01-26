@@ -1,9 +1,13 @@
+from datetime import timedelta
+from dateutil.relativedelta import relativedelta
+
 from django.test import TestCase
-from django_dynamic_fixture import G
 from django.utils import timezone
 
+from django_dynamic_fixture import G
+
 from benchmarks.models import Result, ResultData
-from datetime import timedelta
+
 
 MINIMAL_XML = '<?xml version="1.0" encoding="UTF-8"?><body></body>'
 
@@ -13,7 +17,7 @@ class ResultDateTestCase(TestCase):
     def test_compare_1(self):
 
         now = timezone.now()
-        then = now - timedelta(days=7)
+        then = now - relativedelta(days=7)
 
         result_1 = G(Result,
                      manifest__manifest=MINIMAL_XML,
@@ -60,7 +64,7 @@ class ResultDateTestCase(TestCase):
           name="load-avg",
           measurement=5)
 
-        compare = ResultData.objects.compare(now, timedelta(days=7))
+        compare = ResultData.objects.compare(now, relativedelta(days=7))
 
         self.assertEqual(compare, {})
 
@@ -80,6 +84,6 @@ class ResultDateTestCase(TestCase):
           name="load-avg",
           measurement=5)
 
-        compare = ResultData.objects.compare(now, timedelta(days=7))
+        compare = ResultData.objects.compare(now, relativedelta(days=7))
 
         self.assertEqual(compare, {})
