@@ -131,8 +131,13 @@ class GenericLavaTestSystem(TestSystem):
                                     stream = False)
 
         if response.status_code == 200:
-            result = xmlrpclib.loads(response.content)[0][0]
-            return result
+            try:
+                result = xmlrpclib.loads(response.content)[0][0]
+                return result
+            except xmlrpclib.Fault as e:
+                message = "Fault code: %d, Fault string: %s\n %s" % (
+                    e.faultCode, e.faultString, payload)
+                raise LavaServerException(message)
         else:
             raise LavaServerException(response.status_code)
 
