@@ -36,7 +36,62 @@ class Manifest(models.Model):
         return super(Manifest, self).save(*args, **kwargs)
 
 
-class ResultManager(models.Manager):
+class Result(models.Model):
+    manifest = models.ForeignKey(Manifest, related_name="results", null=True)
+
+    name = models.CharField(max_length=128)
+
+    branch_name = models.CharField(max_length=128, blank=True)
+
+    build_url = models.URLField()
+    build_number = models.IntegerField()
+    build_id  = models.IntegerField()
+
+    gerrit_change_number = models.IntegerField(blank=True, null=True)
+    gerrit_patchset_number = models.IntegerField(blank=True, null=True)
+    gerrit_change_url = models.URLField(blank=True, null=True)
+    gerrit_change_id = models.CharField(max_length=42, blank=True, default="")
+
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __unicode__(self):
+        return "%s - %s" % (self.pk, self.build_url)
+
+
+class TestJob(models.Model):
+    result = models.ForeignKey('Result', related_name="test_jobs")
+
+    id = models.CharField(primary_key=True, max_length=100)
+
+    url = models.URLField(blank=True, null=True)
+    status = models.CharField(blank=True, default="", max_length=16)
+    definition = models.TextField(blank=True, null=True)
+    initialized = models.BooleanField(default=False)
+    completed = models.BooleanField(default=False)
+    data = models.FileField(null=True)
+    testrunnerclass = models.CharField(blank=True, default="GenericLavaTestSystem", max_length=128)
+    testrunnerurl = models.CharField(blank=True, default="https://validation.linaro.org/", max_length=256)
+
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __unicode__(self):
+        return '%s %s' % (self.id, self.result)
+
+
+class Benchmark(models.Model):
+    name = models.CharField(max_length=64)
+
+    def __unicode__(self):
+        return self.name
+
+
+class ResultDataManager(models.Manager):
 
     def _get_first(self, query):
         for item in query:
@@ -87,63 +142,6 @@ class ResultManager(models.Manager):
         return results_by_branch
 
 
-class Result(models.Model):
-    manifest = models.ForeignKey(Manifest, related_name="results", null=True)
-
-    name = models.CharField(max_length=128)
-
-    branch_name = models.CharField(max_length=128, blank=True)
-
-    build_url = models.URLField()
-    build_number = models.IntegerField()
-    build_id  = models.IntegerField()
-
-    gerrit_change_number = models.IntegerField(blank=True, null=True)
-    gerrit_patchset_number = models.IntegerField(blank=True, null=True)
-    gerrit_change_url = models.URLField(blank=True, null=True)
-    gerrit_change_id = models.CharField(max_length=42, blank=True, default="")
-
-    created_at = models.DateTimeField(default=timezone.now)
-
-    objects = ResultManager()
-
-    class Meta:
-        ordering = ['-created_at']
-
-    def __unicode__(self):
-        return "%s - %s" % (self.pk, self.build_url)
-
-
-class TestJob(models.Model):
-    result = models.ForeignKey('Result', related_name="test_jobs")
-
-    id = models.CharField(primary_key=True, max_length=100)
-
-    url = models.URLField(blank=True, null=True)
-    status = models.CharField(blank=True, default="", max_length=16)
-    definition = models.TextField(blank=True, null=True)
-    initialized = models.BooleanField(default=False)
-    completed = models.BooleanField(default=False)
-    data = models.FileField(null=True)
-    testrunnerclass = models.CharField(blank=True, default="GenericLavaTestSystem", max_length=128)
-    testrunnerurl = models.CharField(blank=True, default="https://validation.linaro.org/", max_length=256)
-
-    created_at = models.DateTimeField(default=timezone.now)
-
-    class Meta:
-        ordering = ['-created_at']
-
-    def __unicode__(self):
-        return '%s %s' % (self.id, self.result)
-
-
-class Benchmark(models.Model):
-    name = models.CharField(max_length=64)
-
-    def __unicode__(self):
-        return self.name
-
-
 class ResultData(models.Model):
     result = models.ForeignKey(Result, related_name="data")
     benchmark = models.ForeignKey(Benchmark, related_name="data")
@@ -155,6 +153,8 @@ class ResultData(models.Model):
     values = ArrayField(models.FloatField(), default=list)
 
     created_at = models.DateTimeField(default=timezone.now)
+
+    objects = ResultDataManager()
 
     class Meta:
         ordering = ['-created_at']

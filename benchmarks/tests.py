@@ -5,11 +5,10 @@ from django.utils import timezone
 from benchmarks.models import Result, ResultData
 from datetime import timedelta
 
-
 MINIMAL_XML = '<?xml version="1.0" encoding="UTF-8"?><body></body>'
 
 
-class ResultCase(TestCase):
+class ResultDateTestCase(TestCase):
 
     def test_compare_1(self):
 
@@ -40,7 +39,7 @@ class ResultCase(TestCase):
           name="load-avg",
           measurement=10)
 
-        compare = Result.objects.compare(now, timedelta(days=7))
+        compare = ResultData.objects.compare(now, timedelta(days=7))
 
         self.assertEqual(compare['master'][0]['current'], 5)
         self.assertEqual(compare['master'][0]['previous'], 10)
@@ -61,7 +60,7 @@ class ResultCase(TestCase):
           name="load-avg",
           measurement=5)
 
-        compare = Result.objects.compare(now, timedelta(days=7))
+        compare = ResultData.objects.compare(now, timedelta(days=7))
 
         self.assertEqual(compare, {})
 
@@ -81,8 +80,6 @@ class ResultCase(TestCase):
           name="load-avg",
           measurement=5)
 
-        compare = Result.objects.compare(now, timedelta(days=7))
+        compare = ResultData.objects.compare(now, timedelta(days=7))
 
         self.assertEqual(compare, {})
-
-
