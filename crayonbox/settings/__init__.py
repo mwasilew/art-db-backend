@@ -162,3 +162,8 @@ CELERYD_LOG_FORMAT = '[%(asctime)s] %(levelname)s: %(message)s'
 CELERYD_TASK_LOG_FORMAT = '[%(asctime)s] %(levelname)s %(task_name)s: %(message)s'
 CELERY_TIMEZONE = 'UTC'
 CELERYD_HIJACK_ROOT_LOGGER = False
+
+EXTERNAL_DIR = {
+    "BASE": os.path.join(BASE_DIR, 'ext'),
+    "REPOSITORIES": [("art-testing", "https://android-review.linaro.org/linaro/art-testing")]
+}
