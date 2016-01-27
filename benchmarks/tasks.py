@@ -189,4 +189,4 @@ def monthly_benchmark_progress(self):
 
 
 def _benchmark_progress(now, interval):
-    return models.ResultData.objects.compare(now, interval)
+    return models.Result.objects.compare_progress(now, interval)

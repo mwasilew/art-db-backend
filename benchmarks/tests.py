@@ -65,7 +65,7 @@ class ResultDataTestCase(TestCase):
           name="load-avg",
           measurement=10)
 
-        compare = ResultData.objects.compare(now, timedelta(days=7))
+        compare = Result.objects.compare_progress(now, timedelta(days=7))
 
         self.assertEqual(compare['master'][0]['current'], 5)
         self.assertEqual(compare['master'][0]['previous'], 10)
@@ -86,7 +86,7 @@ class ResultDataTestCase(TestCase):
           name="load-avg",
           measurement=5)
 
-        compare = ResultData.objects.compare(now, relativedelta(days=7))
+        compare = Result.objects.compare_progress(now, relativedelta(days=7))
 
         self.assertEqual(compare, {})
 
@@ -106,6 +106,6 @@ class ResultDataTestCase(TestCase):
           name="load-avg",
           measurement=5)
 
-        compare = ResultData.objects.compare(now, relativedelta(days=7))
+        compare = Result.objects.compare_progress(now, relativedelta(days=7))
 
         self.assertEqual(compare, {})
