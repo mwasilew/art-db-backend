@@ -67,7 +67,7 @@ class Result(models.Model):
 class TestJob(models.Model):
     result = models.ForeignKey('Result', related_name="test_jobs")
 
-    id = models.CharField(primary_key=True, max_length=100)
+    id = models.CharField(primary_key=True, max_length=100, blank=False)
 
     url = models.URLField(blank=True, null=True)
     status = models.CharField(blank=True, default="", max_length=16)
