@@ -37,6 +37,7 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
+HOST = "art-reports.linaro.org"
 
 # Application definition
 INSTALLED_APPS = (

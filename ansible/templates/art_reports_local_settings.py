@@ -4,6 +4,7 @@ from . import *
 
 BROKER_URL = '{{ broker_url }}'
 
+HOST = "{{ hostname }}"
 CELERY_DEFAULT_QUEUE = "{{ hostname }}"
 
 AUTH_CROWD_ALWAYS_UPDATE_USER = False

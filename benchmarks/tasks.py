@@ -4,6 +4,7 @@ import requests
 import subprocess
 
 from dateutil.relativedelta import relativedelta
+from urllib import urlencode
 
 from django.conf import settings
 from django.utils import timezone
@@ -147,7 +148,7 @@ def report_gerrit(self, result):
 
 @celery_app.task(bind=True)
 def update_jenkins(self, result):
-    host = urlsplit(result.build_url).netloc
+    host = urlparse.urlsplit(result.build_url).netloc
 
     if host not in settings.CREDENTIALS.keys():
         logger.error("No credentials found for %s" % host)
@@ -155,33 +156,32 @@ def update_jenkins(self, result):
 
     username, password = settings.CREDENTIALS[host]
 
-    jenkins_description = "<a href=\"https://art-reports.linaro.org/#/build/%s\">Details</a><br/>" % (result.pk)
+    jenkins_description = "<a href=\"https://{0}/#/build/{1}\">Details</a><br/>".format(settings.HOST, result.pk)
     for test_job in result.test_jobs.all():
         icon_name = "red.png"
         if test_job.status == "Complete":
             icon_name = "blue.png"
-        if testjob.status not in ["Complete", "Incomplete", "Canceled"]:
+        if test_job.status not in ["Complete", "Incomplete", "Canceled"]:
             icon_name = "clock.png"
-        test_job_description = "LAVA <a href=\"%s\">%s</a> - <img class=\"icon-sm\" src=\"/jenkins/static/art-reports/images/16x16/%s\" alt=\"%s\" tooltip=\"%s\"><br/>" % (
+        test_job_description = "LAVA <a href=\"{0}\">{1}</a> - <img class=\"icon-sm\" src=\"/jenkins/static/art-reports/images/16x16/{2}\" alt=\"{3}\" tooltip=\"{3}\"><br/>".format(
                 test_job.url,
                 test_job.id,
                 icon_name,
-                test_job.status,
                 test_job.status)
         jenkins_description = jenkins_description + test_job_description
     auth = requests.auth.HTTPBasicAuth(username, password)
-    crumb_url = "https://%s/jenkins/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,%22:%22,//crumb)" % host
+    crumb_url = "https://{0}/jenkins/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,%22:%22,//crumb)".format(host)
     crumb_response = requests.get(crumb_url, auth=auth)
     crumb = None
     if crumb_response.status_code == 200:
         crumb = crumb_response.text
         logger.info("crumb received")
     else:
-        logger.error("crumb retrieval failed with status %s" % crumb_response.status_code)
+        logger.error("crumb retrieval failed with status {0}".format(crumb_response.status_code))
         logger.error(crumb_response.text)
         return
 
-    url = requests.compat.urljoin(result.build_url, "submitDescription")
+    url = result.build_url + "/submitDescription"
     form = urlencode({'description': jenkins_description, "crumb": crumb.split(":")[1]})
     headers = {
         crumb.split(":")[0]: crumb.split(":")[1],
@@ -189,9 +189,9 @@ def update_jenkins(self, result):
         "Content-Type": "application/x-www-form-urlencoded"}
     response = requests.post(url, data=form, headers=headers, auth=auth, verify=True)
     if response.status_code == 200:
-        logger.info("Jenkins updated for %s" % result)
+        logger.info("Jenkins updated for {0}".format(result))
     else:
-        logger.error("Jenkins update fail for %s: %s" % (result, response.text))
+        logger.error("Jenkins update fail for {0}: {1}".format(result, response.text))
 
 
 @celery_app.task(bind=True)
