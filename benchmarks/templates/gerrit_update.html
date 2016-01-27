@@ -1,0 +1,12 @@
+
+
+Build: {{ testjob.result.build_url }}
+
+Lava Job: {{ testjob.url }} [{{ testjob.status }}]
+
+
+########### Benchmarks ###########
+
+{% for result in testjob.result.data.all %}
+{{ result.benchmark.name }} / {{ result.name }} : {{ result.measurement }}
+{% endfor %}

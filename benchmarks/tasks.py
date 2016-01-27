@@ -8,6 +8,7 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.utils import timezone
 from django.core.files.base import ContentFile
+from django.template.loader import render_to_string
 
 from celery.utils.log import get_task_logger
 
@@ -18,7 +19,10 @@ from . import models, testminer, mail
 logger = get_task_logger("tasks")
 
 
-def _set_testjob_results(testjob):
+@celery_app.task(bind=True)
+def set_testjob_results(self, testjob):
+
+    logger.info("Fetch benchmark results for %s" % testjob)
 
     netloc = urlparse.urlsplit(testjob.testrunnerurl).netloc
     username, password = settings.CREDENTIALS[netloc]
@@ -78,6 +82,9 @@ def _set_testjob_results(testjob):
     testjob.save()
     tester.cleanup()
 
+    # when we have results
+    update_gerrit.apply_async(args=[testjob])
+
     # ToDo: not implemented yet. DO NOT REMOVE
     #for result in test_results['test']:
     #    name = result['testdef']
@@ -96,12 +103,6 @@ def _set_testjob_results(testjob):
     #        parameters = result['parameters']
 
 
-@celery_app.task(bind=True)
-def set_testjob_results(self, testjob):
-    logger.info("Fetch benchmark results for %s" % testjob)
-
-    _set_testjob_results(testjob)
-
 
 @celery_app.task(bind=True)
 def check_testjob_completeness(self):
@@ -110,21 +111,26 @@ def check_testjob_completeness(self):
     logger.info("Fetch incomplete TestJobs results, count=%s" % incompleted.count())
 
     for testjob in models.TestJob.objects.filter(completed=False):
-        set_testjob_results.apply_async(args=[testjob])
+        set_testjob_results.apply_async(args=[testjob], link=update_gerrit.s(args=[testjob]))
 
 
 @celery_app.task(bind=True)
-def update_gerrit(self, result):
+def update_gerrit(self, testjob):
     host = 'review.linaro.org'
     username, password = settings.CREDENTIALS[host]
     url = "https://%s/a/changes/%s/revisions/%s/review" % (
         host,
-        result.gerrit_change_number,
-        result.gerrit_patchset_number
+        testjob.result.gerrit_change_number,
+        testjob.result.gerrit_patchset_number
     )
 
+    # fixme
+    message = render_to_string("gerrit_update.html", {"testjob": testjob})
+
+    url = "https://review.linaro.org/a/changes/4194/revisions/7/review"
+
     data = {
-        'message': 'It works!',
+        'message': message,
         'labels': {'Code-Review': '+1'}
     }
 
@@ -132,9 +138,9 @@ def update_gerrit(self, result):
     response = requests.post(url, json=data, auth=auth, verify=True)
 
     if response.status_code == 200:
-        logger.info("Gerrit updated for %s" % result)
+        logger.info("Gerrit updated for %s" % testjob)
     else:
-        logger.error("Gerrit updated fail for %s: %s" % (result, response.text))
+        logger.error("Gerrit updated fail for %s: %s" % (testjob, response.text))
 
 
 @celery_app.task(bind=True)
