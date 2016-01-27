@@ -1,10 +1,6 @@
 
-
 Build: {{ result.build_url }}
 
+Test Job: {{ testjob.url }}
+Status: {{ testjob.status }}
 
-########### Benchmarks ###########
-
-{% for result in testjob.result.data.all %}
-{{ result.benchmark.name }} / {{ result.name }} : {{ result.measurement }}
-{% endfor %}

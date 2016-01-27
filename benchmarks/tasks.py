@@ -46,8 +46,12 @@ def set_testjob_results(self, testjob):
     testjob.completed = True
     if testjob.status in ["Incomplete", "Canceled"]:
         testjob.save()
+
         update_jenkins.delay(testjob.result)
+        update_gerrit.delay(testjob)
+
         return
+
     test_results = tester.get_test_job_results(testjob.id)
 
     if not test_results:
@@ -86,7 +90,9 @@ def set_testjob_results(self, testjob):
 
     testjob.save()
     tester.cleanup()
+
     update_jenkins.delay(testjob.result)
+    update_gerrit.delay(testjob)
 
     # ToDo: not implemented yet. DO NOT REMOVE
     #for result in test_results['test']:
@@ -118,18 +124,19 @@ def check_testjob_completeness(self):
 
 
 @celery_app.task(bind=True)
-def report_gerrit(self, result):
+def update_gerrit(self, testjob):
 
     host = 'review.linaro.org'
     username, password = settings.CREDENTIALS[host]
+
     url = "https://%s/a/changes/%s/revisions/%s/review" % (
         host,
-        result.gerrit_change_number,
-        result.gerrit_patchset_number
+        testjob.result.gerrit_change_number,
+        testjob.result.gerrit_patchset_number
     )
 
     # fixme
-    message = render_to_string("gerrit_update.html", {"testjob": result})
+    message = render_to_string("gerrit_update.html", {"result": testjob.result, "testjob": testjob})
 
     url = "https://review.linaro.org/a/changes/4194/revisions/7/review"
 
@@ -142,12 +149,16 @@ def report_gerrit(self, result):
     response = requests.post(url, json=data, auth=auth, verify=True)
 
     if response.status_code == 200:
-        logger.info("Gerrit updated for %s" % result)
+        logger.info("Gerrit updated for %s" % testjob.result)
     else:
-        logger.error("Gerrit update fail for %s: %s" % (result, response.text))
+        logger.error("Gerrit update fail for %s: %s" % (testjob.result, response.text))
+
 
 @celery_app.task(bind=True)
 def update_jenkins(self, result):
+
+    return
+
     host = urlparse.urlsplit(result.build_url).netloc
 
     if host not in settings.CREDENTIALS.keys():
@@ -199,7 +210,7 @@ def check_result_completeness(self):
     for result in models.Result.objects.filter(completed=True, reported=False):
 
         # when we have results
-        report_gerrit.apply_async(args=[result])
+        # update_gerrit.apply_async(args=[result])
 
         # not implemented yet
         # report_email.apply_async(args=[result])
