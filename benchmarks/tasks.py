@@ -209,10 +209,6 @@ def update_jenkins(self, result):
 def check_result_completeness(self):
     for result in models.Result.objects.filter(completed=True, reported=False):
 
-        # when we have results
-        # update_gerrit.apply_async(args=[result])
-
-        # not implemented yet
         report_email.apply_async(args=[result])
 
         result.reported = True
