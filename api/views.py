@@ -182,6 +182,7 @@ class ResultViewSet(viewsets.ModelViewSet):
                 )
                 tasks.set_testjob_results.delay(testjob)
 
+        tasks.update_jenkins.delay(result)
         return response.Response(serializer.data, status=status.HTTP_201_CREATED)
 
 

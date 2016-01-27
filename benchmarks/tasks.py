@@ -43,6 +43,10 @@ def set_testjob_results(self, testjob):
 
     testjob.definition = tester.get_test_job_details(testjob.id)['definition']
     testjob.completed = True
+    if testjob.status in ["Incomplete", "Canceled"]:
+        testjob.save()
+        update_jenkins.delay(testjob.result)
+        return
     test_results = tester.get_test_job_results(testjob.id)
 
     if not test_results:
@@ -81,6 +85,7 @@ def set_testjob_results(self, testjob):
 
     testjob.save()
     tester.cleanup()
+    update_jenkins.delay(testjob.result)
 
     # ToDo: not implemented yet. DO NOT REMOVE
     #for result in test_results['test']:
@@ -155,6 +160,8 @@ def update_jenkins(self, result):
         icon_name = "red.png"
         if test_job.status == "Complete":
             icon_name = "blue.png"
+        if testjob.status not in ["Complete", "Incomplete", "Canceled"]:
+            icon_name = "clock.png"
         test_job_description = "LAVA <a href=\"%s\">%s</a> - <img class=\"icon-sm\" src=\"/jenkins/static/art-reports/images/16x16/%s\" alt=\"%s\" tooltip=\"%s\"><br/>" % (
                 test_job.url,
                 test_job.id,
