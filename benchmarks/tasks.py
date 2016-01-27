@@ -82,9 +82,6 @@ def set_testjob_results(self, testjob):
     testjob.save()
     tester.cleanup()
 
-    # when we have results
-    update_gerrit.apply_async(args=[testjob])
-
     # ToDo: not implemented yet. DO NOT REMOVE
     #for result in test_results['test']:
     #    name = result['testdef']
@@ -111,21 +108,22 @@ def check_testjob_completeness(self):
     logger.info("Fetch incomplete TestJobs results, count=%s" % incompleted.count())
 
     for testjob in models.TestJob.objects.filter(completed=False):
-        set_testjob_results.apply_async(args=[testjob], link=update_gerrit.s(args=[testjob]))
+        set_testjob_results.apply_async(args=[testjob])
 
 
 @celery_app.task(bind=True)
-def update_gerrit(self, testjob):
+def report_gerrit(self, result):
+
     host = 'review.linaro.org'
     username, password = settings.CREDENTIALS[host]
     url = "https://%s/a/changes/%s/revisions/%s/review" % (
         host,
-        testjob.result.gerrit_change_number,
-        testjob.result.gerrit_patchset_number
+        result.gerrit_change_number,
+        result.gerrit_patchset_number
     )
 
     # fixme
-    message = render_to_string("gerrit_update.html", {"testjob": testjob})
+    message = render_to_string("gerrit_update.html", {"testjob": result})
 
     url = "https://review.linaro.org/a/changes/4194/revisions/7/review"
 
@@ -138,14 +136,21 @@ def update_gerrit(self, testjob):
     response = requests.post(url, json=data, auth=auth, verify=True)
 
     if response.status_code == 200:
-        logger.info("Gerrit updated for %s" % testjob)
+        logger.info("Gerrit updated for %s" % result)
     else:
-        logger.error("Gerrit updated fail for %s: %s" % (testjob, response.text))
+        logger.error("Gerrit updated fail for %s: %s" % (result, response.text))
 
 
 @celery_app.task(bind=True)
 def check_result_completeness(self):
     for result in models.Result.objects.filter(completed=True, reported=False):
+
+        # when we have results
+        report_gerrit.apply_async(args=[result])
+
+        # not implemented yet
+        # report_email.apply_async(args=[result])
+
         result.reported = True
         result.save()
 
