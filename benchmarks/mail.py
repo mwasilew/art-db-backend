@@ -14,6 +14,29 @@ def benchmark_progress(context):
     send_mail(subject, None, from_email, to_email, html_message=message)
 
 
+def current_benchmark_progress(result, results):
+    header = "Art - Monthly Benchmark Progress"
+    time = result.created_at
+
+    header = "Art - Benchmark Progress for %s" % result.name
+
+    context = {
+        "header": header,
+        "time": time,
+        "results": results,
+        "result": result
+    }
+
+    message = render_to_string('benchmark_report.html', context)
+
+    subject = "%s [%s]" % (context['header'], context['time'])
+
+    from_email = settings.DEFAULT_FROM_EMAIL
+    to_email = settings.EMAIL_REPORTS_TO
+
+    send_mail(subject, None, from_email, to_email, html_message=message)
+
+
 def monthly_benchmark_progress(now, then, results):
     header = "Art - Monthly Benchmark Progress"
     time = now.strftime('%B %Y')

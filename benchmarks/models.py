@@ -115,7 +115,8 @@ class Result(models.Model):
 
     def to_compare(self):
         if self.gerrit_change_number:
-            return self.objects.filter(
+            return self._default_manager.filter(
+                branch_name=self.branch_name,
                 gerrit_change_number=None,
                 manifest__reduced_hash=self.manifest.reduced_hash
             ).first()

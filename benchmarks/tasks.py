@@ -213,7 +213,7 @@ def check_result_completeness(self):
         # update_gerrit.apply_async(args=[result])
 
         # not implemented yet
-        # report_email.apply_async(args=[result])
+        report_email.apply_async(args=[result])
 
         result.reported = True
         result.save()
@@ -230,6 +230,15 @@ def _sync_external_repos():
             subprocess.check_call(['git', 'clone', address, repo_path], cwd=base)
         else:
             subprocess.check_call(['git', 'pull'], cwd=repo_path)
+
+
+@celery_app.task(bind=True)
+def report_email(self, result):
+    other = result.to_compare()
+    if other:
+        results = models.Result.objects.compare(result, other)
+
+        mail.current_benchmark_progress(result, results)
 
 
 @celery_app.task(bind=True)
