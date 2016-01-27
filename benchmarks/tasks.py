@@ -168,7 +168,8 @@ def update_jenkins(self, result):
     username, password = settings.CREDENTIALS[host]
 
     jenkins_description = "<a href=\"https://{0}/#/build/{1}\">Details</a><br/>".format(settings.HOST, result.pk)
-    for test_job in result.test_jobs.all():
+
+    for test_job in models.TestJob.objects.filter(result=result):
         icon_name = "red.png"
         if test_job.status == "Complete":
             icon_name = "blue.png"
