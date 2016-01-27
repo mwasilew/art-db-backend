@@ -6,6 +6,7 @@ BROKER_URL = '{{ broker_url }}'
 
 HOST = "{{ hostname }}"
 CELERY_DEFAULT_QUEUE = "{{ hostname }}"
+CELERY_SEND_TASK_ERROR_EMAILS = True
 
 AUTH_CROWD_ALWAYS_UPDATE_USER = False
 AUTH_CROWD_ALWAYS_UPDATE_GROUPS = False
