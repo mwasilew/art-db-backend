@@ -132,6 +132,23 @@ class ResultViewSet(viewsets.ModelViewSet):
         serializer = serializers.ResultDataSerializer(benchmarks, many=True)
         return response.Response(serializer.data)
 
+    @detail_route()
+    def benchmarks_compare(self, request, pk=None):
+        result = self.get_object()
+        result_to_compare = benchmarks_models.Result.objects.filter(
+            gerrit_change_number=None, manifest__reduced_hash=result.manifest.reduced_hash
+        ).first()
+
+        if not result_to_compare:
+            response.Response([])
+
+        benchmarks = (benchmarks_models.ResultData.objects
+                      .filter(result=result_to_compare)
+                      .select_related("benchmark"))
+
+        serializer = serializers.ResultDataSerializer(benchmarks, many=True)
+        return response.Response(serializer.data)
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
