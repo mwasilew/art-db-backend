@@ -166,6 +166,8 @@ class ResultData(models.Model):
     objects = ResultDataManager()
 
     def save(self, *args, **kwargs):
+        if self.measurement and not self.values:
+            self.values = [self.measurement]
         if self.values:
             self.measurement = sum(self.values)/float(len(self.values))
         else:
