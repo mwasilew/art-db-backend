@@ -19,3 +19,8 @@ DATABASES = {
     }
 }
 
+
+EXTERNAL_DIR = {
+    "BASE": os.path.join(BASE_DIR, 'ext'),
+    "REPOSITORIES": [("art-testing", "https://android-review.linaro.org/linaro/art-testing")]
+}
