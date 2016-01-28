@@ -26,10 +26,12 @@ def mean(data):
         return 0
     return sum(data)/float(n)
 
+
 def _ss(data):
     c = mean(data)
     ss = sum((x-c)**2 for x in data)
     return ss
+
 
 def stddev(data):
     n = len(data)
@@ -101,6 +103,7 @@ class StatsViewSet(viewsets.ModelViewSet):
         return self.queryset.filter(benchmark__name__in=benchmarks,
                                     result__branch_name=branch)
 
+
 # result
 class ResultViewSet(viewsets.ModelViewSet):
     permission_classes = [DjangoModelPermissions]
@@ -135,19 +138,13 @@ class ResultViewSet(viewsets.ModelViewSet):
     @detail_route()
     def benchmarks_compare(self, request, pk=None):
         result = self.get_object()
-        result_to_compare = benchmarks_models.Result.objects.filter(
-            gerrit_change_number=None, manifest__reduced_hash=result.manifest.reduced_hash
-        ).first()
+        previous = result.to_compare()
 
-        if not result_to_compare:
-            response.Response([])
+        if not previous:
+            return response.Response([])
 
-        benchmarks = (benchmarks_models.ResultData.objects
-                      .filter(result=result_to_compare)
-                      .select_related("benchmark"))
-
-        serializer = serializers.ResultDataSerializer(benchmarks, many=True)
-        return response.Response(serializer.data)
+        data = benchmarks_models.Result.objects.compare(result, previous)
+        return response.Response(data)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -200,9 +197,9 @@ class ResultDataViewSet(viewsets.ModelViewSet):
     queryset = benchmarks_models.ResultData.objects.all()
     serializer_class = serializers.ResultDataSerializer
     filter_fields = ('id',
-        'benchmark',
-        'result',
-        'created_at')
+                     'benchmark',
+                     'result',
+                     'created_at')
 
 
 class ResultDataForManifest(views.APIView):

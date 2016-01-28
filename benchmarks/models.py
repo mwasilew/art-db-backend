@@ -45,7 +45,7 @@ class ResultManager(models.Manager):
         return None
 
     def compare(self, first, second):
-        measurement_previous =  {d.name: d.measurement for d in second.data.all()}
+        measurement_previous = {d.name: d.measurement for d in second.data.all()}
 
         results = []
 
@@ -79,8 +79,11 @@ class ResultManager(models.Manager):
                      .filter(gerrit_change_number__isnull=True,
                              branch_name=branch_name))
 
-            current = self._get_first(query.filter(created_at__gt=then, created_at__lte=now))
-            previous = self._get_first(query.filter(created_at__gt=then - interval, created_at__lte=then))
+            current = self._get_first(
+                query.filter(created_at__gt=then, created_at__lte=now))
+
+            previous = self._get_first(
+                query.filter(created_at__gt=then - interval, created_at__lte=then))
 
             if not (previous and current):
                 continue
@@ -101,7 +104,7 @@ class Result(models.Model):
 
     build_url = models.URLField()
     build_number = models.IntegerField()
-    build_id  = models.IntegerField()
+    build_id = models.IntegerField()
 
     gerrit_change_number = models.IntegerField(blank=True, null=True)
     gerrit_patchset_number = models.IntegerField(blank=True, null=True)
