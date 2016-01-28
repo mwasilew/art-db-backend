@@ -45,22 +45,37 @@ class TestJobSerializer(serializers.ModelSerializer):
         model = benchmarks_models.TestJob
 
 
+class ResultManifestSerializer(serializers.CharField):
+
+    class Meta:
+        fields = ("id", "manifest_hash", "reduced_hash",)
+        model = benchmarks_models.Manifest
+
+    def to_internal_value(self, data):
+        manifest, _ = benchmarks_models.Manifest.objects.get_or_create(
+            manifest=data
+        )
+        return manifest
+
+    def to_representation(self, obj):
+        return {
+            'id': obj.id,
+            'manifest_hash': obj.manifest_hash,
+            'reduced_hash': obj.reduced_hash
+        }
+
+
 class ResultSerializer(serializers.ModelSerializer):
-    manifest =  serializers.CharField()
+    manifest = ResultManifestSerializer()
     test_jobs = TestJobSerializer(many=True, read_only=True)
 
     class Meta:
         model = benchmarks_models.Result
 
-    def validate_manifest(self, value):
-        manifest, _ = benchmarks_models.Manifest.objects.get_or_create(
-            manifest=value
-        )
-        return manifest
 
-
-class ManifestSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
+class ManifestSerializer(serializers.ModelSerializer):
     results = ResultSerializer(many=True, read_only=True)
+
     class Meta:
         fields = ("id", "manifest_hash", "reduced_hash", "results")
         model = benchmarks_models.Manifest
