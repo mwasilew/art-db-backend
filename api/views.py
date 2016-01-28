@@ -57,8 +57,10 @@ class ManifestViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = benchmarks_models.Manifest.objects.prefetch_related("results")
 
     serializer_class = serializers.ManifestSerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('id', 'manifest_hash', 'reduced_hash')
+
+    filter_backends = (filters.SearchFilter, filters.DjangoFilterBackend)
+    search_fields = ('manifest_hash', 'reduced_hash')
+    filter_fields = ('manifest_hash', 'reduced_hash')
 
 
 # benchmark

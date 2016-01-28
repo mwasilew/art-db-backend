@@ -182,6 +182,25 @@ class ManifestTests(APITestCase):
         self.assertEqual(response.data['count'], 1)
         self.assertEqual(response.data['results'][0]['manifest_hash'], manifest_hash)
 
+    def test_search(self):
+        xml_1 = MINIMAL_XML + " "
+        xml_2 = MINIMAL_XML + "  "
+
+        manifest_hash_1 = hashlib.sha1(xml_1).hexdigest()
+        manifest_hash_2 = hashlib.sha1(xml_1).hexdigest()
+
+        benchmarks_models.Manifest.objects.create(manifest=xml_1)
+        benchmarks_models.Manifest.objects.create(manifest=xml_2)
+
+        response = self.client.get('/api/manifest/?manifest_hash=test')
+        self.assertEqual(response.data['count'], 0)
+
+        response = self.client.get('/api/manifest/?manifest_hash=%s' % manifest_hash_1)
+        self.assertEqual(response.data['count'], 1)
+
+        response = self.client.get('/api/manifest/?manifest_hash=%s' % manifest_hash_2)
+        self.assertEqual(response.data['count'], 1)
+
 
 class CompareTests(APITestCase):
 
