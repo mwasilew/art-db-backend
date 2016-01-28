@@ -19,6 +19,7 @@ install:
 
 script:
   - python manage.py test --noinput -v 2
+  - flake8 --select=F821,F823 . --exclude=.svn,CVS,.bzr,.hg,.git,__pycache__,.tox,.virtualenv,ext
 
 
 notifications:
