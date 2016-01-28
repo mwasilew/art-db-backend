@@ -1,4 +1,5 @@
 import hashlib
+from mock import patch
 
 from django_dynamic_fixture import G
 from django.contrib.auth.models import User
@@ -31,6 +32,7 @@ class ResultTests(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['id'], 123)
 
+    @patch('benchmarks.tasks.set_testjob_results.delay', lambda x: None)
     def test_post_1(self):
 
         data = {
@@ -48,6 +50,7 @@ class ResultTests(APITestCase):
         self.assertEqual(benchmarks_models.Manifest.objects.count(), 1)
         self.assertEqual(response.status_code, 201)
 
+    @patch('benchmarks.tasks.set_testjob_results.delay', lambda x: None)
     def test_post_2(self):
 
         data = {
@@ -71,6 +74,7 @@ class ResultTests(APITestCase):
         self.assertIn('655839.0', items)
         self.assertIn('655838.0', items)
 
+    @patch('benchmarks.tasks.set_testjob_results.delay', lambda x: None)
     def test_post_3(self):
 
         data_1 = {
@@ -100,6 +104,7 @@ class ResultTests(APITestCase):
         self.assertEqual(benchmarks_models.Result.objects.count(), 2)
         self.assertEqual(benchmarks_models.Manifest.objects.count(), 1)
 
+    @patch('benchmarks.tasks.set_testjob_results.delay', lambda x: None)
     def test_post_4(self):
         build_id = 200
         build_number = 20
@@ -132,6 +137,7 @@ class ResultTests(APITestCase):
         self.assertEqual(benchmarks_models.Result.objects.count(), 1)
         self.assertEqual(benchmarks_models.Manifest.objects.count(), 1)
 
+    @patch('benchmarks.tasks.set_testjob_results.delay', lambda x: None)
     def test_post_5(self):
 
         data = {

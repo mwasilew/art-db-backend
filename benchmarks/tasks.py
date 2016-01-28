@@ -48,8 +48,6 @@ def set_testjob_results(self, testjob):
         testjob.save()
 
         update_jenkins.delay(testjob.result)
-        update_gerrit.delay(testjob)
-
         return
 
     test_results = tester.get_test_job_results(testjob.id)
@@ -79,7 +77,7 @@ def set_testjob_results(self, testjob):
             else:
                 subscore_results[item['name']] = [item['measurement']]
 
-        for name, values  in subscore_results.items():
+        for name, values in subscore_results.items():
             models.ResultData.objects.create(
                 name=name,
                 values=values,
@@ -92,10 +90,9 @@ def set_testjob_results(self, testjob):
     tester.cleanup()
 
     update_jenkins.delay(testjob.result)
-    update_gerrit.delay(testjob)
 
     # ToDo: not implemented yet. DO NOT REMOVE
-    #for result in test_results['test']:
+    # for result in test_results['test']:
     #    name = result['testdef']
     #    if 'results' in result.keys():
     #        print "\t\tTest(%s): %s" % (name, result['result'])
@@ -112,7 +109,6 @@ def set_testjob_results(self, testjob):
     #        parameters = result['parameters']
 
 
-
 @celery_app.task(bind=True)
 def check_testjob_completeness(self):
     incompleted = models.TestJob.objects.filter(completed=False)
@@ -124,19 +120,19 @@ def check_testjob_completeness(self):
 
 
 @celery_app.task(bind=True)
-def update_gerrit(self, testjob):
+def report_gerrit(self, result):
 
     host = 'review.linaro.org'
     username, password = settings.CREDENTIALS[host]
 
     url = "https://%s/a/changes/%s/revisions/%s/review" % (
         host,
-        testjob.result.gerrit_change_number,
-        testjob.result.gerrit_patchset_number
+        result.gerrit_change_number,
+        result.gerrit_patchset_number
     )
 
     # fixme
-    message = render_to_string("gerrit_update.html", {"result": testjob.result, "testjob": testjob})
+    message = render_to_string("gerrit_update.html", {"result": result})
 
     url = "https://review.linaro.org/a/changes/4194/revisions/7/review"
 
@@ -149,9 +145,9 @@ def update_gerrit(self, testjob):
     response = requests.post(url, json=data, auth=auth, verify=True)
 
     if response.status_code == 200:
-        logger.info("Gerrit updated for %s" % testjob.result)
+        logger.info("Gerrit updated for %s" % result)
     else:
-        logger.error("Gerrit update fail for %s: %s" % (testjob.result, response.text))
+        logger.error("Gerrit update fail for %s: %s" % (result, response.text))
 
 
 @celery_app.task(bind=True)
@@ -211,6 +207,7 @@ def check_result_completeness(self):
     for result in models.Result.objects.filter(completed=True, reported=False):
 
         report_email.apply_async(args=[result])
+        report_gerrit.apply_async(args=[result])
 
         result.reported = True
         result.save()
