@@ -32,6 +32,7 @@ class ResultTests(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['id'], 123)
 
+    @patch('benchmarks.tasks.update_jenkins.delay', lambda x: None)
     @patch('benchmarks.tasks.set_testjob_results.delay', lambda x: None)
     def test_post_1(self):
 
@@ -50,6 +51,7 @@ class ResultTests(APITestCase):
         self.assertEqual(models.Manifest.objects.count(), 1)
         self.assertEqual(response.status_code, 201)
 
+    @patch('benchmarks.tasks.update_jenkins.delay', lambda x: None)
     @patch('benchmarks.tasks.set_testjob_results.delay', lambda x: None)
     def test_post_2(self):
 
@@ -74,6 +76,7 @@ class ResultTests(APITestCase):
         self.assertIn('655839.0', items)
         self.assertIn('655838.0', items)
 
+    @patch('benchmarks.tasks.update_jenkins.delay', lambda x: None)
     @patch('benchmarks.tasks.set_testjob_results.delay', lambda x: None)
     def test_post_3(self):
 
@@ -104,6 +107,7 @@ class ResultTests(APITestCase):
         self.assertEqual(models.Result.objects.count(), 2)
         self.assertEqual(models.Manifest.objects.count(), 1)
 
+    @patch('benchmarks.tasks.update_jenkins.delay', lambda x: None)
     @patch('benchmarks.tasks.set_testjob_results.delay', lambda x: None)
     def test_post_4(self):
         build_id = 200
@@ -136,6 +140,7 @@ class ResultTests(APITestCase):
         self.assertEqual(models.Result.objects.count(), 1)
         self.assertEqual(models.Manifest.objects.count(), 1)
 
+    @patch('benchmarks.tasks.update_jenkins.delay', lambda x: None)
     @patch('benchmarks.tasks.set_testjob_results.delay', lambda x: None)
     def test_post_5(self):
 
