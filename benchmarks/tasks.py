@@ -38,18 +38,17 @@ def set_testjob_results(self, testjob):
         testjob.save()
         tester = getattr(testminer, testjob.testrunnerclass)(testjob.testrunnerurl, username, password)
 
-    # if testjob.status not in ["Complete", "Incomplete", "Canceled"]:
-    #     testjob.save()
-    #     return
+    if testjob.status not in ["Complete", "Incomplete", "Canceled"]:
+        testjob.save()
+        return
 
     testjob.definition = tester.get_test_job_details(testjob.id)['definition']
     testjob.completed = True
+    if testjob.status in ["Incomplete", "Canceled"]:
+        testjob.save()
 
-    # if testjob.status in ["Incomplete", "Canceled"]:
-    #     testjob.save()
-
-    #     update_jenkins.delay(testjob.result)
-    #     return
+        update_jenkins.delay(testjob.result)
+        return
 
     test_results = tester.get_test_job_results(testjob.id)
 
@@ -90,7 +89,7 @@ def set_testjob_results(self, testjob):
     testjob.save()
     tester.cleanup()
 
-    # update_jenkins.delay(testjob.result)
+    update_jenkins.delay(testjob.result)
 
     # ToDo: not implemented yet. DO NOT REMOVE
     # for result in test_results['test']:
