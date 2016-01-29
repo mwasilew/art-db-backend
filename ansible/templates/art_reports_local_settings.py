@@ -126,5 +126,7 @@ EXTERNAL_DIR = {
 
 EMAIL_REPORTS_TO = [
     "sebastian.pawlus@linaro.org",
-    "milosz.wasilewski@linaro.org"
+    "milosz.wasilewski@linaro.org",
+    "serban.constantinescu@linaro.org",
+    "stuart.monteith@linaro.org"
 ]
