@@ -161,39 +161,39 @@ def update_jenkins(self, result):
 
     username, password = settings.CREDENTIALS[host]
 
-    jenkins_description = "<a href=\"https://{0}/#/build/{1}\">Details</a><br/>".format(settings.HOST, result.pk)
+    description = render_to_string("jenkins_update.html", {
+        "host": settings.HOST,
+        "result": result,
+        "testjobs": models.TestJob.objects.filter(result=result)
+    })
 
-    for test_job in models.TestJob.objects.filter(result=result):
-        icon_name = "red.png"
-        if test_job.status == "Complete":
-            icon_name = "blue.png"
-        if test_job.status not in ["Complete", "Incomplete", "Canceled"]:
-            icon_name = "clock.png"
-        test_job_description = "LAVA <a href=\"{0}\">{1}</a> - <img class=\"icon-sm\" src=\"/jenkins/static/art-reports/images/16x16/{2}\" alt=\"{3}\" tooltip=\"{3}\"><br/>".format(
-                test_job.url,
-                test_job.id,
-                icon_name,
-                test_job.status)
-        jenkins_description = jenkins_description + test_job_description
     auth = requests.auth.HTTPBasicAuth(username, password)
-    crumb_url = "https://{0}/jenkins/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,%22:%22,//crumb)".format(host)
+
+    crumb_url = ("https://{0}/jenkins/crumbIssuer/api/xml"
+                 "?xpath=concat(//crumbRequestField,%22:%22,//crumb)".format(host))
+
     crumb_response = requests.get(crumb_url, auth=auth)
-    crumb = None
-    if crumb_response.status_code == 200:
-        crumb = crumb_response.text
-        logger.info("crumb received")
-    else:
+
+    if crumb_response.status_code != 200:
         logger.error("crumb retrieval failed with status {0}".format(crumb_response.status_code))
         logger.error(crumb_response.text)
         return
 
-    url = result.build_url + "/submitDescription"
-    form = urlencode({'description': jenkins_description, "crumb": crumb.split(":")[1]})
+    crumb = crumb_response.text
+    logger.info("crumb received")
+
+    data = urlencode({'description': description, "crumb": crumb.split(":")[1]})
+
     headers = {
         crumb.split(":")[0]: crumb.split(":")[1],
-        "Content-Length": len(form),
-        "Content-Type": "application/x-www-form-urlencoded"}
-    response = requests.post(url, data=form, headers=headers, auth=auth, verify=True)
+        "Content-Length": len(data),
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+
+    url = result.build_url + "/submitDescription"
+
+    response = requests.post(url, data=data, headers=headers, auth=auth, verify=True)
+
     if response.status_code == 200:
         logger.info("Jenkins updated for {0}".format(result))
     else:
