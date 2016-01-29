@@ -242,7 +242,7 @@ def report_email(self, result):
     if other:
         results = models.Result.objects.compare(result, other)
 
-        mail.current_benchmark_progress(result, results)
+        mail.current_benchmark_progress(result, other, results)
 
 
 @celery_app.task(bind=True)

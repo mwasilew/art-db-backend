@@ -4,12 +4,14 @@
 
     <h1>{{ header }}</h1>
     <h2>{{ time }}</h2>
-    <h3><a href="{{ result.build_url }}">{{ result.build_id }}#{{ result.name }}</a></h>
+
+    <h3>Current: <a href="{{ current.build_url }}">{{ current.build_id }}#{{ current.name }}</a></h3>
+    <h4>Previous: <a href="{{ previous.build_url }}">{{ previous.build_id }}#{{ previous.name }}</a></h4>
 
     <br/>
     <hr/>
 
-    <h3>branch: {{ result.branch_name }}</h3>
+    <h3>branch: {{ current.branch_name }}</h3>
 
     <table class="benchmarks-results">
         <tr>
