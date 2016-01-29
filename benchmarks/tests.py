@@ -67,8 +67,8 @@ class ResultDataTestCase(TestCase):
 
         compare = Result.objects.compare_progress(now, timedelta(days=7))
 
-        self.assertEqual(compare['master'][0]['current'], 5)
-        self.assertEqual(compare['master'][0]['previous'], 10)
+        self.assertEqual(compare['master'][0]['current'].measurement, 5)
+        self.assertEqual(compare['master'][0]['previous'].measurement, 10)
         self.assertEqual(compare['master'][0]['change'], 50.0)
 
     def test_compare_missing_past(self):
