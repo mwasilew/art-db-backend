@@ -75,10 +75,10 @@ class ResultDataTestCase(TestCase):
         now = timezone.now()
 
         result = G(Result,
-                     manifest__manifest=MINIMAL_XML,
-                     branch_name="master",
-                     gerrit_change_number=None,
-                     created_at=now)
+                   manifest__manifest=MINIMAL_XML,
+                   branch_name="master",
+                   gerrit_change_number=None,
+                   created_at=now)
 
         G(ResultData,
           result=result,
@@ -95,10 +95,10 @@ class ResultDataTestCase(TestCase):
         then = now - timedelta(days=7)
 
         result = G(Result,
-                     manifest__manifest=MINIMAL_XML,
-                     branch_name="master",
-                     gerrit_change_number=None,
-                     created_at=then)
+                   manifest__manifest=MINIMAL_XML,
+                   branch_name="master",
+                   gerrit_change_number=None,
+                   created_at=then)
 
         G(ResultData,
           result=result,
