@@ -13,22 +13,39 @@
 
     <table class="benchmarks-results">
         <tr>
-            <td style="width: 80%">benchmark name</td>
+            <td style="width: 60%">benchmark name (sample count)</td>
             <td style="text-align:right; width:100%">
-                Current
+                Current (stdev)
             </td>
             <td style="text-align:right">
-                Last
+                Last (stdev)
             </td>
             <td style="text-align:right">change</td>
         </tr>
 
-        {% for benchmark in results %}
-            <tr>
-                <td style="width: 80%">{{ benchmark.benchmark }} / <b>{{ benchmark.name }}</b></td>
-                <td align="right" style="text-align:right; width:100%">{{ benchmark.current }}</td>
-                <td align="right" style="text-align:right; min-width: 100px;">{{ benchmark.previous }}</td>
-                <td align="right" style="text-align:right; min-width: 100px;">{{ benchmark.change }}%</td>
+        {% for result in results %}
+            <tr style="border-bottom: 1px solid #ddd;">
+                <td style="width: 60%">
+                    {{ result.current.benchmark.name }} / <b>{{ result.current.name }}</b>
+                    ({{ result.current.values | length }})
+                </td>
+                <td align="right" style="text-align:right; width:100%">
+                    {{ result.current.measurement|floatformat:2 }} <br/>
+                    ({{ result.current.stdev|floatformat:2 }})
+                </td>
+                <td align="right" style="text-align:right; min-width: 100px;">
+                    {{ result.previous.measurement|floatformat:2 }} <br/>
+                    ({{ result.previous.stdev|floatformat:2 }})
+                </td>
+                <td align="right" style="text-align:right; min-width: 100px;">
+                    {% if result.change > 0 %}
+                        <span style="color:#77DD77">{{ result.change|floatformat:3 }}%</span>
+                    {% elif result.change < 0 %}
+                        <span style="color:#FF6961">{{ result.change|floatformat:3 }}%</span>
+                    {% else %}
+                        ---
+                    {% endif %}
+                </td>
             </tr>
         {% endfor %}
     </table>

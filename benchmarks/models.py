@@ -45,20 +45,21 @@ class ResultManager(models.Manager):
         return None
 
     def compare(self, first, second):
-        measurement_previous = {d.name: d.measurement for d in second.data.all()}
+        measurement_previous = {d.name: d for d in second.data.all()}
 
         results = []
 
-        for benchmark in first.data.order_by("name"):
-            current_value = benchmark.measurement
-            previous_value = measurement_previous.get(benchmark.name)
-            change = current_value / previous_value * 100 if previous_value else None
+        for resultdata in first.data.order_by("name"):
+            current = resultdata
+            previous = measurement_previous.get(resultdata.name)
+
+            if previous.measurement:
+                change = current.measurement / previous.measurement * 100
+                change = (change - 100) * -1
 
             results.append({
-                "benchmark": benchmark.benchmark.name,
-                "name": benchmark.name,
-                "current": current_value,
-                "previous": previous_value,
+                "current": current,
+                "previous": previous,
                 "change": change
             })
 
@@ -174,19 +175,39 @@ class ResultData(models.Model):
 
     name = models.CharField(max_length=256)
     board = models.CharField(default="default", max_length=128)
-    measurement = models.FloatField()
+    measurement = models.FloatField(default=0)
+    stdev = models.FloatField(default=0)
 
     values = ArrayField(models.FloatField(), default=list)
 
     created_at = models.DateTimeField(default=timezone.now)
 
+    def _mean(self, data):
+        n = len(data)
+        if n < 1:
+            return 0
+        return sum(data)/float(n)
+
+    def _ss(self, data):
+        c = self._mean(data)
+        ss = sum((x-c)**2 for x in data)
+        return ss
+
+    def _stddev(self, data):
+        n = len(data)
+        if n < 2:
+            return 0
+        ss = self._ss(data)
+        pvar = ss/n
+        return pvar**0.5
+
     def save(self, *args, **kwargs):
         if self.measurement and not self.values:
             self.values = [self.measurement]
+
         if self.values:
-            self.measurement = sum(self.values)/float(len(self.values))
-        else:
-            self.measurement = 0
+            self.measurement = self._mean(self.values)
+            self.stdev = self._stddev(self.values)
 
         return super(ResultData, self).save(*args, **kwargs)
 
