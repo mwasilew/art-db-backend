@@ -122,7 +122,20 @@ def check_testjob_completeness(self):
 @celery_app.task(bind=True)
 def report_gerrit(self, result):
 
+    other = result.to_compare()
+    if not other:
+        return
+
+    results = models.Result.objects.compare(result, other)
+
+    message = render_to_string("gerrit_update.html", {
+        "current": result,
+        "previous": other,
+        "results": results
+    })
+
     host = 'review.linaro.org'
+    host = "android-review.linaro.org"
     username, password = settings.CREDENTIALS[host]
 
     url = "https://%s/a/changes/%s/revisions/%s/review" % (
@@ -132,9 +145,8 @@ def report_gerrit(self, result):
     )
 
     # fixme
-    message = render_to_string("gerrit_update.html", {"result": result})
-
-    url = "https://review.linaro.org/a/changes/4194/revisions/7/review"
+    # url = "https://review.linaro.org/a/changes/4194/revisions/7/review"
+    url = "https://android-review.linaro.org/a/changes/16574/revisions/1/review"
 
     data = {
         'message': message,
