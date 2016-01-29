@@ -1,19 +1,12 @@
+current: {{ current.build_id }}#{{ current.name }} ({{ current.build_url }})
+previous: {{ previous.build_id }}#{{ previous.name }} ({{ previous.build_url }})
 
+branch: {{ current.branch_name }}
 
-### build ###
-
-
-Build: {{ result.build_url }}
-
-
-### test jobs ### 
-
-{% for testjob in result.test_jobs.all %}
-Test Job: {{ testjob.url }} Status: {{ testjob.status }}
-{% endfor %}
-
-### results ###
-
-{% for data in result.data.all %}
-{{ data.benchmark.name }} / {{ data.name }} - {{ data.measurement }}
+benchmark name / subscore (sample size)
+---------------------------------------------------{% for result in results %}
+# {{ result.current.benchmark.name }} / {{ result.current.name }} ({{ result.current.values | length }})
+# current (stdev) -> {{ result.current.measurement|floatformat:2 }} ({{ result.current.stdev|floatformat:2 }})
+# previous (stdev) -> {{ result.previous.measurement|floatformat:2 }} ({{ result.previous.stdev|floatformat:2 }})
+# -/+ -> {{ result.change|floatformat:3 }} %
 {% endfor %}
