@@ -20,8 +20,22 @@ AUTHENTICATION_BACKENDS = (
 )
 
 CREDENTIALS = {
-    'validation.linaro.org': ('{{lava_user}}', '{{lava_key}}'),
-    'review.linaro.org': ('{{gerrit_user}}', '{{gerrit_key}}')
+    'validation.linaro.org': (
+        '{{ validation_linaro_org_user }}',
+        '{{ validation_linaro_org_password }}'
+    ),
+    'review.linaro.org': (
+        '{{ review_linaro_org_user }}',
+        '{{ review_linaro_org_password }}'
+    ),
+    'android-build.linaro.org': (
+        '{{ android_build_linaro_org_user }}',
+        '{{ android_build_linaro_org_password }}'
+    ),
+    'android-review.linaro.org': (
+        '{{ android_review_linaro_org_user }}',
+        '{{ android_review_linaro_org_password }}'
+    )
 }
 
 
