@@ -104,6 +104,7 @@
 	<tr>
 	  <th style="width: 60%">name (sample size)</th>
 	  <th class="text-right">measurement</th>
+	  <th class="text-right">stdev</th>
 	</tr>
       </thead>
       <tbody>
@@ -114,6 +115,9 @@
 	  </td>
 	  <td class="text-right">
 	    {{ item.measurement.toFixed(2)}}
+	  </td>
+	  <td class="text-right">
+	    {{ item.stdev.toFixed(2) }}
 	  </td>
 	</tr>
       </tbody>
