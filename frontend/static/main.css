@@ -31,10 +31,6 @@ nav .navbar-brand {
 	text-align: left;
 }
 
-table {
-	table-layout: fixed;
-}
-
 input, select, button, .btn {
     border-radius: 0 !important;
 }
@@ -54,4 +50,9 @@ input, select, button, .btn {
 
 .checkbox span:hover {
 	color: #888;
+}
+
+#manifest-list .builds {
+	font-size: 13px;
+	border-bottom: 2px #aaa solid;
 }

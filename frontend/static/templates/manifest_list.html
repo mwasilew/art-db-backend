@@ -1,4 +1,4 @@
-<div id="build-list">
+<div id="manifest-list">
 
   <form>
     <div class="form-group">
@@ -9,18 +9,33 @@
   <table class="table table-striped">
     <tbody>
       <tr ng-repeat-start="item in page.results">
-	<td>{{ item.manifest_hash }}<br/><small>{{ item.reduced_hash }}</small></td>
+	<td>
+	  <h4>
+	    {{ item.manifest_hash }}
+	    <small>{{ item.reduced_hash }}</small>
+	  </h4>
+	</td>
       </tr>
       <tr ng-repeat-end ng-show="item.results.length">
 	<td style="padding: 0">
-	  <table class="table" style="margin-bottom: 0">
+
+	  <table class="table builds" style="margin-bottom: 0">
+	    <thead>
+	      <tr>
+		<th>build</th>
+		<th class="text-right">change</th>
+		<th class="text-right">patchset</th>
+		<th class="text-right">created at</th>
+	      </tr>
+	    </thead>	    
 	    <tbody>
 	      <tr ng-repeat="result in item.results">
-		<td style="border-top: none; width: 70%;">
+		<td>
 		  <a ng-href="#/build/{{ result.id }}">#{{ result.build_id }} / {{ result.name }}</a>
 		</td>
-		<td style="border-top: none; width: 5%;">{{ result.gerrit_patchset_number }}</td>
-		<td style="border-top: none; width: 25%;">{{ result.created_at }}</td>
+		<td class="text-right">{{ result.gerrit_change_number }}</td>
+		<td class="text-right">{{ result.gerrit_patchset_number }}</td>
+		<td class="text-right">{{ result.created_at }}</td>
 	      </tr>
 	    </tbody>
 	  </table>
@@ -30,5 +45,5 @@
   </table>
 
   <ng-include src="'/static/templates/_pagination.html'" onload="name='manifests'">
-    
+
 </div>
