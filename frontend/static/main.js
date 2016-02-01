@@ -68,22 +68,19 @@ app.controller('BuildList', ['$scope', '$http', '$routeParams', function($scope,
     };
 }]);
 
-app.controller('BuildDetail', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
+app.controller('BuildDetail', ['$scope', '$http', '$routeParams', '$q', function($scope, $http, $routeParams, $q) {
 
     $http.get('/api/result/' + $routeParams.buildId + '/', {cache: false}).then(function(response) {
         $scope.build = response.data;
 
-        $http.get('/api/result/' + $routeParams.buildId + '/benchmarks/').then(function(response) {
-            $scope.benchmarks = response.data;
+        $q.all([
+            $http.get('/api/result/' + $routeParams.buildId + '/benchmarks/'),
+            $http.get('/api/result/' + $routeParams.buildId + '/benchmarks_compare/')
+        ]).then(function(response) {
+            $scope.benchmarks = response[0].data;
+            $scope.benchmarksCompare = response[1].data;
         });
-
-        $http.get('/api/result/' + $routeParams.buildId + '/benchmarks_compare/').then(function(response) {
-            $scope.benchmarksCompare = response.data;
-        });
-
     });
-
-
 
 }]);
 

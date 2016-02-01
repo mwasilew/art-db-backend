@@ -31,6 +31,10 @@ nav .navbar-brand {
 	text-align: left;
 }
 
+#build-detail table.benchmarks {
+	font-size: 13px;
+}
+
 input, select, button, .btn {
     border-radius: 0 !important;
 }

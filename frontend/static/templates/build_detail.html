@@ -50,22 +50,66 @@
     </table>
   </div>
 
-
-  <div ng-if="benchmarks.length">
+  
+  <div ng-if="benchmarksCompare.length">
     <hr>
     
     <h3>Benchmarks</h3>
 
-    <table class="table table-striped">
+    <table class="table table-striped benchmarks">
       <thead>
 	<tr>
-	  <th style="width: 60%">name</th>
+	  <th style="width: 60%">name (sample size)</th>
+	  <th class="text-right">current (stdev)</th>
+	  <th class="text-right">previous (stdev)</th>
+	  <th class="text-right">change</th>
+	</tr>
+      </thead>
+      <tbody>
+	
+	<tr ng-repeat="item in benchmarksCompare">
+	  <td>
+	    {{ item.current.benchmark }} / <b>{{ item.current.name }}</b>
+	    ({{ item.current.values.length }})
+	  </td>
+	  <td class="text-right">
+	    {{ item.current.measurement.toFixed(2) }}<br/>
+	    ({{ item.current.stdev.toFixed(2) }})
+	  </td>
+	  <td class="text-right">
+	    {{ item.previous.measurement.toFixed(2) }}<br/>
+	    ({{ item.previous.stdev.toFixed(2) }})
+	  </td>
+	  <td class="text-right">
+	    <span ng-if="item.change > 0" style="color:#77DD77">
+	      {{ item.change.toFixed(2) }}
+	    </span>
+	    <span ng-if="item.change < 0" style="color:#FF6961">
+	      {{ item.change.toFixed(2) }}
+	    </span>
+	  </td>
+	</tr>
+	
+      </tbody>
+    </table>
+  </div>
+
+  <div ng-if="benchmarks.length && !benchmarksCompare.length">
+    <hr>
+    <h3>Benchmarks</h3>
+    <table class="table table-striped benchmarks">
+      <thead>
+	<tr>
+	  <th style="width: 60%">name (sample size)</th>
 	  <th class="text-right">measurement</th>
 	</tr>
       </thead>
       <tbody>
 	<tr ng-repeat="item in benchmarks">
-	  <td>{{ item.name }}</td>
+	  <td>
+	    {{ item.benchmark }} / <b>{{ item.name }}</b>
+	    ({{ item.values.length }})
+	  </td>
 	  <td class="text-right">
 	    {{ item.measurement.toFixed(2)}}
 	  </td>
