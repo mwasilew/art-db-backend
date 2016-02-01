@@ -20,7 +20,8 @@ app.config(['$routeProvider', function($routeProvider) {
         })
         .when('/build/:buildId', {
             templateUrl: '/static/templates/build_detail.html',
-            controller: 'BuildDetail'
+            controller: 'BuildDetail',
+            reloadOnSearch: false
         })
         .when('/manifests/', {
             templateUrl: '/static/templates/manifest_list.html',
@@ -68,7 +69,9 @@ app.controller('BuildList', ['$scope', '$http', '$routeParams', function($scope,
     };
 }]);
 
-app.controller('BuildDetail', ['$scope', '$http', '$routeParams', '$q', function($scope, $http, $routeParams, $q) {
+app.controller('BuildDetail', ['$scope', '$http', '$routeParams', '$q', '$routeParams', '$location', function($scope, $http, $routeParams, $q, $routeParams, $location) {
+
+    $scope.queryBenchmarks = $routeParams.benchmarks || "";
 
     $http.get('/api/result/' + $routeParams.buildId + '/', {cache: false}).then(function(response) {
         $scope.build = response.data;
@@ -83,6 +86,8 @@ app.controller('BuildDetail', ['$scope', '$http', '$routeParams', '$q', function
     });
 
     $scope.filterBenchmarks = function(criteria) {
+        $location.search({'benchmarks': criteria || null});
+
         return function(item) {
             if (!criteria) {
                 return true;
@@ -96,6 +101,8 @@ app.controller('BuildDetail', ['$scope', '$http', '$routeParams', '$q', function
     };
 
     $scope.filterBenchmarksCompared = function(criteria) {
+        $location.search({'benchmarks': criteria || null});
+
         return function( item ) {
             if (!criteria) {
                 return true;
