@@ -145,7 +145,12 @@ class ResultViewSet(viewsets.ModelViewSet):
         if not previous:
             return response.Response([])
 
-        data = benchmarks_models.Result.objects.compare(result, previous)
+        data = [{
+            'change': item['change'],
+            'current': serializers.ResultDataSerializer(item['current']).data,
+            'previous': serializers.ResultDataSerializer(item['previous']).data,
+        } for item in benchmarks_models.Result.objects.compare(result, previous)]
+
         return response.Response(data)
 
     def create(self, request, *args, **kwargs):
