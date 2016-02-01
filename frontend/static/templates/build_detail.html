@@ -50,11 +50,17 @@
     </table>
   </div>
 
-  
-  <div ng-if="benchmarksCompare.length">
+  <div ng-show="benchmarksCompare.length">
+
     <hr>
-    
+
     <h3>Benchmarks</h3>
+
+    <form>
+      <div class="form-group">
+	<input type="text" ng-model="queryBenchmarks" class="form-control input-sm" placeholder="filter">
+      </div>
+    </form>
 
     <table class="table table-striped benchmarks">
       <thead>
@@ -66,8 +72,8 @@
 	</tr>
       </thead>
       <tbody>
-	
-	<tr ng-repeat="item in benchmarksCompare">
+
+	<tr ng-repeat="item in benchmarksCompare | filter:filterBenchmarksCompared(queryBenchmarks)">
 	  <td>
 	    {{ item.current.benchmark }} / <b>{{ item.current.name }}</b>
 	    ({{ item.current.values.length }})
@@ -91,14 +97,22 @@
 	    </b>
 	  </td>
 	</tr>
-	
+
       </tbody>
     </table>
   </div>
 
-  <div ng-if="benchmarks.length && !benchmarksCompare.length">
+  <div ng-show="benchmarks.length && !benchmarksCompare.length">
     <hr>
+
     <h3>Benchmarks</h3>
+    
+    <form>
+      <div class="form-group">
+	<input type="text" ng-model="queryBenchmarks" class="form-control input-sm" placeholder="filter">
+      </div>
+    </form>
+
     <table class="table table-striped benchmarks">
       <thead>
 	<tr>
@@ -108,7 +122,7 @@
 	</tr>
       </thead>
       <tbody>
-	<tr ng-repeat="item in benchmarks">
+	<tr ng-repeat="item in benchmarks | filter:filterBenchmarks(queryBenchmarks)">
 	  <td>
 	    {{ item.benchmark }} / <b>{{ item.name }}</b>
 	    ({{ item.values.length }})
@@ -123,5 +137,5 @@
       </tbody>
     </table>
   </div>
-  
+
 </div>

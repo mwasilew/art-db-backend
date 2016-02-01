@@ -82,6 +82,32 @@ app.controller('BuildDetail', ['$scope', '$http', '$routeParams', '$q', function
         });
     });
 
+    $scope.filterBenchmarks = function(criteria) {
+        return function(item) {
+            if (!criteria) {
+                return true;
+            }
+            if (item.benchmark.toLowerCase().indexOf(criteria.toLowerCase()) != -1 ||
+                item.name.toLowerCase().indexOf(criteria.toLowerCase()) != -1) {
+                return true;
+            }
+            return false;
+        };
+    };
+
+    $scope.filterBenchmarksCompared = function(criteria) {
+        return function( item ) {
+            if (!criteria) {
+                return true;
+            }
+            if (item.current.benchmark.toLowerCase().indexOf(criteria.toLowerCase()) != -1 ||
+                item.current.name.toLowerCase().indexOf(criteria.toLowerCase()) != -1) {
+                return true;
+            }
+            return false;
+        };
+    };
+
 }]);
 
 app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', function($scope, $http, $routeParams, $timeout, $q) {
