@@ -1,7 +1,21 @@
-<span ng-if="!test.status" class="label label-default">Not set</span>
-<span ng-if="test.status === 'Complete'" class="label label-success">{{ test.status }}</span>
-<span ng-if="test.status === 'Submitted'" class="label label-info">{{ test.status }}</span>
-<span ng-if="test.status === 'Running'" class="label label-primary">{{ test.status }}</span>
-<span ng-if="test.status === 'Incomplete'" class="label label-warning">{{ test.status }}</span>
-<span ng-if="test.status === 'Canceling' || test.status === 'Canceled'" class="label label-danger">{{ test.status }}</span>
-<span ng-if="test.status === 'Results Missing'" class="label label-default">{{ test.status }}</span>
+<span ng-if="!test.status" class="label label-default">
+  Not set
+</span>
+<span ng-if="test.status === 'Complete'" class="label label-success">
+  {{ test.status }}
+</span>
+<span ng-if="test.status === 'Submitted'" class="label label-info">
+  {{ test.status }}
+</span>
+<span ng-if="test.status === 'Running'" class="label label-primary">
+  {{ test.status }}
+</span>
+<span ng-if="test.status === 'Incomplete'" class="label label-warning">
+  {{ test.status }}
+</span>
+<span ng-if="test.status === 'Canceling' || test.status === 'Canceled'" class="label label-danger">
+  {{ test.status }}
+</span>
+<span ng-if="test.status === 'Results Missing'" class="label label-default">
+  {{ test.status }}
+</span>
