@@ -112,7 +112,7 @@
   sudo_user: "{{apache_user}}"
   template: src=secrets/art-reports-bot.key
             dest={{ dev_private_review_linaro_org_password }}
-            owner={{apache_user}} group={{apache_user}} mode=0755
+            owner={{apache_user}} group={{apache_user}} mode=0600
   notify: restart-apache
   tags:
     - install
