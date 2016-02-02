@@ -45,8 +45,10 @@ class ResultManager(models.Manager):
         return None
 
     def compare(self, first, second):
-        measurement_previous = {d.name: d for d in second.data.select_related("benchmark")}
+        if not (first.data.count() and second.data.count()):
+            return []
 
+        measurement_previous = {d.name: d for d in second.data.select_related("benchmark")}
         results = []
 
         for resultdata in first.data.order_by("name").select_related("benchmark"):
