@@ -25,21 +25,38 @@
   <div ng-show="build.test_jobs.length">
     <hr>
     <h3>TestJob</h3>
-
+    
     <table class="table table-striped" ng-show="build.test_jobs.length">
       <thead>
 	<tr>
-	  <th style="width: 10%;">#</th>
-	  <th style="width: 90%;">status</th>
+	  <th>job id</th>
+	  <th class="text-right">status</th>
+	  <th class="text-right">refresh</th>
 	</tr>
       </thead>
       <tbody>
 	<tr ng-repeat="test in build.test_jobs">
-
 	  <td>
-	    <a href="{{ test.url }}" target="_blank">{{ test.id }}</a></td>
-	  <td>
+	    <a href="{{ test.url }}" target="_blank">
+	      {{ test.id }}</a>
+	  </td>
+	  <td class="text-right">
 	    <ng-include src="'/static/templates/_test_job_status.html'" />
+	  </td>
+	  <td class="text-right" style="width: 100px">
+	    <button type="button" class="btn btn-default" ng-hide="test.refresh"
+		    ng-click="test.refresh = true" ng-disabled="testJobUpdate">
+	      <span class="fa fa-refresh"></span>
+	    </button>
+
+	    <div class="btn-group" role="group" ng-show="test.refresh">
+	      <button type="button" class="btn btn-success" ng-click="test.refresh = false">
+		<i class="fa fa-times"></i>
+	      </button>
+	      <button type="button" class="btn btn-warning" ng-click="refreshTestJob(test)">
+		<i class="fa fa-check"></i>
+	      </button>
+	    </div>
 	  </td>
 	</tr>
       </tbody>

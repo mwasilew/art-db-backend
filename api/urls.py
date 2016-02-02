@@ -12,7 +12,7 @@ router.register(r'resultdata', views.ResultDataViewSet)
 router.register(r'benchmark', views.BenchmarkViewSet)
 router.register(r'build', views.BuildViewSet)
 router.register(r'branch', views.BranchViewSet)
-router.register(r'test', views.TestJobViewSet)
+router.register(r'testjob', views.TestJobViewSet)
 router.register(r'stats', views.StatsViewSet)
 
 # functional view

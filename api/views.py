@@ -1,5 +1,8 @@
+import urlparse
+
 from itertools import groupby
 
+from django.conf import settings
 from django.db.models import Avg, StdDev, Count
 
 from rest_framework import views
@@ -14,7 +17,7 @@ from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from rest_framework.decorators import list_route
 
 from benchmarks import models as benchmarks_models
-from benchmarks import tasks
+from benchmarks import tasks, testminer
 
 from . import serializers
 
@@ -195,10 +198,41 @@ class TestJobViewSet(viewsets.ModelViewSet):
     queryset = benchmarks_models.TestJob.objects.all()
     serializer_class = serializers.TestJobSerializer
 
-    lookup_value_regex = "[^/]+" # LAVA ids are 000.0
+    lookup_value_regex = "[^/]+"  # LAVA ids are 000.0
+
+    @detail_route()
+    def resubmit(self, request, pk=None):
+        testjob = self.get_object()
+
+        netloc = urlparse.urlsplit(testjob.testrunnerurl).netloc
+        username, password = settings.CREDENTIALS[netloc]
+        tester = (getattr(testminer, testjob.testrunnerclass)
+                  (testjob.testrunnerurl, username, password))
+
+        # fixme
+        testjobs = tester.call_xmlrpc('scheduler.resubmit_job', '639330')
+
+        result = testjob.result
+
+        testjob.delete()
+
+        if not isinstance(testjobs, (list, tuple)):
+            testjobs = [testjobs]
+
+        for testjob_id in testjobs:
+            testjob = benchmarks_models.TestJob.objects.create(
+                result=result,
+                id=testjob_id
+            )
+            # fixme
+            tester.call_xmlrpc('scheduler.cancel_job', testjob_id)
+            tasks.set_testjob_results.apply(args=[testjob]).get(propagate=True)
+
+        serializer = serializers.TestJobSerializer(result.test_jobs.all(), many=True)
+
+        return response.Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-# result data
 class ResultDataViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
     queryset = benchmarks_models.ResultData.objects.all()

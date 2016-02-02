@@ -80,6 +80,15 @@ app.controller('BuildDetail', ['$scope', '$http', '$routeParams', '$q', '$routeP
         });
     });
 
+    $scope.refreshTestJob = function(testJob) {
+        testJob.refresh = false;
+        $scope.testJobUpdate = true;
+        $http.get('/api/testjob/' + testJob.id + '/resubmit/').then(function(response) {
+            $scope.build.test_jobs = response.data;
+            $scope.testJobUpdate = false;
+        });
+    };
+
     $scope.filterBenchmarks = function(criteria) {
         $location.search({'benchmarks': criteria || null});
 

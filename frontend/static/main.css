@@ -45,6 +45,10 @@ nav .navbar-brand {
 	font-size: 13px;
 }
 
+#build-detail table tbody>tr>td {
+	vertical-align: middle;
+}
+
 input, select, button, .btn {
     border-radius: 0 !important;
 }
