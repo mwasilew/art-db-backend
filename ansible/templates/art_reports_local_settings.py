@@ -112,7 +112,7 @@ DEBUG=False
 
 SERVER_EMAIL = "{{ email }}"
 DEFAULT_FROM_EMAIL = "{{ email }}"
-ALLOWED_HOSTS = ['{{ hostname }}']
+ALLOWED_HOSTS = ['{{ hostname }}', '52.90.187.47']
 
 ADMINS = [
     ("Milosz Wasilewski", 'milosz.wasilewski@linaro.org'),
