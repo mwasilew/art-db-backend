@@ -107,3 +107,14 @@
   notify: restart-apache
   tags:
       - install
+
+- name: Copy ext keys
+  sudo_user: "{{apache_user}}"
+  template: src=secrets/art-reports-bot.key
+            dest={{ dev_private_review_linaro_org_password }}
+            owner={{apache_user}} group={{apache_user}} mode=0755
+  notify: restart-apache
+  tags:
+    - install
+    - update
+    - django

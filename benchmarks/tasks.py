@@ -15,7 +15,7 @@ from celery.utils.log import get_task_logger
 
 from crayonbox import celery_app
 
-from . import models, testminer, mail
+from . import models, testminer, mail, gerrit
 
 logger = get_task_logger("tasks")
 
@@ -134,32 +134,7 @@ def report_gerrit(self, result):
         "results": results
     })
 
-    host = 'review.linaro.org'
-    host = "android-review.linaro.org"
-    username, password = settings.CREDENTIALS[host]
-
-    url = "https://%s/a/changes/%s/revisions/%s/review" % (
-        host,
-        result.gerrit_change_number,
-        result.gerrit_patchset_number
-    )
-
-    # fixme
-    # url = "https://review.linaro.org/a/changes/4194/revisions/7/review"
-    url = "https://android-review.linaro.org/a/changes/16574/revisions/1/review"
-
-    data = {
-        'message': message,
-        'labels': {'Code-Review': '+1'}
-    }
-
-    auth = requests.auth.HTTPDigestAuth(username, password)
-    response = requests.post(url, json=data, auth=auth, verify=True)
-
-    if response.status_code == 200:
-        logger.info("Gerrit updated for %s" % result)
-    else:
-        logger.error("Gerrit update fail for %s: %s" % (result, response.text))
+    gerrit.update(result, message)
 
 
 @celery_app.task(bind=True)

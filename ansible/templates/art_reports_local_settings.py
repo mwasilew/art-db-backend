@@ -34,9 +34,12 @@ CREDENTIALS = {
     'android-review.linaro.org': (
         '{{ android_review_linaro_org_user }}',
         '{{ android_review_linaro_org_password }}'
+    ),
+    "dev-private-review.linaro.org": (
+        '{{ dev_private_review_linaro_org_user }}',
+        '{{ dev_private_review_linaro_org_password }}'
     )
 }
-
 
 DATABASES = {
     'default': {
