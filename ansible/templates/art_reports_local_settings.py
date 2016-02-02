@@ -1,6 +1,5 @@
-import sys
-
 from . import *
+
 
 BROKER_URL = '{{ broker_url }}'
 
@@ -108,7 +107,7 @@ LOGGING = {
     }
 }
 
-DEBUG=False
+DEBUG = False
 
 SERVER_EMAIL = "{{ email }}"
 DEFAULT_FROM_EMAIL = "{{ email }}"
