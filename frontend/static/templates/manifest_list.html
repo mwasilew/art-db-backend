@@ -1,8 +1,11 @@
-<div id="manifest-list">
+<i ng-show="!page" class="fa fa-cog fa-spin"></i>
+
+<div ng-show="page" id="manifest-list">
 
   <form>
     <div class="form-group">
-      <input type="text" ng-change="search()" ng-model="searchQuery" class="form-control" placeholder="search query">
+      <input type="text" ng-change="search()" ng-model="searchQuery"
+	     class="form-control" placeholder="search query">
     </div>
   </form>
 
@@ -27,7 +30,7 @@
 		<th class="text-right">patchset</th>
 		<th class="text-right">created at</th>
 	      </tr>
-	    </thead>	    
+	    </thead>
 	    <tbody>
 	      <tr ng-repeat="result in item.results">
 		<td>

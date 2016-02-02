@@ -1,4 +1,6 @@
-<div id="build-list">
+<i ng-show="!page" class="fa fa-cog fa-spin"></i>
+
+<div ng-show="page" id="build-list">
   <form>
     <div class="form-group">
       <input type="text" ng-change="search()" ng-model="searchQuery" class="form-control" placeholder="search query">
@@ -36,6 +38,6 @@
     </tbody>
   </table>
 
-  <ng-include src="'/static/templates/_pagination.html'" onload="name='builds'">
+  <ng-include src="'/static/templates/_pagination.html'" onload="name='builds'" />
   
 </div>

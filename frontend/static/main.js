@@ -40,11 +40,6 @@ app.config(['$routeProvider', function($routeProvider) {
 app.controller('ManifestList', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
     var page = $routeParams.page || 1;
 
-    $http.get('/api/manifest/', {cache: false, params: {page: page}})
-        .then(function(response) {
-            $scope.page = response.data;
-        });
-
     $scope.search = function() {
         $http.get('/api/manifest/', {params: {'search': $scope.searchQuery, page: page}})
             .then(function(response) {
@@ -52,14 +47,12 @@ app.controller('ManifestList', ['$scope', '$http', '$routeParams', function($sco
             });
     };
 
+    $scope.search();
+
 }]);
 
 app.controller('BuildList', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
     var page = $routeParams.page || 1;
-
-    $http.get('/api/result/', {cache: false, params: {page: page}}).then(function(response) {
-        $scope.page = response.data;
-    });
 
     $scope.search = function() {
         $http.get('/api/result/', {params: {'search': $scope.searchQuery, page: page}})
@@ -67,6 +60,8 @@ app.controller('BuildList', ['$scope', '$http', '$routeParams', function($scope,
                 $scope.page = response.data;
             });
     };
+
+    $scope.search();
 }]);
 
 app.controller('BuildDetail', ['$scope', '$http', '$routeParams', '$q', '$routeParams', '$location', function($scope, $http, $routeParams, $q, $routeParams, $location) {

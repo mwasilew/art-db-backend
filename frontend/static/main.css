@@ -1,3 +1,13 @@
+.fa-spin {
+	display: inline-block;
+    font-size: 100px;
+    color: #ddd;
+    position: absolute;
+    transform: translateX(-50%);
+    left: 50%;
+    top: 50%;
+}
+
 input, select, button, .btn {
     border-radius: 0 !important;
 }
