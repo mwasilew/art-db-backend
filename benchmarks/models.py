@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ET
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from django.db.models import Count
 from django.contrib.postgres.fields import ArrayField
 
 
@@ -76,6 +77,7 @@ class ResultManager(models.Manager):
 
         results_by_branch = {}
 
+
         for branch_name in branches:
             query = (Result.objects
                      .order_by("-created_at")
@@ -90,7 +92,6 @@ class ResultManager(models.Manager):
 
             if not (previous and current):
                 continue
-
             results_by_branch[branch_name] = self.compare(current, previous)
 
         return results_by_branch
@@ -124,12 +125,12 @@ class Result(models.Model):
         ordering = ['-created_at']
 
     def to_compare(self):
-        if self.gerrit_change_number:
-            return self._default_manager.filter(
-                branch_name=self.branch_name,
-                gerrit_change_number=None,
-                manifest__reduced_hash=self.manifest.reduced_hash
-            ).first()
+        if self.gerrit_change_number and self.data.count():
+            return (self._default_manager
+                    .annotate(data_count=Count('data'))
+                    .filter(data_count__gt=0,
+                            branch_name=self.branch_name, gerrit_change_number=None,
+                            manifest__reduced_hash=self.manifest.reduced_hash)).first()
         return None
 
     def __unicode__(self):

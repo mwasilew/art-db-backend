@@ -214,10 +214,12 @@ def _sync_external_repos():
 @celery_app.task(bind=True)
 def report_email(self, result):
     other = result.to_compare()
-    if other:
-        results = models.Result.objects.compare(result, other)
+    if not other:
+        return
 
-        mail.current_benchmark_progress(result, other, results)
+    results = models.Result.objects.compare(result, other)
+
+    mail.current_benchmark_progress(result, other, results)
 
 
 @celery_app.task(bind=True)

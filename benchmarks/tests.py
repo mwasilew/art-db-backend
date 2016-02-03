@@ -36,7 +36,7 @@ class ResultTestCase(TestCase):
 
 class ResultDataTestCase(TestCase):
 
-    def test_compare_1(self):
+    def test_compare_progress(self):
 
         now = timezone.now()
         then = now - relativedelta(days=7)
@@ -71,7 +71,7 @@ class ResultDataTestCase(TestCase):
         self.assertEqual(compare['master'][0]['previous'].measurement, 10)
         self.assertEqual(compare['master'][0]['change'], 50.0)
 
-    def test_compare_missing_past(self):
+    def test_compare_progress_missing_past(self):
         now = timezone.now()
 
         result = G(Result,
@@ -90,7 +90,7 @@ class ResultDataTestCase(TestCase):
 
         self.assertEqual(compare, {})
 
-    def test_compare_missing_current(self):
+    def test_compare_progress_missing_current(self):
         now = timezone.now()
         then = now - timedelta(days=7)
 
@@ -109,3 +109,142 @@ class ResultDataTestCase(TestCase):
         compare = Result.objects.compare_progress(now, relativedelta(days=7))
 
         self.assertEqual(compare, {})
+
+    def test_compare_progress_missing_results_current(self):
+
+        now = timezone.now()
+        then = now - relativedelta(days=7)
+
+        result_1 = G(Result,
+                     manifest__manifest=MINIMAL_XML,
+                     branch_name="master",
+                     gerrit_change_number=None,
+                     created_at=now)
+
+        result_2 = G(Result,
+                     manifest__manifest=MINIMAL_XML,
+                     branch_name="master",
+                     gerrit_change_number=None,
+                     created_at=then)
+
+        G(ResultData,
+          result=result_2,
+          benchmark__name="load",
+          name="load-avg",
+          measurement=10)
+
+        compare = Result.objects.compare_progress(now, timedelta(days=7))
+        self.assertEqual(compare, {})
+
+    def test_compare_progress_missing_results_previous(self):
+
+        now = timezone.now()
+        then = now - relativedelta(days=7)
+
+        result_1 = G(Result,
+                     manifest__manifest=MINIMAL_XML,
+                     branch_name="master",
+                     gerrit_change_number=None,
+                     created_at=now)
+
+        result_2 = G(Result,
+                     manifest__manifest=MINIMAL_XML,
+                     branch_name="master",
+                     gerrit_change_number=None,
+                     created_at=then)
+
+        G(ResultData,
+          result=result_1,
+          benchmark__name="load",
+          name="load-avg",
+          measurement=10)
+
+        compare = Result.objects.compare_progress(now, timedelta(days=7))
+        self.assertEqual(compare, {})
+
+    def test_to_compare_missing_results_current(self):
+
+        now = timezone.now()
+        then = now - relativedelta(days=7)
+
+        result_1 = G(Result,
+                     manifest__manifest=MINIMAL_XML,
+                     branch_name="master",
+                     gerrit_change_number=123,
+                     created_at=now)
+
+        result_2 = G(Result,
+                     manifest__manifest=MINIMAL_XML,
+                     branch_name="master",
+                     gerrit_change_number=None,
+                     created_at=then)
+
+        G(ResultData,
+          result=result_2,
+          benchmark__name="load",
+          name="load-avg",
+          measurement=10)
+
+        self.assertEqual(result_1.to_compare(), None)
+
+    def test_to_compare_missing_results_previous(self):
+
+        now = timezone.now()
+        then = now - relativedelta(days=7)
+
+        result_1 = G(Result,
+                     manifest__manifest=MINIMAL_XML,
+                     branch_name="master",
+                     gerrit_change_number=123,
+                     created_at=now)
+
+        result_2 = G(Result,
+                     manifest__manifest=MINIMAL_XML,
+                     branch_name="master",
+                     gerrit_change_number=None,
+                     created_at=then)
+
+        G(ResultData,
+          result=result_1,
+          benchmark__name="load",
+          name="load-avg",
+          measurement=10)
+
+        self.assertEqual(result_1.to_compare(), None)
+
+    def test_to_compare(self):
+
+        now = timezone.now()
+        then = now - relativedelta(days=7)
+
+        result_1 = G(Result,
+                     manifest__manifest=MINIMAL_XML,
+                     branch_name="master",
+                     gerrit_change_number=123,
+                     created_at=now)
+
+        result_2 = G(Result,
+                     manifest__manifest=MINIMAL_XML,
+                     branch_name="master",
+                     gerrit_change_number=None,
+                     created_at=then)
+
+        result_3 = G(Result,
+                     manifest__manifest=MINIMAL_XML,
+                     branch_name="master",
+                     gerrit_change_number=None,
+                     created_at=then)
+
+        G(ResultData,
+          result=result_1,
+          benchmark__name="load",
+          name="load-avg",
+          measurement=10)
+
+        G(ResultData,
+          result=result_3,
+          benchmark__name="load",
+          name="load-avg",
+          measurement=10)
+
+        self.assertEqual(result_1.to_compare(), result_3)
