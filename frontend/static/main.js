@@ -126,9 +126,10 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', fu
     $scope.redrawChart = function() {
 
         $scope.disabled = true;
+
         var options = {params: {
             branch: $scope.branch.branch_name,
-            benchmark: _.map(_.filter($scope.benchmarkList, "selected"), "name")
+            benchmark: $scope.benchmark.name
         }};
 
         $http.get('/api/stats/', options).then(function(response) {
@@ -169,11 +170,18 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', fu
         $http.get('/api/branch/'),
         $http.get('/api/benchmark/')
     ]).then(function(response) {
+
+        var defaults = {
+            branch: "master",
+            benchmark: "NBody"
+        };
+
         $scope.branchList = response[0].data;
         $scope.branch = $scope.branchList[0];
+        _.find($scope.branchList, ['branch_name', defaults.branch]);
 
         $scope.benchmarkList = response[1].data;
-        $scope.benchmarkList[0].selected = true;
+        $scope.benchmark = _.find($scope.benchmarkList, ['name', defaults.benchmark]);
     }).then($scope.redrawChart);
 
 }]);

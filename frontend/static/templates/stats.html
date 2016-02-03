@@ -1,22 +1,36 @@
 <div class="row">
-  <div class="col-md-9"><div id="charts"></div></div>
-  <div class="col-md-3">
-
+  <div class="col-md-12">
     <form>
+      <div class="row">
 
-      <div class="form-group">
-	<select ng-disabled="disabled" ng-model="branch" class="form-control" ng-change="redrawChart()"
-		ng-options="item.branch_name for item in branchList">
-	</select>
+	<div class="col-md-6">
+	  <div class="form-group">
+	    <label>Branch</label>
+	    <select ng-disabled="disabled" ng-model="branch" class="form-control"
+		    ng-change="redrawChart()"
+		    ng-options="item.branch_name for item in branchList"></select>
+	  </div>
+	</div>
+
+	<div class="col-md-6">
+	  <div class="form-group">
+	    <label>Benchmark</label>
+	    <select ng-disabled="disabled" ng-model="benchmark" class="form-control"
+		    ng-change="redrawChart()" ng-options="item.name for item in benchmarkList"></select>
+	  </div>
+	</div>
       </div>
-
-      <div class="form-group">
-	<label class="checkbox" ng-repeat="benchmark in benchmarkList">
-	  <input ng-disabled="disabled" ng-change="redrawChart()" type="checkbox" ng-model="benchmark.selected" value="benchmark.id">
-	  <span>{{ benchmark.name }}</span>
-	</label>
-      </div>
-
+      <!-- <div class="form-group"> -->
+      <!-- 	<label class="checkbox" ng-repeat="benchmark in benchmarkList"> -->
+      <!-- 	  <input ng-disabled="disabled" ng-change="redrawChart()" type="checkbox" ng-model="benchmark.selected" value="benchmark.id"> -->
+      <!-- 	  <span>{{ benchmark.name }}</span> -->
+      <!-- 	</label> -->
+      <!-- </div> -->
     </form>
   </div>
+
+  <div class="col-md-12">
+    <div id="charts"></div>
+  </div>
+
 </div>
