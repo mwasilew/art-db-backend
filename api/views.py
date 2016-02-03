@@ -202,7 +202,16 @@ class TestJobViewSet(viewsets.ModelViewSet):
 
     @detail_route()
     def resubmit(self, request, pk=None):
+        # fixme: this should not happen on GET
+
+        forbidden_statuses = ['Complete', 'Running', 'Submitted']
+
         testjob = self.get_object()
+
+        if testjob.status in forbidden_statuses:
+
+            serializer = serializers.TestJobSerializer(testjob.result.test_jobs.all(), many=True)
+            return response.Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
 
         netloc = urlparse.urlsplit(testjob.testrunnerurl).netloc
         username, password = settings.CREDENTIALS[netloc]
@@ -211,7 +220,6 @@ class TestJobViewSet(viewsets.ModelViewSet):
 
         # fixme
         testjobs = tester.call_xmlrpc('scheduler.resubmit_job', '639330')
-
         result = testjob.result
 
         testjob.delete()
@@ -226,7 +234,7 @@ class TestJobViewSet(viewsets.ModelViewSet):
             )
             # fixme
             tester.call_xmlrpc('scheduler.cancel_job', testjob_id)
-            tasks.set_testjob_results.apply(args=[testjob]).get(propagate=True)
+            tasks.set_testjob_results.apply(args=[testjob])
 
         serializer = serializers.TestJobSerializer(result.test_jobs.all(), many=True)
 

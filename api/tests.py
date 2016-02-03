@@ -11,6 +11,65 @@ from benchmarks import models
 MINIMAL_XML = '<?xml version="1.0" encoding="UTF-8"?><body></body>'
 
 
+class TestJobTests(APITestCase):
+
+    def setUp(self):
+        user = User.objects.create_superuser('test', 'email@test.com', 'test')
+        self.client.force_authenticate(user=user)
+
+    @patch('benchmarks.testminer.GenericLavaTestSystem.call_xmlrpc', lambda *x, **y: "111")
+    @patch('benchmarks.tasks.update_jenkins.delay', lambda *x, **y: None)
+    @patch('benchmarks.tasks.set_testjob_results.apply', lambda *x, **y: None)
+    def test_resubmit_1(self):
+        testjob = G(models.TestJob, id="000", result__manifest__manifest=MINIMAL_XML)
+
+        response = self.client.get('/api/testjob/%s/resubmit/' % testjob.id)
+
+        self.assertEqual(response.data[0]['id'], "111")
+
+        self.assertEqual(models.TestJob.objects.count(), 1)
+        self.assertEqual(models.TestJob.objects.filter(id="000").exists(), False)
+        self.assertEqual(models.TestJob.objects.filter(id="111").exists(), True)
+
+    @patch('benchmarks.testminer.GenericLavaTestSystem.call_xmlrpc', lambda *x, **y: "111")
+    @patch('benchmarks.tasks.update_jenkins.delay', lambda *x, **y: None)
+    @patch('benchmarks.tasks.set_testjob_results.apply', lambda *x, **y: None)
+    def test_resubmit_with_status_completed(self):
+
+        testjob = G(models.TestJob, status='Complete', result__manifest__manifest=MINIMAL_XML)
+
+        response = self.client.get('/api/testjob/%s/resubmit/' % testjob.id)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(models.TestJob.objects.count(), 1)
+        self.assertEqual(models.TestJob.objects.filter(id="000").exists(), False)
+
+    @patch('benchmarks.testminer.GenericLavaTestSystem.call_xmlrpc', lambda *x, **y: "111")
+    @patch('benchmarks.tasks.update_jenkins.delay', lambda *x, **y: None)
+    @patch('benchmarks.tasks.set_testjob_results.apply', lambda *x, **y: None)
+    def test_resubmit_with_status_running(self):
+
+        testjob = G(models.TestJob, status='Running', result__manifest__manifest=MINIMAL_XML)
+
+        response = self.client.get('/api/testjob/%s/resubmit/' % testjob.id)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(models.TestJob.objects.count(), 1)
+        self.assertEqual(models.TestJob.objects.filter(id="000").exists(), False)
+
+    @patch('benchmarks.testminer.GenericLavaTestSystem.call_xmlrpc', lambda *x, **y: "111")
+    @patch('benchmarks.tasks.update_jenkins.delay', lambda *x, **y: None)
+    @patch('benchmarks.tasks.set_testjob_results.apply', lambda *x, **y: None)
+    def test_resubmit_with_status_submitted(self):
+
+        testjob = G(models.TestJob, status='Submitted', result__manifest__manifest=MINIMAL_XML)
+
+        response = self.client.get('/api/testjob/%s/resubmit/' % testjob.id)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(models.TestJob.objects.count(), 1)
+        self.assertEqual(models.TestJob.objects.filter(id="000").exists(), False)
+
 class ResultTests(APITestCase):
 
     def setUp(self):

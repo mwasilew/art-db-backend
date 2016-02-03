@@ -25,13 +25,13 @@
   <div ng-show="build.test_jobs.length">
     <hr>
     <h3>TestJob</h3>
-    
+
     <table class="table table-striped" ng-show="build.test_jobs.length">
       <thead>
 	<tr>
 	  <th>job id</th>
 	  <th class="text-right">status</th>
-	  <th class="text-right">refresh</th>
+	  <th class="text-right">resubmit</th>
 	</tr>
       </thead>
       <tbody>
@@ -44,19 +44,23 @@
 	    <ng-include src="'/static/templates/_test_job_status.html'" />
 	  </td>
 	  <td class="text-right" style="width: 100px">
-	    <button type="button" class="btn btn-default" ng-hide="test.refresh"
-		    ng-click="test.refresh = true" ng-disabled="testJobUpdate">
-	      <span class="fa fa-refresh"></span>
-	    </button>
 
-	    <div class="btn-group" role="group" ng-show="test.refresh">
-	      <button type="button" class="btn btn-success" ng-click="test.refresh = false">
-		<i class="fa fa-times"></i>
-	      </button>
-	      <button type="button" class="btn btn-warning" ng-click="refreshTestJob(test)">
-		<i class="fa fa-check"></i>
-	      </button>
-	    </div>
+	    <span ng-hide="{{ test.status==='Complete' || test.status==='Running' || test.status==='Submitted'}}">
+	       <button type="button" class="btn btn-default" ng-hide="test.refresh"
+		       ng-click="test.refresh = true" ng-disabled="testJobUpdate">
+		 <span class="fa fa-refresh"></span>
+	       </button>
+
+	       <div class="btn-group" role="group" ng-show="test.refresh">
+		 <button type="button" class="btn btn-success" ng-click="test.refresh = false">
+		   <i class="fa fa-times"></i>
+		 </button>
+		 <button type="button" class="btn btn-warning" ng-click="refreshTestJob(test)">
+		   <i class="fa fa-check"></i>
+		 </button>
+	       </div>
+	    </span>
+
 	  </td>
 	</tr>
       </tbody>
@@ -121,7 +125,7 @@
     <hr>
 
     <h3>Benchmarks</h3>
-    
+
     <form>
       <div class="form-group">
 	<input type="text" ng-model="queryBenchmarks" class="form-control input-sm" placeholder="filter">
