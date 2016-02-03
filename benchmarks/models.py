@@ -105,9 +105,9 @@ class Result(models.Model):
     name = models.CharField(max_length=128)
     branch_name = models.CharField(max_length=128, blank=True)
 
+    build_id = models.IntegerField()
     build_url = models.URLField()
     build_number = models.IntegerField()
-    build_id = models.IntegerField()
 
     gerrit_change_number = models.IntegerField(blank=True, null=True)
     gerrit_patchset_number = models.IntegerField(blank=True, null=True)
@@ -119,6 +119,10 @@ class Result(models.Model):
     completed = models.BooleanField(default=False)
     reported = models.BooleanField(default=False)
 
+    class Meta:
+        index_together = ["build_id", "name"]
+        ordering = ['-created_at']
+
     def to_compare(self):
         if self.gerrit_change_number:
             return self._default_manager.filter(
@@ -127,9 +131,6 @@ class Result(models.Model):
                 manifest__reduced_hash=self.manifest.reduced_hash
             ).first()
         return None
-
-    class Meta:
-        ordering = ['-created_at']
 
     def __unicode__(self):
         return "%s - %s" % (self.pk, self.build_url)

@@ -150,7 +150,7 @@ class ResultTests(APITestCase):
             'url': u'http://dynamicfixture1.com',
             'manifest': MINIMAL_XML,
             'build_number': 200,
-            'build_id': 20
+            'build_id': 200
         }
 
         data_2 = {
@@ -159,7 +159,7 @@ class ResultTests(APITestCase):
             'url': u'http://dynamicfixture1.com',
             'manifest': MINIMAL_XML,
             'build_number': 201,
-            'build_id': 20
+            'build_id': 201
         }
 
         response_1 = self.client.post('/api/result/', data=data_1)
