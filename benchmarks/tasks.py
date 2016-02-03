@@ -184,7 +184,7 @@ def update_jenkins(self, result):
     if response.status_code == 200:
         logger.info("Jenkins updated for {0}".format(result))
     else:
-        logger.error("Jenkins update fail for {0}: {1}".format(result, response.text))
+        logger.error("Jenkins update fail for {0}: {1}".format(result, response.text.decode('utf-8')))
 
 
 @celery_app.task(bind=True)
