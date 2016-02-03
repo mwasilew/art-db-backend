@@ -6,12 +6,12 @@ from .models import Manifest, Result, ResultData, TestJob
 @admin.register(Manifest)
 class ManifestAdmin(admin.ModelAdmin):
     list_display = ('manifest_hash', 'reduced_hash')
-    readonly_fields=('manifest_hash', 'reduced_hash')
+    readonly_fields = ('manifest_hash', 'reduced_hash')
 
 
 @admin.register(Result)
 class ResultAdmin(admin.ModelAdmin):
-    list_display = ('build_id', 'name', 'build_number', 'gerrit_change_number',
+    list_display = ('id', 'build_id', 'name', 'build_number', 'gerrit_change_number',
                     'gerrit_patchset_number', 'gerrit_change_id', 'created_at')
 
 
