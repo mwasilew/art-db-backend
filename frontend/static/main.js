@@ -177,10 +177,9 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', fu
         };
 
         $scope.branchList = response[0].data;
-        $scope.branch = $scope.branchList[0];
-        _.find($scope.branchList, ['branch_name', defaults.branch]);
-
         $scope.benchmarkList = response[1].data;
+
+        $scope.branch = _.find($scope.branchList, ['branch_name', defaults.branch]);
         $scope.benchmark = _.find($scope.benchmarkList, ['name', defaults.benchmark]);
     }).then($scope.redrawChart);
 
