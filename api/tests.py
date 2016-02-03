@@ -20,6 +20,7 @@ class TestJobTests(APITestCase):
     @patch('benchmarks.testminer.GenericLavaTestSystem.call_xmlrpc', lambda *x, **y: "111")
     @patch('benchmarks.tasks.update_jenkins.delay', lambda *x, **y: None)
     @patch('benchmarks.tasks.set_testjob_results.apply', lambda *x, **y: None)
+    @patch.dict('django.conf.settings.CREDENTIALS', {'validation.linaro.org': ("hej", "ho")})
     def test_resubmit_1(self):
         testjob = G(models.TestJob, id="000", result__manifest__manifest=MINIMAL_XML)
 
@@ -34,6 +35,7 @@ class TestJobTests(APITestCase):
     @patch('benchmarks.testminer.GenericLavaTestSystem.call_xmlrpc', lambda *x, **y: "111")
     @patch('benchmarks.tasks.update_jenkins.delay', lambda *x, **y: None)
     @patch('benchmarks.tasks.set_testjob_results.apply', lambda *x, **y: None)
+    @patch.dict('django.conf.settings.CREDENTIALS', {'validation.linaro.org': ("hej", "ho")})
     def test_resubmit_with_status_completed(self):
 
         testjob = G(models.TestJob, status='Complete', result__manifest__manifest=MINIMAL_XML)
@@ -47,6 +49,7 @@ class TestJobTests(APITestCase):
     @patch('benchmarks.testminer.GenericLavaTestSystem.call_xmlrpc', lambda *x, **y: "111")
     @patch('benchmarks.tasks.update_jenkins.delay', lambda *x, **y: None)
     @patch('benchmarks.tasks.set_testjob_results.apply', lambda *x, **y: None)
+    @patch.dict('django.conf.settings.CREDENTIALS', {'validation.linaro.org': ("hej", "ho")})
     def test_resubmit_with_status_running(self):
 
         testjob = G(models.TestJob, status='Running', result__manifest__manifest=MINIMAL_XML)
@@ -60,6 +63,7 @@ class TestJobTests(APITestCase):
     @patch('benchmarks.testminer.GenericLavaTestSystem.call_xmlrpc', lambda *x, **y: "111")
     @patch('benchmarks.tasks.update_jenkins.delay', lambda *x, **y: None)
     @patch('benchmarks.tasks.set_testjob_results.apply', lambda *x, **y: None)
+    @patch.dict('django.conf.settings.CREDENTIALS', {'validation.linaro.org': ("hej", "ho")})
     def test_resubmit_with_status_submitted(self):
 
         testjob = G(models.TestJob, status='Submitted', result__manifest__manifest=MINIMAL_XML)
@@ -69,6 +73,7 @@ class TestJobTests(APITestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(models.TestJob.objects.count(), 1)
         self.assertEqual(models.TestJob.objects.filter(id="000").exists(), False)
+
 
 class ResultTests(APITestCase):
 
