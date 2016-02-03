@@ -29,7 +29,8 @@ app.config(['$routeProvider', function($routeProvider) {
         })
         .when('/stats/', {
             templateUrl: '/static/templates/stats.html',
-            controller: 'Stats'
+            controller: 'Stats',
+            reloadOnSearch: false
         })
         .otherwise({
             redirectTo: '/manifests/'
