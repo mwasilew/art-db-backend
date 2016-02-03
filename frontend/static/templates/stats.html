@@ -7,7 +7,7 @@
 	  <div class="form-group">
 	    <label>Branch</label>
 	    <select ng-disabled="disabled" ng-model="branch" class="form-control"
-		    ng-change="redrawChart()"
+		    ng-change="change()"
 		    ng-options="item.branch_name for item in branchList"></select>
 	  </div>
 	</div>
@@ -16,16 +16,10 @@
 	  <div class="form-group">
 	    <label>Benchmark</label>
 	    <select ng-disabled="disabled" ng-model="benchmark" class="form-control"
-		    ng-change="redrawChart()" ng-options="item.name for item in benchmarkList"></select>
+		    ng-change="change()" ng-options="item.name for item in benchmarkList"></select>
 	  </div>
 	</div>
       </div>
-      <!-- <div class="form-group"> -->
-      <!-- 	<label class="checkbox" ng-repeat="benchmark in benchmarkList"> -->
-      <!-- 	  <input ng-disabled="disabled" ng-change="redrawChart()" type="checkbox" ng-model="benchmark.selected" value="benchmark.id"> -->
-      <!-- 	  <span>{{ benchmark.name }}</span> -->
-      <!-- 	</label> -->
-      <!-- </div> -->
     </form>
   </div>
 

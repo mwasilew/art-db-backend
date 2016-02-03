@@ -121,16 +121,20 @@ app.controller('BuildDetail', ['$scope', '$http', '$routeParams', '$q', '$routeP
 
 }]);
 
-app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', function($scope, $http, $routeParams, $timeout, $q) {
+app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$routeParams', '$location', function($scope, $http, $routeParams, $timeout, $q, $routeParams, $location) {
 
-    $scope.redrawChart = function() {
+    $scope.change = function() {
 
         $scope.disabled = true;
 
-        var options = {params: {
+        var params = {
             branch: $scope.branch.branch_name,
             benchmark: $scope.benchmark.name
-        }};
+        };
+
+        $location.search(params);
+
+        var options = {params: params};
 
         $http.get('/api/stats/', options).then(function(response) {
 
@@ -172,8 +176,8 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', fu
     ]).then(function(response) {
 
         var defaults = {
-            branch: "master",
-            benchmark: "NBody"
+            branch: $routeParams.branch || "master",
+            benchmark: $routeParams.benchmark || "NBody"
         };
 
         $scope.branchList = response[0].data;
@@ -181,6 +185,7 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', fu
 
         $scope.branch = _.find($scope.branchList, ['branch_name', defaults.branch]);
         $scope.benchmark = _.find($scope.benchmarkList, ['name', defaults.benchmark]);
-    }).then($scope.redrawChart);
+
+    }).then($scope.change);
 
 }]);
