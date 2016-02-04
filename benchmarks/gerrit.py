@@ -18,9 +18,6 @@ def http(result, message):
         result.gerrit_patchset_number
     )
 
-    # fixme
-    url = "https://android-review.linaro.org/a/changes/16574/revisions/1/review"
-
     data = {
         'message': message,
         'labels': {'Code-Review': '+1'}
@@ -38,10 +35,6 @@ def ssh(result, message):
 
     change_number = result.gerrit_change_number
     patchset_number = result.gerrit_patchset_number
-
-    # fixme
-    change_number = 398
-    patchset_number = 2
 
     username, password = settings.CREDENTIALS[host]
 
