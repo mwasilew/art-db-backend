@@ -27,7 +27,8 @@ class TestSystem(object):
         return None
 
     def get_test_job_results(self, job_id):
-        return dict(boot=[], test=[])
+        #return dict(boot=[], test=[])
+        return []
 
     def get_test_job_details(self, job_id):
         """

@@ -52,7 +52,7 @@ def set_testjob_results(self, testjob):
 
     test_results = tester.get_test_job_results(testjob.id)
 
-    if not test_results:
+    if not test_results and testjob.testrunnerclass != "GenericLavaTestSystem":
         testjob.status = "Results Missing"
         testjob.save()
         return
