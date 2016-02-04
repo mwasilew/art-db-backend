@@ -1,35 +1,39 @@
 {% extends "email_base.html" %}
 
+
 {% block content %}
 
     <h1>{{ header }}</h1>
-    <h2>{{ time }}</h2>
+    <h4>{{ time }}</h4>
 
-    <h3>Change: <a href="{{ current.build_url }}">{{ current.build_id }}#{{ current.name }}</a></h3>
-    <ul>
+    <hr>
+
+    <h3 style="margin-bottom: 0px;">Change: <a href="{{ current.build_url }}">{{ current.build_id }}#{{ current.name }}</a></h3>
+
+    <ul style="padding-left: 0; margin-top: 0;">
+        <li>branch: {{ current.branch_name }}</li>
         <li>Gerrit change: <a href="{{ current.gerrit_change_url }}">{{ current.gerrit_change_number }}/{{ current.gerrit_patchset_number }}</a>
         <li>Jenkins build: <a href="{{ current.build_url }}">{{ current.build_number }}</a>
     </ul>
-    <h4>Baseline: <a href="{{ previous.build_url }}">{{ previous.build_id }}#{{ previous.name }}</a></h4>
-    <ul>
-        <li>Jenkins build: <a href="{{ previous.build_url }}">{{ previous.build_number }}</a>
-    </ul>
 
-    <br/>
+    <hr>
+
+    <h3>Baseline: <a href="{{ baseline.build_url }}">{{ baseline.build_id }}#{{ baseline.name }}</a></h3>
+
     <hr/>
 
-    <h3>branch: {{ current.branch_name }}</h3>
+    <h3>Benchmarks</h3>
 
     <table class="benchmarks-results">
         <tr>
-            <td style="width: 60%">benchmark name (sample count)</td>
-            <td style="text-align:right; width:100%">
+            <td style="width: 60%; border-bottom: 1px solid #ccc;">benchmark name (sample size)</td>
+            <td style="text-align:right; width:100%; border-bottom: 1px solid #ccc;">
                 Current (stdev)
             </td>
-            <td style="text-align:right">
+            <td style="text-align:right; border-bottom: 1px solid #ccc;">
                 Last (stdev)
             </td>
-            <td style="text-align:right">change</td>
+            <td style="text-align:right; border-bottom: 1px solid #ccc;">change</td>
         </tr>
 
         {% for result in results %}

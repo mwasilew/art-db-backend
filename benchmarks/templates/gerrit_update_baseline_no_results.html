@@ -1,0 +1,14 @@
+current: {{ current.build_id }}#{{ current.name }} ({{ current.build_url }})
+baseline: {{ baseline.build_id }}#{{ baseline.name }} ({{ baseline.build_url }})
+
+branch: {{ current.branch_name }}
+
+Baseline tests didn't produce useful results. Please try to resubmit tests using ART Reports link.
+
+{% if baseline.test_jobs.count %}
+Lava jobs:{% for testjob in baseline.test_jobs.all %}
+- {{ testjob.url }}{{ testjob.status }}{% endfor %}
+{% endif %}
+
+Art Reports:
+{{ baseline.permalink }}

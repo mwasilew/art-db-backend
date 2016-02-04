@@ -38,12 +38,14 @@ def ssh(result, message):
 
     username, password = settings.CREDENTIALS[host]
 
-    subprocess.check_call(['ssh', '-i', password, '-p', '29418',
-                           '-o', 'UserKnownHostsFile=/dev/null',
-                           '-o', 'StrictHostKeyChecking=no',
-                           '%s@%s' % (username, host),
-                           'gerrit', 'review', '-m', "'%s'" % message,
-                           '--code-review', '+1', '%s,%s' % (change_number, patchset_number)])
+    subprocess.check_call(
+        ['ssh', '-i', password, '-p', '29418',
+         '-o', 'UserKnownHostsFile=/dev/null',
+         '-o', 'StrictHostKeyChecking=no',
+         '%s@%s' % (username, host),
+         'gerrit', 'review', '-m', '"%s"' % message,
+         '--code-review', '+1', '%s,%s' % (change_number, patchset_number)],
+        stderr=subprocess.STDOUT)
 
 methods = {
     "android-review.linaro.org": http,

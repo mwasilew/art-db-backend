@@ -3,7 +3,7 @@ from . import *
 
 BROKER_URL = '{{ broker_url }}'
 
-HOST = "{{ hostname }}"
+URL = "https://{{ hostname }}"
 CELERY_DEFAULT_QUEUE = "{{ hostname }}"
 CELERY_SEND_TASK_ERROR_EMAILS = True
 

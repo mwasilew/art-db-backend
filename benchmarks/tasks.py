@@ -120,24 +120,6 @@ def check_testjob_completeness(self):
 
 
 @celery_app.task(bind=True)
-def report_gerrit(self, result):
-
-    other = result.to_compare()
-    if not other:
-        return
-
-    results = models.Result.objects.compare(result, other)
-
-    message = render_to_string("gerrit_update.html", {
-        "current": result,
-        "previous": other,
-        "results": results
-    })
-
-    gerrit.update(result, message)
-
-
-@celery_app.task(bind=True)
 def update_jenkins(self, result):
 
     host = urlparse.urlsplit(result.build_url).netloc
@@ -149,7 +131,7 @@ def update_jenkins(self, result):
     username, password = settings.CREDENTIALS[host]
 
     description = render_to_string("jenkins_update.html", {
-        "host": settings.HOST,
+        "host": settings.URL,
         "result": result,
         "testjobs": models.TestJob.objects.filter(result=result)
     })
@@ -198,6 +180,42 @@ def check_result_completeness(self):
         result.save()
 
 
+@celery_app.task(bind=True)
+def report_gerrit(self, current):
+
+    if not current.baseline:
+        message = render_to_string("gerrit_update_baseline_missing.html", {
+            "current": current,
+        })
+    elif not current.baseline.data.count():
+        message = render_to_string("gerrit_update_baseline_no_results.html", {
+            "current": current,
+            "baseline": current.baseline
+        })
+    else:
+        results = models.Result.objects.compare(current, current.baseline)
+
+        message = render_to_string("gerrit_update.html", {
+            "current": current,
+            "baseline": current.baseline,
+            "results": results
+        })
+
+    gerrit.update(current, message)
+
+
+@celery_app.task(bind=True)
+def report_email(self, current):
+    if not current.baseline:
+        return mail.result_progress_baseline_missing(current)
+
+    if not current.baseline.data.count():
+        return mail.result_progress_baseline_no_results(current)
+
+    results = models.Result.objects.compare(current, current.baseline)
+    return mail.result_progress(current, results)
+
+
 def _sync_external_repos():
     base = settings.EXTERNAL_DIR['BASE']
     for name, address in settings.EXTERNAL_DIR['REPOSITORIES']:
@@ -212,17 +230,6 @@ def _sync_external_repos():
 
 
 @celery_app.task(bind=True)
-def report_email(self, result):
-    other = result.to_compare()
-    if not other:
-        return
-
-    results = models.Result.objects.compare(result, other)
-
-    mail.current_benchmark_progress(result, other, results)
-
-
-@celery_app.task(bind=True)
 def sync_external_repos(self):
     _sync_external_repos()
 
@@ -230,22 +237,18 @@ def sync_external_repos(self):
 @celery_app.task(bind=True)
 def weekly_benchmark_progress(self):
     now = timezone.now()
-    then = relativedelta(days=7)
+    interval = relativedelta(days=7)
 
-    results = _benchmark_progress(now, then)
+    results = models.Result.objects.compare_progress(now, interval)
 
-    mail.weekly_benchmark_progress(now, then, results)
+    mail.weekly_benchmark_progress(now, interval, results)
 
 
 @celery_app.task(bind=True)
 def monthly_benchmark_progress(self):
-
     now = timezone.now()
-    then = relativedelta(months=1)
-    results = _benchmark_progress(now, then)
+    interval = relativedelta(months=1)
 
-    mail.monthly_benchmark_progress(now, then, results)
+    results = models.Result.objects.compare_progress(now, interval)
 
-
-def _benchmark_progress(now, interval):
-    return models.Result.objects.compare_progress(now, interval)
+    mail.monthly_benchmark_progress(now, interval, results)

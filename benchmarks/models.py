@@ -124,7 +124,18 @@ class Result(models.Model):
         index_together = ["build_id", "name"]
         ordering = ['-created_at']
 
-    def to_compare(self):
+    @property
+    def permalink(self):
+        return "%s/#/build/%s" % (settings.URL, self.id)
+
+    @property
+    def baseline(self):
+        return (self._default_manager.filter(
+            branch_name=self.branch_name,
+            gerrit_change_number=None,
+            manifest__reduced_hash=self.manifest.reduced_hash)).first()
+
+    def to_compare(self, results=True):
         if self.gerrit_change_number and self.data.count():
             return (self._default_manager
                     .annotate(data_count=Count('data'))

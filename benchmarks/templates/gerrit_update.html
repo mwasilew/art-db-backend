@@ -1,7 +1,7 @@
 current: {{ current.build_id }}#{{ current.name }} ({{ current.build_url }})
-previous: {{ previous.build_id }}#{{ previous.name }} ({{ previous.build_url }})
+baseline: {{ baseline.build_id }}#{{ baseline.name }} ({{ baseline.build_url }})
 
-branch: {{ current.branch_name }}
+branch: {{ current.branch_name }} 
 
 benchmark name / subscore (sample size)
 ---------------------------------------------------{% for result in results %}
