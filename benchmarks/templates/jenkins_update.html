@@ -1,5 +1,5 @@
 <a href="https://{{ host }}/#/build/{{ result.pk }}">Details</a><br/>
 {% for testjob in testjobs %}
- LAVA <a href="{{ testjob.url }}">{{ testjob.id }}</a> -{% if testjob.status == "Complete" %} <img class="icon-sm" src="/jenkins/static/art-reports/images/16x16/blue.png" alt="{{ testjob.status }}" tooltip="{{ testjob.status }}">{% elif testjob.status != "Incomplete" and testjob.status != "Canceled" %}<img class="icon-sm" src="/jenkins/static/art-reports/images/16x16/clock.png" alt="{{ testjob.status }}" tooltip="{{ testjob.status }}">{% else %}<img class="icon-sm" src="/jenkins/static/art-reports/images/16x16/red.png" alt="{{ testjob.status }}" tooltip="{{ testjob.status }}">{% endif %}<br/>
+LAVA <a href="{{ testjob.url }}">{{ testjob.id }}</a> -{% if testjob.status == "Complete" %} <img class="icon-sm" src="/jenkins/static/art-reports/images/16x16/blue.png" alt="{{ testjob.status }}" tooltip="{{ testjob.status }}">{% elif testjob.status != "Incomplete" and testjob.status != "Canceled" %}<img class="icon-sm" src="/jenkins/static/art-reports/images/16x16/clock.png" alt="{{ testjob.status }}" tooltip="{{ testjob.status }}">{% else %}<img class="icon-sm" src="/jenkins/static/art-reports/images/16x16/red.png" alt="{{ testjob.status }}" tooltip="{{ testjob.status }}">{% endif %}{% if not forloop.last %}<br/>{% endif %}
 {% endfor %}
 
