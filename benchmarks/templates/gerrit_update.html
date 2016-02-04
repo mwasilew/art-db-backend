@@ -7,6 +7,6 @@ benchmark name / subscore (sample size)
 ---------------------------------------------------{% for result in results %}
 # {{ result.current.benchmark.name }} / {{ result.current.name }} ({{ result.current.values | length }})
 # current (stdev) -> {{ result.current.measurement|floatformat:2 }} ({{ result.current.stdev|floatformat:2 }})
-# previous (stdev) -> {{ result.previous.measurement|floatformat:2 }} ({{ result.previous.stdev|floatformat:2 }})
+# baseline (stdev) -> {{ result.previous.measurement|floatformat:2 }} ({{ result.previous.stdev|floatformat:2 }})
 # -/+ -> {{ result.change|floatformat:3 }} %
 {% endfor %}
