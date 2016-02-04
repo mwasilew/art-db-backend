@@ -118,10 +118,8 @@ class ResultViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.ResultSerializer
 
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('id',
-                     'branch_name',
+    search_fields = ('branch_name',
                      'name',
-                     'build_number',
                      'build_id',
                      'gerrit_change_number',
                      'gerrit_patchset_number',

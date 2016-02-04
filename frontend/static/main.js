@@ -16,7 +16,8 @@ app.config(['$routeProvider', function($routeProvider) {
     $routeProvider
         .when('/builds/', {
             templateUrl: '/static/templates/build_list.html',
-            controller: 'BuildList'
+            controller: 'BuildList',
+            reloadOnSearch: false
         })
         .when('/build/:buildId', {
             templateUrl: '/static/templates/build_detail.html',
@@ -25,7 +26,8 @@ app.config(['$routeProvider', function($routeProvider) {
         })
         .when('/manifests/', {
             templateUrl: '/static/templates/manifest_list.html',
-            controller: 'ManifestList'
+            controller: 'ManifestList',
+            reloadOnSearch: false
         })
         .when('/stats/', {
             templateUrl: '/static/templates/stats.html',
@@ -37,33 +39,104 @@ app.config(['$routeProvider', function($routeProvider) {
         });
 }]);
 
+app.directive('pagination', ['$route', '$httpParamSerializer', '$location', function($route, $httpParamSerializer, $location) {
+    return {
+        restrict: 'E',
+        scope: {
+            page: '='
+        },
+        templateUrl: '/static/templates/_pagination.html',
+        link: function(scope, elem, attrs) {
 
-app.controller('ManifestList', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
-    var page = $routeParams.page || 1;
+            scope.goNext = function() {
+                $location.search("page", scope.page.page.next);
+                $route.reload();
+            };
 
-    $scope.search = function() {
-        $http.get('/api/manifest/', {params: {'search': $scope.searchQuery, page: page}})
-            .then(function(response) {
-                $scope.page = response.data;
-            });
+            scope.goBack = function() {
+                $location.search("page", scope.page.page.previous);
+                $route.reload();
+            };
+
+            // scope.$watch('page', function(a, b) {
+            //     if(!a) return;
+
+            //     var path = "#" + $route.current.$$route.originalPath;
+
+            //     if(scope.page.page.previous) {
+            //         var params = angular.copy($route.current.params);
+            //         params['page'] = scope.page.page.previous;
+            //         scope.previous = path + "?" + $httpParamSerializer(params);
+            //     }
+
+            //     if(scope.page.page.next) {
+            //         var params = angular.copy($route.current.params);
+            //         params['page'] = scope.page.page.next;
+            //         scope.next = path + "?" +$httpParamSerializer(params);
+            //     }
+            // });
+        }
     };
-
-    $scope.search();
-
 }]);
 
-app.controller('BuildList', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
-    var page = $routeParams.page || 1;
 
-    $scope.search = function() {
-        $http.get('/api/result/', {params: {'search': $scope.searchQuery, page: page}})
-            .then(function(response) {
-                $scope.page = response.data;
-            });
-    };
+app.controller(
+    'ManifestList',
 
-    $scope.search();
-}]);
+    ['$scope', '$http', '$routeParams', '$location',
+
+     function($scope, $http, $routeParams, $location) {
+
+         var params = {
+             'search': $routeParams.search,
+             'page': $routeParams.page
+         };
+
+         $http.get('/api/manifest/', {params: params}).then(function(response) {
+             $scope.page = response.data;
+         });
+
+         $scope.search = $routeParams.search;
+
+         $scope.makeSearch = function() {
+             $location.search({'search': $scope.search || null});
+
+             $http.get('/api/manifest/', {params: {'search': $scope.search}})
+                 .then(function(response) {
+                     $scope.page = response.data;
+                 });
+         };
+     }]
+);
+
+app.controller(
+    'BuildList',
+
+    ['$scope', '$http', '$routeParams', '$location',
+
+     function($scope, $http, $routeParams, $location) {
+
+         var params = {
+             'search': $routeParams.search,
+             'page': $routeParams.page
+         };
+
+         $http.get('/api/result/', {params: params}).then(function(response) {
+             $scope.page = response.data;
+         });
+
+         $scope.search = $routeParams.search;
+
+         $scope.makeSearch = function() {
+             $location.search({'search': $scope.search || null});
+
+             $http.get('/api/result/', {params: {'search': $scope.search}})
+                 .then(function(response) {
+                     $scope.page = response.data;
+                 });
+         };
+     }]
+);
 
 app.controller('BuildDetail', ['$scope', '$http', '$routeParams', '$q', '$routeParams', '$location', function($scope, $http, $routeParams, $q, $routeParams, $location) {
 
