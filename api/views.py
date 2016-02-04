@@ -218,8 +218,7 @@ class TestJobViewSet(viewsets.ModelViewSet):
         tester = (getattr(testminer, testjob.testrunnerclass)
                   (testjob.testrunnerurl, username, password))
 
-        # fixme
-        testjobs = tester.call_xmlrpc('scheduler.resubmit_job', '639330')
+        testjobs = tester.call_xmlrpc('scheduler.resubmit_job', testjob.id)
         result = testjob.result
 
         testjob.delete()
@@ -232,8 +231,6 @@ class TestJobViewSet(viewsets.ModelViewSet):
                 result=result,
                 id=testjob_id
             )
-            # fixme
-            tester.call_xmlrpc('scheduler.cancel_job', testjob_id)
             tasks.set_testjob_results.apply(args=[testjob])
 
         serializer = serializers.TestJobSerializer(result.test_jobs.all(), many=True)
