@@ -5,8 +5,15 @@
     <h1>{{ header }}</h1>
     <h2>{{ time }}</h2>
 
-    <h3>Current: <a href="{{ current.build_url }}">{{ current.build_id }}#{{ current.name }}</a></h3>
-    <h4>Previous: <a href="{{ previous.build_url }}">{{ previous.build_id }}#{{ previous.name }}</a></h4>
+    <h3>Change: <a href="{{ current.build_url }}">{{ current.build_id }}#{{ current.name }}</a></h3>
+    <ul>
+        <li>Gerrit change: <a href="{{ current.gerrit_change_url }}">{{ current.gerrit_change_number }}/{{ current.gerrit_patchset_number }}</a>
+        <li>Jenkins build: <a href="{{ current.build_url }}">{{ current.build_number }}</a>
+    </ul>
+    <h4>Baseline: <a href="{{ previous.build_url }}">{{ previous.build_id }}#{{ previous.name }}</a></h4>
+    <ul>
+        <li>Jenkins build: <a href="{{ previous.build_url }}">{{ previous.build_number }}</a>
+    </ul>
 
     <br/>
     <hr/>
