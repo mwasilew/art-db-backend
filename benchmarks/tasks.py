@@ -182,6 +182,8 @@ def check_result_completeness(self):
 
 @celery_app.task(bind=True)
 def report_gerrit(self, current):
+    if not current.gerrit_change_id:
+        return
 
     if not current.baseline:
         message = render_to_string("gerrit_update_baseline_missing.html", {
@@ -206,6 +208,9 @@ def report_gerrit(self, current):
 
 @celery_app.task(bind=True)
 def report_email(self, current):
+    if not current.gerrit_change_id:
+        return
+
     if not current.baseline:
         return mail.result_progress_baseline_missing(current)
 
