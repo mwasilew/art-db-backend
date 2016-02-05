@@ -41,6 +41,10 @@ nav .navbar-brand {
 	text-align: left;
 }
 
+#build-detail .baseline {
+	border-bottom: 1px solid #eee;
+}
+
 #build-detail table.benchmarks {
 	font-size: 13px;
 }

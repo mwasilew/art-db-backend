@@ -1,5 +1,5 @@
 - name: Install Apache site config
-  template: src=files/{{src}} dest=/etc/apache2/sites-available/{{config}} mode=0644 backup=yes
+  template: src=files/art-reports.linaro.org dest=/etc/apache2/sites-available/{{inventory_hostname}} mode=0644 backup=yes
             owner=root
             group=root
   sudo: yes
@@ -12,13 +12,13 @@
 - name: Add Apache 2.4 compatibility symlink
   sudo: yes
   file: state=link force=yes
-        src={{config}}
-        dest=/etc/apache2/sites-available/{{config}}.conf
+        src={{inventory_hostname}}
+        dest=/etc/apache2/sites-available/{{inventory_hostname}}.conf
   tags:
       - apache
 
 - name: Enable site config
-  command: a2ensite {{config}}
+  command: a2ensite {{inventory_hostname}}
   sudo: yes
   register: result
   changed_when: "'already enabled' not in result.stdout"
