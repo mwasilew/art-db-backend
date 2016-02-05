@@ -224,7 +224,7 @@ class ResultTests(APITestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(models.Manifest.objects.count(), 1)
         self.assertEqual(models.TestJob.objects.count(), 2)
-        self.assertEqual(response.data['created_at'], '2016-01-06 09:00:01')
+        self.assertEqual(response.data['created_at'], '2016-01-06T09:00:01Z')
 
     @patch('benchmarks.tasks.update_jenkins.delay', lambda x: None)
     @patch('benchmarks.tasks.set_testjob_results.delay', lambda x: None)
