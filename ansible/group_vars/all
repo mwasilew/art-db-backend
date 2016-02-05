@@ -26,8 +26,8 @@ media_base: "{{ install_base }}/media"
 
 django_app_root: "{{install_base}}/project"
 django_settings: crayonbox.settings.private
-django_local_settings: templates/art_reports_local_settings.py
-django_local_wsgi: templates/art_reports_index.wsgi
+django_local_settings: templates/private.py
+django_local_wsgi: templates/index.wsgi
 
 supervisord_conf: "/srv/supervisord.conf"
 supervisord_bin: "/usr/local/bin/supervisord"
