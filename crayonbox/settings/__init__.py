@@ -61,9 +61,9 @@ INSTALLED_APPS = (
     'frontend'
 )
 
+DATETIME_FORMAT = "%d-%m-%Y %H:%M:%S"
 
 REST_FRAMEWORK = {
-    'DATETIME_FORMAT': "%Y-%m-%d %H:%M:%S",
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
     ),
