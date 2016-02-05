@@ -154,7 +154,7 @@ app.controller('BuildDetail', ['$scope', '$http', '$routeParams', '$q', '$routeP
         });
     });
 
-    $scope.refreshTestJob = function(testJob) {
+    $scope.resubmit = function(testJob) {
         testJob.refresh = false;
         $scope.testJobUpdate = true;
         $http.get('/api/testjob/' + testJob.id + '/resubmit/').then(function(response) {
