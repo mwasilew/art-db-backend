@@ -169,8 +169,8 @@ class ResultViewSet(viewsets.ModelViewSet):
 
         try:
             result = benchmarks_models.Result.objects.get(
-                build_id=serializer.data['build_id'],
-                name=serializer.data['name']
+                build_id=serializer.validated_data['build_id'],
+                name=serializer.validated_data['name']
             )
 
             serializer = self.get_serializer(instance=result, data=request.data)

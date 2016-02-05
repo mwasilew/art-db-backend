@@ -1,4 +1,5 @@
 import json
+import ast
 
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
@@ -65,13 +66,37 @@ class ResultManifestSerializer(serializers.CharField):
         }
 
 
+class ResultFieldSerializers(serializers.ListField):
+
+    def to_internal_value(self, data):
+        data = super(ResultFieldSerializers, self).to_internal_value(data)
+
+        return [ast.literal_eval(item) for item in data]
+
+
 class ResultSerializer(serializers.ModelSerializer):
     manifest = ResultManifestSerializer()
     permalink = serializers.CharField(read_only=True)
     test_jobs = TestJobSerializer(many=True, read_only=True)
+    results = ResultFieldSerializers(write_only=True, required=False)
 
     class Meta:
         model = benchmarks_models.Result
+
+    def create(self, validated_data):
+        benchmark_results = validated_data.pop('results')
+        result = super(ResultSerializer, self).create(validated_data)
+
+        for item in benchmark_results:
+            benchmark, _ = benchmarks_models.Benchmark.objects.get_or_create(
+                name=item['benchmark']
+            )
+            result.data.create(
+                benchmark=benchmark,
+                name=item['name'],
+                measurement=item['measurement']
+            )
+        return result
 
 
 class ManifestSerializer(serializers.ModelSerializer):

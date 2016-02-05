@@ -226,6 +226,54 @@ class ResultTests(APITestCase):
         self.assertEqual(models.TestJob.objects.count(), 2)
         self.assertEqual(response.data['created_at'], '2016-01-06 09:00:01')
 
+    @patch('benchmarks.tasks.update_jenkins.delay', lambda x: None)
+    @patch('benchmarks.tasks.set_testjob_results.delay', lambda x: None)
+    def test_post_with_results(self):
+
+        data = {
+            'build_url': 'http://linaro.org',
+            'name': u'linaro-art-stable-m-build-juno',
+            'url': u'http://dynamicfixture1.com',
+            'build_number': 200,
+            'build_id': 20,
+            'manifest': MINIMAL_XML,
+            'test_jobs': " 111, 222 ",
+            'results': [
+                {"benchmark": "benchmark", "name": "load", "measurement": 3},
+                {"benchmark": "benchmark", "name": "boot", "measurement": 10}
+            ]
+        }
+
+        response = self.client.post('/api/result/', data=data)
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(models.Manifest.objects.count(), 1)
+        self.assertEqual(models.ResultData.objects.count(), 2)
+
+        self.assertEqual(models.ResultData.objects.get(name="load").measurement, 3)
+        self.assertEqual(models.ResultData.objects.get(name="boot").measurement, 10)
+
+    @patch('benchmarks.tasks.update_jenkins.delay', lambda x: None)
+    @patch('benchmarks.tasks.set_testjob_results.delay', lambda x: None)
+    def test_post_with_results_empty(self):
+
+        data = {
+            'build_url': 'http://linaro.org',
+            'name': u'linaro-art-stable-m-build-juno',
+            'url': u'http://dynamicfixture1.com',
+            'build_number': 200,
+            'build_id': 20,
+            'manifest': MINIMAL_XML,
+            'test_jobs': " 111, 222 ",
+            'results': []
+        }
+
+        response = self.client.post('/api/result/', data=data)
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(models.Manifest.objects.count(), 1)
+        self.assertEqual(models.ResultData.objects.count(), 0)
+
     def test_baseline_1(self):
 
         baseline = G(models.Result,
