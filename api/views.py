@@ -129,6 +129,15 @@ class ResultViewSet(viewsets.ModelViewSet):
                      'manifest__reduced_hash')
 
     @detail_route()
+    def baseline(self, request, pk=None):
+        result = self.get_object()
+        if not result.baseline:
+            return response.Response(status=status.HTTP_204_NO_CONTENT)
+
+        serializer = self.serializer_class(result.baseline)
+        return response.Response(serializer.data)
+
+    @detail_route()
     def benchmarks(self, request, pk=None):
         result = self.get_object()
         benchmarks = (benchmarks_models.ResultData.objects

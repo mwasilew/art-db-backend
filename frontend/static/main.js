@@ -142,16 +142,16 @@ app.controller('BuildDetail', ['$scope', '$http', '$routeParams', '$q', '$routeP
 
     $scope.queryBenchmarks = $routeParams.benchmarks || "";
 
-    $http.get('/api/result/' + $routeParams.buildId + '/', {cache: false}).then(function(response) {
-        $scope.build = response.data;
-
-        $q.all([
-            $http.get('/api/result/' + $routeParams.buildId + '/benchmarks/'),
-            $http.get('/api/result/' + $routeParams.buildId + '/benchmarks_compare/')
-        ]).then(function(response) {
-            $scope.benchmarks = response[0].data;
-            $scope.benchmarksCompare = response[1].data;
-        });
+    $q.all([
+        $http.get('/api/result/' + $routeParams.buildId + '/'),
+        $http.get('/api/result/' + $routeParams.buildId + '/benchmarks/'),
+        $http.get('/api/result/' + $routeParams.buildId + '/benchmarks_compare/'),
+        $http.get('/api/result/' + $routeParams.buildId + '/baseline/')
+    ]).then(function(response) {
+        $scope.build = response[0].data;
+        $scope.benchmarks = response[1].data;
+        $scope.benchmarksCompare = response[2].data;
+        $scope.baseline = response[3].data;
     });
 
     $scope.resubmit = function(testJob) {

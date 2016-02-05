@@ -20,6 +20,13 @@
 
     <dt>Gerrit Patchset Number</dt>
     <dd>{{ build.gerrit_patchset_number || "not set" }}</dd>
+
+    <dt ng-show="baseline">Baseline</dt>
+    <dd ng-show="baseline">
+      <a ng-href="{{ baseline.permalink }}" target="_blank">
+	{{ baseline.build_id }}#{{ baseline.name }}
+      </a>
+    </dd>
   </dl>
 
   <div ng-show="build.test_jobs.length">

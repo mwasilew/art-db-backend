@@ -67,6 +67,7 @@ class ResultManifestSerializer(serializers.CharField):
 
 class ResultSerializer(serializers.ModelSerializer):
     manifest = ResultManifestSerializer()
+    permalink = serializers.CharField(read_only=True)
     test_jobs = TestJobSerializer(many=True, read_only=True)
 
     class Meta:

@@ -226,6 +226,52 @@ class ResultTests(APITestCase):
         self.assertEqual(models.TestJob.objects.count(), 2)
         self.assertEqual(response.data['created_at'], '2016-01-06 09:00:01')
 
+    def test_baseline_1(self):
+
+        baseline = G(models.Result,
+                     manifest__manifest=MINIMAL_XML,
+                     branch_name="master",
+                     gerrit_change_number=None)
+
+        current = G(models.Result,
+                    manifest__manifest=MINIMAL_XML,
+                    branch_name="master",
+                    gerrit_change_number=123)
+
+        G(models.ResultData,
+          result=current,
+          benchmark__name="load",
+          name="load-avg",
+          measurement=10)
+
+        G(models.ResultData,
+          result=baseline,
+          benchmark__name="load",
+          name="load-avg",
+          measurement=10)
+
+        response = self.client.get('/api/result/%s/baseline/' % current.pk)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['id'], baseline.id)
+
+    def test_baseline_2(self):
+
+        result_1 = G(models.Result,
+                     manifest__manifest=MINIMAL_XML,
+                     branch_name="master",
+                     gerrit_change_number=123)
+
+        G(models.ResultData,
+          result=result_1,
+          benchmark__name="load",
+          name="load-avg",
+          measurement=10)
+
+        response = self.client.get('/api/result/%s/baseline/' % result_1.pk)
+
+        self.assertEqual(response.status_code, 204)
+
 
 class ManifestTests(APITestCase):
 

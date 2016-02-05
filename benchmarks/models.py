@@ -131,6 +131,7 @@ class Result(models.Model):
     @property
     def baseline(self):
         return (self._default_manager.filter(
+            created_at__lt=self.created_at,
             branch_name=self.branch_name,
             gerrit_change_number=None,
             manifest__reduced_hash=self.manifest.reduced_hash)).first()
@@ -140,7 +141,9 @@ class Result(models.Model):
             return (self._default_manager
                     .annotate(data_count=Count('data'))
                     .filter(data_count__gt=0,
-                            branch_name=self.branch_name, gerrit_change_number=None,
+                            created_at__lt=self.created_at,
+                            branch_name=self.branch_name,
+                            gerrit_change_number=None,
                             manifest__reduced_hash=self.manifest.reduced_hash)).first()
         return None
 
