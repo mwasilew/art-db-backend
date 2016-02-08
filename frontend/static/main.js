@@ -112,6 +112,10 @@ app.controller(
              $scope.page = response.data;
          });
 
+         $http.get('/api/settings/manifest_settings/').then(function(response) {
+             $scope.settings = response.data;
+         });
+
          $scope.search = $routeParams.search;
 
          $scope.makeSearch = function() {

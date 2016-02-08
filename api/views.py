@@ -355,6 +355,12 @@ class ResultDataForManifest(views.APIView):
         return response.Response(ret)
 
 
+class SettingsViewSet(viewsets.ViewSet):
+    @list_route()
+    def manifest_settings(self, query):
+        return response.Response(settings.BENCHMARK_MANIFEST_PROJECT_LIST)
+
+
 class CompareResults(viewsets.ViewSet):
 
     def group_resuls(self, query):

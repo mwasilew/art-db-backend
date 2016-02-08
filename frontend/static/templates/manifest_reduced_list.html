@@ -11,10 +11,14 @@
   </form>
 
   <ul class="nav nav-pills nav-pills-sm" >
-    <li role="presentation"><a href="#/manifests/">hash</a></li>
-    <li role="presentation" class="active"><a href="#/manifests/reduced/">reduced hash</a></li>
+    <li role="presentation"><a href="#/manifests/">full</a></li>
+    <li role="presentation" class="active"><a href="#/manifests/reduced/">reduced</a></li>
   </ul>
 
+  <h4>Manifest projects taken into account for comparison</h4>
+  <ul>
+      <li ng-repeat="item in settings">{{ item }}
+  </ul>
   <table class="table table-striped">
     <tbody>
       <tr ng-repeat-start="item in page.results">
