@@ -1,4 +1,7 @@
+import json
 import urlparse
+
+from django.utils import timezone
 
 from itertools import groupby
 
@@ -164,6 +167,13 @@ class ResultViewSet(viewsets.ModelViewSet):
         return response.Response(data)
 
     def create(self, request, *args, **kwargs):
+        now = timezone.now()
+
+        json.dump(
+            request.data,
+            open("/tmp/%s.json" % now.strftime("%Y-%M-%d_%H-%m-%S"), 'w'),
+            indent=4)
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
