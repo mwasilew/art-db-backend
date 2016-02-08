@@ -8,6 +8,7 @@
     top: 50%;
 }
 
+
 input, select, button, .btn {
     border-radius: 0 !important;
 }
@@ -19,6 +20,12 @@ select {
 
 a:hover {
     text-decoration: none;
+}
+
+.nav-pills > li > a {
+	border-radius: 0 !important;
+	padding: 8px 12px;
+	font-size: 12px;
 }
 
 .navbar {
@@ -77,4 +84,9 @@ input, select, button, .btn {
 #manifest-list .builds {
 	font-size: 13px;
 	border-bottom: 2px #aaa solid;
+}
+
+#manifest-list .nav {
+	margin: 10px 0 15px 0;
+	background-color: #eee;
 }

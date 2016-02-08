@@ -60,13 +60,22 @@ class TokenViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 class ManifestViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [DjangoModelPermissions]
-    queryset = benchmarks_models.Manifest.objects.prefetch_related("results")
+    queryset = (benchmarks_models.Manifest.objects
+                .select_related("reduced")
+                .prefetch_related("results"))
 
     serializer_class = serializers.ManifestSerializer
 
     filter_backends = (filters.SearchFilter, filters.DjangoFilterBackend)
-    search_fields = ('manifest_hash', 'reduced_hash')
-    filter_fields = ('manifest_hash', 'reduced_hash')
+    search_fields = ('manifest_hash', 'reduced__hash')
+    filter_fields = ('manifest_hash', 'reduced__hash')
+
+
+class ManifestReducedViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [DjangoModelPermissions]
+    queryset = benchmarks_models.ManifestReduced.objects.prefetch_related("manifests__results")
+
+    serializer_class = serializers.ManifestReducedSerializer
 
 
 # benchmark
@@ -167,13 +176,6 @@ class ResultViewSet(viewsets.ModelViewSet):
         return response.Response(data)
 
     def create(self, request, *args, **kwargs):
-        now = timezone.now()
-
-        json.dump(
-            request.data,
-            open("/tmp/%s.json" % now.strftime("%Y-%M-%d_%H-%m-%S"), 'w'),
-            indent=4)
-
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 

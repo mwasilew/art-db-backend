@@ -49,7 +49,7 @@ class TestJobSerializer(serializers.ModelSerializer):
 class ResultManifestSerializer(serializers.CharField):
 
     class Meta:
-        fields = ("id", "manifest_hash", "reduced_hash",)
+        fields = ("id", "manifest_hash")
         model = benchmarks_models.Manifest
 
     def to_internal_value(self, data):
@@ -62,7 +62,7 @@ class ResultManifestSerializer(serializers.CharField):
         return {
             'id': obj.id,
             'manifest_hash': obj.manifest_hash,
-            'reduced_hash': obj.reduced_hash
+            'reduced_hash': obj.reduced.hash
         }
 
 
@@ -91,16 +91,33 @@ class ResultSerializer(serializers.ModelSerializer):
         return result
 
 
+class ManifestResultSerializer(serializers.ModelSerializer):
+    permalink = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = benchmarks_models.Result
+
+
 class ManifestSerializer(serializers.ModelSerializer):
-    results = ResultSerializer(many=True, read_only=True)
+    results = ManifestResultSerializer(many=True, read_only=True)
+    reduced_hash = serializers.CharField(source='reduced.hash')
 
     class Meta:
         fields = ("id", "manifest_hash", "reduced_hash", "results")
         model = benchmarks_models.Manifest
 
 
+class ManifestReducedSerializer(serializers.ModelSerializer):
+    manifests = ManifestSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = benchmarks_models.ManifestReduced
+        # fields = ('hash', 'results')
+
+
 class TokenSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username')
+
     class Meta:
         model = Token
         fields = ('key', 'username')
@@ -108,6 +125,7 @@ class TokenSerializer(serializers.ModelSerializer):
 
 class BuildSerializer(serializers.ModelSerializer):
     name = serializers.CharField()
+
     class Meta:
         model = benchmarks_models.Result
         fields = ('name',)
@@ -115,6 +133,7 @@ class BuildSerializer(serializers.ModelSerializer):
 
 class BranchSerializer(serializers.ModelSerializer):
     branch_name = serializers.CharField()
+
     class Meta:
         model = benchmarks_models.Result
         fields = ('branch_name',)

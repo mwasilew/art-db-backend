@@ -8,11 +8,17 @@ from django.db.models import Count
 from django.contrib.postgres.fields import ArrayField
 
 
+class ManifestReduced(models.Model):
+    hash = models.CharField(primary_key=True, max_length=40)
+
+    def __str__(self):
+        return self.hash
+
+
 class Manifest(models.Model):
+    reduced = models.ForeignKey(ManifestReduced, related_name="manifests", null=True)
+
     manifest_hash = models.CharField(max_length=40, editable=False)
-    # sha1 for selected projects in manifest
-    # project list is defined in settings
-    reduced_hash = models.CharField(max_length=40, editable=False, default=None)
     manifest = models.TextField()
 
     class Meta:
@@ -23,7 +29,7 @@ class Manifest(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            self.manifest_hash = hashlib.sha1(self.manifest).hexdigest()
+
             doc = ET.fromstring(self.manifest)
             commit_id_hash = hashlib.sha1()
             for project in settings.BENCHMARK_MANIFEST_PROJECT_LIST:
@@ -33,7 +39,10 @@ class Manifest(models.Model):
                         if project_element.tag == "project":
                             commit_id = project_element.get('revision')
                             commit_id_hash.update(commit_id)
-            self.reduced_hash = commit_id_hash.hexdigest()
+
+            self.reduced, _ = ManifestReduced.objects.get_or_create(hash=commit_id_hash.hexdigest())
+            self.manifest_hash = hashlib.sha1(self.manifest).hexdigest()
+
         return super(Manifest, self).save(*args, **kwargs)
 
 
@@ -133,7 +142,7 @@ class Result(models.Model):
             created_at__lt=self.created_at,
             branch_name=self.branch_name,
             gerrit_change_number=None,
-            manifest__reduced_hash=self.manifest.reduced_hash)).first()
+            manifest__reduced__hash=self.manifest.reduced.hash)).first()
 
     def to_compare(self, results=True):
         if self.gerrit_change_number and self.data.count():
@@ -143,7 +152,7 @@ class Result(models.Model):
                             created_at__lt=self.created_at,
                             branch_name=self.branch_name,
                             gerrit_change_number=None,
-                            manifest__reduced_hash=self.manifest.reduced_hash)).first()
+                            manifest__reduced__hash=self.manifest.reduced.hash)).first()
         return None
 
     def __unicode__(self):
