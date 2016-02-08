@@ -77,7 +77,6 @@ class ResultManager(models.Manager):
 
         results_by_branch = {}
 
-
         for branch_name in branches:
             query = (Result.objects
                      .order_by("-created_at")
