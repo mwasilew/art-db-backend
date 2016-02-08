@@ -29,6 +29,11 @@ app.config(['$routeProvider', function($routeProvider) {
             controller: 'ManifestList',
             reloadOnSearch: false
         })
+        .when('/manifests/reduced/', {
+            templateUrl: '/static/templates/manifest_reduced_list.html',
+            controller: 'ManifestReducedList',
+            reloadOnSearch: false
+        })
         .when('/stats/', {
             templateUrl: '/static/templates/stats.html',
             controller: 'Stats',
@@ -90,6 +95,36 @@ app.controller(
          };
      }]
 );
+
+app.controller(
+    'ManifestReducedList',
+
+    ['$scope', '$http', '$routeParams', '$location',
+
+     function($scope, $http, $routeParams, $location) {
+
+         var params = {
+             'search': $routeParams.search,
+             'page': $routeParams.page
+         };
+
+         $http.get('/api/manifest_reduced/', {params: params}).then(function(response) {
+             $scope.page = response.data;
+         });
+
+         $scope.search = $routeParams.search;
+
+         $scope.makeSearch = function() {
+             $location.search({'search': $scope.search || null});
+
+             $http.get('/api/manifest_reduced/', {params: {'search': $scope.search}})
+                 .then(function(response) {
+                     $scope.page = response.data;
+                 });
+         };
+     }]
+);
+
 
 app.controller(
     'BuildList',

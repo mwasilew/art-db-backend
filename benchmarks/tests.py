@@ -1,3 +1,4 @@
+import os
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 
@@ -6,10 +7,19 @@ from django.utils import timezone
 
 from django_dynamic_fixture import G
 
-from benchmarks.models import Result, ResultData, TestJob
+from benchmarks.models import Result, ResultData, TestJob, Manifest
 
 
 MINIMAL_XML = '<?xml version="1.0" encoding="UTF-8"?><body></body>'
+FULL_MANFIEST = open(os.path.join(os.path.dirname(__file__), 'manifest.xml')).read()
+
+
+class ManifestTest(TestCase):
+
+    def test_complete_1(self):
+        manifest = Manifest.objects.create(manifest=FULL_MANFIEST)
+
+        self.assertEqual(manifest.reduced.hash, '0efe8e2c8c680e488049abc8fd28941fb828bc95')
 
 
 class ResultTestCase(TestCase):

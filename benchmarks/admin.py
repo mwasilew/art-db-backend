@@ -5,8 +5,8 @@ from .models import Manifest, Result, ResultData, TestJob
 
 @admin.register(Manifest)
 class ManifestAdmin(admin.ModelAdmin):
-    list_display = ('manifest_hash', 'reduced_hash')
-    readonly_fields = ('manifest_hash', 'reduced_hash')
+    list_display = ('manifest_hash', 'reduced')
+    readonly_fields = ('manifest_hash', 'reduced')
 
 
 @admin.register(Result)

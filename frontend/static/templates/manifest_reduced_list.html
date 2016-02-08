@@ -11,8 +11,8 @@
   </form>
 
   <ul class="nav nav-pills nav-pills-sm" >
-    <li role="presentation" class="active"><a href="#/manifests/">hash</a></li>
-    <li role="presentation"><a href="#/manifests/reduced/">reduced hash</a></li>
+    <li role="presentation"><a href="#/manifests/">hash</a></li>
+    <li role="presentation" class="active"><a href="#/manifests/reduced/">reduced hash</a></li>
   </ul>
 
   <table class="table table-striped">
@@ -20,32 +20,35 @@
       <tr ng-repeat-start="item in page.results">
 	<td>
 	  <h4>
-	    <span title="manifest hash">{{ item.manifest_hash }}</span>
-	    <small title="reduced hash">{{ item.reduced_hash }}</small>
+	    <span title="reduced hash">{{ item.hash }}</span>
 	  </h4>
 	</td>
       </tr>
-      <tr ng-repeat-end ng-show="item.results.length">
+
+      <tr ng-repeat-end ng-show="item.manifests">
 	<td style="padding: 0">
 
 	  <table class="table builds" style="margin-bottom: 0">
 	    <thead>
 	      <tr>
 		<th>build</th>
+		<th class="text-right">manifest</th>
 		<th class="text-right">change</th>
 		<th class="text-right">patchset</th>
 		<th class="text-right">created at</th>
 	      </tr>
 	    </thead>
-	    <tbody>
-	      <tr ng-repeat="result in item.results">
-		<td>
-		  <a ng-href="#/build/{{ result.id }}">#{{ result.build_id }} / {{ result.name }}</a>
-		</td>
-		<td class="text-right">{{ result.gerrit_change_number }}</td>
-		<td class="text-right">{{ result.gerrit_patchset_number }}</td>
-		<td class="text-right">{{ result.created_at }}</td>
-	      </tr>
+	      <tbody ng-repeat="manifest in item.manifests">
+		
+		<tr ng-repeat="result in manifest.results">
+	      	  <td>
+	      	    <a ng-href="#/build/{{ result.id }}">#{{ result.build_id }} / {{ result.name }}</a>
+	      	  </td>
+		  <td class="text-right">{{ manifest.manifest_hash }}</td>
+	      	  <td class="text-right">{{ result.gerrit_change_number }}</td>
+	      	  <td class="text-right">{{ result.gerrit_patchset_number }}</td>
+	      	  <td class="text-right">{{ result.created_at }}</td>
+		</tr>
 	    </tbody>
 	  </table>
 	</td>
