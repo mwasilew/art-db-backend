@@ -67,11 +67,11 @@ class ResultManifestSerializer(serializers.CharField):
 
 
 class ResultFieldSerializers(serializers.ListField):
+    pass
+    # def to_internal_value(self, data):
+    #     data = super(ResultFieldSerializers, self).to_internal_value(data)
 
-    def to_internal_value(self, data):
-        data = super(ResultFieldSerializers, self).to_internal_value(data)
-
-        return [ast.literal_eval(item) for item in data]
+    #     return [ast.literal_eval(item) for item in data]
 
 
 class ResultSerializer(serializers.ModelSerializer):
