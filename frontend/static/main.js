@@ -57,24 +57,6 @@ app.directive('pagination', ['$route', '$httpParamSerializer', '$location', func
                 $location.search("page", scope.page.page.previous);
                 $route.reload();
             };
-
-            // scope.$watch('page', function(a, b) {
-            //     if(!a) return;
-
-            //     var path = "#" + $route.current.$$route.originalPath;
-
-            //     if(scope.page.page.previous) {
-            //         var params = angular.copy($route.current.params);
-            //         params['page'] = scope.page.page.previous;
-            //         scope.previous = path + "?" + $httpParamSerializer(params);
-            //     }
-
-            //     if(scope.page.page.next) {
-            //         var params = angular.copy($route.current.params);
-            //         params['page'] = scope.page.page.next;
-            //         scope.next = path + "?" +$httpParamSerializer(params);
-            //     }
-            // });
         }
     };
 }]);
