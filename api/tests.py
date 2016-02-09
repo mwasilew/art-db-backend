@@ -244,7 +244,7 @@ class ResultTests(APITestCase):
             ]
         }
 
-        response = self.client.post('/api/result/', data=data)
+        response = self.client.post('/api/result/', data=data, format='json')
 
         self.assertEqual(response.status_code, 201)
         self.assertEqual(models.Manifest.objects.count(), 1)

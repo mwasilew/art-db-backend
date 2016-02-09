@@ -66,19 +66,11 @@ class ResultManifestSerializer(serializers.CharField):
         }
 
 
-class ResultFieldSerializers(serializers.ListField):
-    pass
-    # def to_internal_value(self, data):
-    #     data = super(ResultFieldSerializers, self).to_internal_value(data)
-
-    #     return [ast.literal_eval(item) for item in data]
-
-
 class ResultSerializer(serializers.ModelSerializer):
     manifest = ResultManifestSerializer()
     permalink = serializers.CharField(read_only=True)
     test_jobs = TestJobSerializer(many=True, read_only=True)
-    results = ResultFieldSerializers(write_only=True, required=False)
+    results = serializers.ListField(write_only=True, required=False)
 
     class Meta:
         model = benchmarks_models.Result
