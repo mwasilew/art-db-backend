@@ -138,7 +138,7 @@ class ResultViewSet(viewsets.ModelViewSet):
                      'gerrit_change_url',
                      'gerrit_change_id',
                      'manifest__manifest_hash',
-                     'manifest__reduced_hash')
+                     'manifest__reduced__hash')
 
     @detail_route()
     def baseline(self, request, pk=None):
