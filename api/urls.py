@@ -18,6 +18,7 @@ router.register(r'stats', views.StatsViewSet)
 
 # functional view
 router.register(r'compare', views.CompareResults, base_name="compare")
+router.register(r'settings', views.SettingsViewSet, base_name="settings")
 
 urlpatterns = [
     url(r'^', include(router.urls)),
