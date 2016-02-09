@@ -92,6 +92,20 @@ def _benchmark_progress(context):
     send_mail(subject, None, from_email, to_email, html_message=message)
 
 
+def daily_benchmark_progress(now, then, results):
+    header = "Art - Daily Benchmark Progress"
+    time = now.strftime('%d %m %Y')
+
+    context = {
+        "now": now,
+        "header": header,
+        "time": time,
+        "results": results
+    }
+
+    _benchmark_progress(context)
+
+
 def monthly_benchmark_progress(now, then, results):
     header = "Art - Monthly Benchmark Progress"
     time = now.strftime('%B %Y')
