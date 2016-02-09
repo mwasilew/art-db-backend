@@ -157,6 +157,18 @@ CELERYBEAT_SCHEDULE = {
         'task': 'benchmarks.tasks.check_result_completeness',
         'schedule': crontab(minute='*/5'),
     },
+    'Daily Benchmark Progress': {
+        'task': 'benchmarks.tasks.daily_benchmark_progress',
+        'schedule': crontab(minute=0, hour=9),
+    },
+    'Weekly Benchmark Progress': {
+        'task': 'benchmarks.tasks.daily_benchmark_progress',
+        'schedule': crontab(minute=0, hour=9, day_of_week='1'),
+    },
+    'Monthly Benchmark Progress': {
+        'task': 'benchmarks.tasks.daily_benchmark_progress',
+        'schedule': crontab(minute=0, hour=9, day_of_month='1'),
+    }
 }
 
 CELERYD_LOG_FORMAT = '[%(asctime)s] %(levelname)s: %(message)s'
