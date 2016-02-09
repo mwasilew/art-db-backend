@@ -127,9 +127,4 @@ EXTERNAL_DIR = {
     "REPOSITORIES": [("art-testing", "https://android-review.linaro.org/linaro/art-testing")]
 }
 
-EMAIL_REPORTS_TO = [
-    "sebastian.pawlus@linaro.org",
-    "milosz.wasilewski@linaro.org",
-    "serban.constantinescu@linaro.org",
-    "stuart.monteith@linaro.org"
-]
+EMAIL_REPORTS_TO = [{{EMAIL_REPORTS_TO}}]
