@@ -162,11 +162,11 @@ CELERYBEAT_SCHEDULE = {
         'schedule': crontab(minute=0, hour=9),
     },
     'Weekly Benchmark Progress': {
-        'task': 'benchmarks.tasks.daily_benchmark_progress',
+        'task': 'benchmarks.tasks.weekly_benchmark_progress',
         'schedule': crontab(minute=0, hour=9, day_of_week='1'),
     },
     'Monthly Benchmark Progress': {
-        'task': 'benchmarks.tasks.daily_benchmark_progress',
+        'task': 'benchmarks.tasks.monthly_benchmark_progress',
         'schedule': crontab(minute=0, hour=9, day_of_month='1'),
     }
 }
