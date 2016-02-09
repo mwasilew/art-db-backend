@@ -127,4 +127,4 @@ EXTERNAL_DIR = {
     "REPOSITORIES": [("art-testing", "https://android-review.linaro.org/linaro/art-testing")]
 }
 
-EMAIL_REPORTS_TO = [{{EMAIL_REPORTS_TO}}]
+EMAIL_REPORTS_TO = {{email_reports_to}}
