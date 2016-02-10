@@ -67,6 +67,34 @@ def result_progress_baseline_no_results(current):
 
     message = render_to_string('result_progress_baseline_no_results.html', context)
 
+    subject = "%s, Baseline missing results - %s" % (context['header'], context['time'])
+
+    attachments = [("manifest.xml", current.manifest.manifest, "application/xml")]
+
+    email = EmailMessage(subject,
+                         message,
+                         settings.DEFAULT_FROM_EMAIL,
+                         settings.EMAIL_REPORTS_TO,
+                         attachments=attachments)
+
+    email.content_subtype = "html"
+    email.send()
+
+
+def result_progress_no_results(current):
+    time = current.created_at.strftime("%d-%m-%Y %H:%M:%S")
+
+    header = "Art - Benchmark Progress for %s" % current.name
+
+    context = {
+        "header": header,
+        "time": time,
+        "current": current,
+        "baseline": current.baseline,
+    }
+
+    message = render_to_string('result_progress_no_results.html', context)
+
     subject = "%s, missing results - %s" % (context['header'], context['time'])
 
     attachments = [("manifest.xml", current.manifest.manifest, "application/xml")]
@@ -79,6 +107,7 @@ def result_progress_baseline_no_results(current):
 
     email.content_subtype = "html"
     email.send()
+
 
 
 def _benchmark_progress(context):

@@ -214,7 +214,10 @@ def report_email(self, current):
     if not current.baseline:
         return mail.result_progress_baseline_missing(current)
 
-    if not (current.baseline.data.count() and current.data.count()):
+    if not current.data.count():
+        return mail.result_progress_no_results(current)
+
+    if not current.baseline.data.count():
         return mail.result_progress_baseline_no_results(current)
 
     results = models.Result.objects.compare(current, current.baseline)

@@ -1,0 +1,35 @@
+{% extends "email_base.html" %}
+
+
+{% block content %}
+    <h1>{{ header }}</h1>
+    <h4>{{ time }}</h4>
+
+    <hr>
+
+    <h3 style="margin-bottom: 0px;">Change: <a href="{{ current.build_url }}">{{ current.build_id }}#{{ current.name }}</a></h3>
+
+    <ul style="padding-left: 0; margin-top: 0;">
+        <li>branch: {{ current.branch_name }}</li>
+        <li>Gerrit change: <a href="{{ current.gerrit_change_url }}">{{ current.gerrit_change_number }}/{{ current.gerrit_patchset_number }}</a>
+        <li>Jenkins build: <a href="{{ current.build_url }}">{{ current.build_number }}</a>
+    </ul>
+
+    <hr>
+
+    <i>Current build tests didn't produce useful results. Please try to resubmit tests using ART Reports link.</i>
+
+    <p>
+        <h5 style="margin-bottom: 0px;">Lava jobs:</h5>
+        {% if current.test_jobs.count %}
+            <ul style="padding-left: 0; margin-top: 0;">
+            {% for testjob in current.test_jobs.all %}
+                <li>{{ testjob.url }} {{ testjob.status }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+
+        <h5 style="margin-bottom: 0px;">Art Reports:</h5>
+        <a href="{{ baseline.permalink }}">{{ current.permalink }}</a>
+    </p>
+{% endblock %}
