@@ -67,7 +67,7 @@ def result_progress_baseline_no_results(current):
 
     message = render_to_string('result_progress_baseline_no_results.html', context)
 
-    subject = "%s, missing baseline results - %s" % (context['header'], context['time'])
+    subject = "%s, missing results - %s" % (context['header'], context['time'])
 
     attachments = [("manifest.xml", current.manifest.manifest, "application/xml")]
 
