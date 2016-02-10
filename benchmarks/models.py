@@ -99,7 +99,7 @@ class ResultManager(models.Manager):
                 "change": change,
             })
 
-        return results
+        return sorted(results, key=lambda x: x['name'])
 
     def compare_progress(self, now, interval):
         then = now - interval
@@ -114,7 +114,6 @@ class ResultManager(models.Manager):
             query = (ResultData.objects
                      .filter(result__branch_name=branch_name)
                      .filter(result__gerrit_change_number__isnull=True))
-
             current = (query
                        .filter(result__created_at__gt=then,
                                result__created_at__lte=now)

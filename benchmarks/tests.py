@@ -155,15 +155,16 @@ class ResultDataTestCase(TestCase):
 
         compare = Result.objects.compare_progress(now, timedelta(days=7))
 
-        master = [{'change': None,
-                   'current': 5.0,
-                   'name': u'load-b / load-avg',
-                   'previous': None},
+        master = [
+            {'change': 50.0,
+             'current': 5.0,
+             'name': u'load-a / load-avg',
+             'previous': 10.0},
 
-                  {'change': 50.0,
-                   'current': 5.0,
-                   'name': u'load-a / load-avg',
-                   'previous': 10.0}]
+            {'change': None,
+             'current': 5.0,
+             'name': u'load-b / load-avg',
+             'previous': None}]
 
         self.assertEqual(compare['master'], master)
 
