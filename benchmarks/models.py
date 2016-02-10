@@ -77,6 +77,30 @@ class ResultManager(models.Manager):
 
         return results
 
+    def compare_benchmarks(self, current, previous):
+        current_results = {"%s / %s" % (i.benchmark.name, i.name): i.measurement for i in current}
+        previous_results = {"%s / %s" % (i.benchmark.name, i.name): i.measurement for i in previous}
+
+        results = []
+
+        for name, current_measurement in current_results.items():
+            previous_measurement = previous_results.get(name)
+
+            if previous_measurement:
+                change = current_measurement / previous_measurement * 100
+                change = (change - 100) * -1
+            else:
+                change = None
+
+            results.append({
+                "name": name,
+                "current": current_measurement,
+                "previous": previous_measurement,
+                "change": change,
+            })
+
+        return results
+
     def compare_progress(self, now, interval):
         then = now - interval
 
@@ -87,21 +111,26 @@ class ResultManager(models.Manager):
         results_by_branch = {}
 
         for branch_name in branches:
-            query = (Result.objects
-                     .order_by("-created_at")
-                     .filter(gerrit_change_number__isnull=True,
-                             branch_name=branch_name))
+            query = (ResultData.objects
+                     .filter(result__branch_name=branch_name)
+                     .filter(result__gerrit_change_number__isnull=True))
 
-            current = self._get_first(
-                query.filter(created_at__gt=then, created_at__lte=now))
+            current = (query
+                       .filter(result__created_at__gt=then,
+                               result__created_at__lte=now)
+                       .order_by("benchmark", "name")
+                       .distinct("benchmark", "name"))
 
-            previous = self._get_first(
-                query.filter(created_at__gt=then - interval, created_at__lte=then))
+            previous = (query
+                        .filter(result__created_at__gt=then - interval,
+                                result__created_at__lte=then)
+                        .order_by("benchmark", "name")
+                        .distinct("benchmark", "name"))
 
-            if not (previous and current):
-                continue
-            results_by_branch[branch_name] = self.compare(current, previous)
-
+            if current and previous:
+                results_by_branch[branch_name] = self.compare_benchmarks(
+                    current, previous
+                )
         return results_by_branch
 
 

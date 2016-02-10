@@ -242,11 +242,11 @@ def sync_external_repos(self):
 @celery_app.task(bind=True)
 def daily_benchmark_progress(self):
     now = timezone.now()
-    interval = relativedelta(days=1)
+    interval = relativedelta(hours=23)
 
     results = models.Result.objects.compare_progress(now, interval)
-
-    mail.daily_benchmark_progress(now, interval, results)
+    if results:
+        mail.daily_benchmark_progress(now, interval, results)
 
 
 @celery_app.task(bind=True)
@@ -255,8 +255,8 @@ def weekly_benchmark_progress(self):
     interval = relativedelta(days=7)
 
     results = models.Result.objects.compare_progress(now, interval)
-
-    mail.weekly_benchmark_progress(now, interval, results)
+    if results:
+        mail.weekly_benchmark_progress(now, interval, results)
 
 
 @celery_app.task(bind=True)
@@ -265,5 +265,5 @@ def monthly_benchmark_progress(self):
     interval = relativedelta(months=1)
 
     results = models.Result.objects.compare_progress(now, interval)
-
-    mail.monthly_benchmark_progress(now, interval, results)
+    if results:
+        mail.monthly_benchmark_progress(now, interval, results)
