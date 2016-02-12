@@ -245,7 +245,7 @@ def sync_external_repos(self):
 @celery_app.task(bind=True)
 def daily_benchmark_progress(self):
     now = timezone.now()
-    interval = relativedelta(day=1)
+    interval = relativedelta(days=1)
 
     results = models.Result.objects.compare_progress(now, interval)
     if results:
