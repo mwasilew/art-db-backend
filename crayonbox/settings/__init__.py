@@ -151,11 +151,11 @@ CELERYBEAT_SCHEDULE = {
     },
     'Check for incopleted TestJobs': {
         'task': 'benchmarks.tasks.check_testjob_completeness',
-        'schedule': crontab(minute='*/5'),
+        'schedule': crontab(minute='*/10'),
     },
     'Check for copleted Build': {
         'task': 'benchmarks.tasks.check_result_completeness',
-        'schedule': crontab(minute='*/5'),
+        'schedule': crontab(minute='*/10'),
     },
     'Daily Benchmark Progress': {
         'task': 'benchmarks.tasks.daily_benchmark_progress',
