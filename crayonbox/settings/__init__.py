@@ -53,6 +53,7 @@ INSTALLED_APPS = (
     'rest_framework',
     'rest_framework.authtoken',
     'djcelery',
+    'kombu.transport.django',
 
     # local apps
     'benchmarks',
@@ -138,11 +139,15 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Celery settings
-BROKER_URL = 'redis://localhost:6379/0'
+BROKER_URL = 'django://'
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
 CELERY_ACCEPT_CONTENT = ['json', 'pickle']
 CELERYBEAT_SCHEDULE_FILENAME = "/tmp/celery-beat"
 
+CELERYD_LOG_FORMAT = '[%(asctime)s] %(levelname)s: %(message)s'
+CELERYD_TASK_LOG_FORMAT = '[%(asctime)s] %(levelname)s %(task_name)s: %(message)s'
+CELERY_TIMEZONE = 'UTC'
+CELERYD_HIJACK_ROOT_LOGGER = False
 
 CELERYBEAT_SCHEDULE = {
     'Update External Repositories': {
@@ -170,11 +175,6 @@ CELERYBEAT_SCHEDULE = {
         'schedule': crontab(minute=0, hour=9, day_of_month='1'),
     }
 }
-
-CELERYD_LOG_FORMAT = '[%(asctime)s] %(levelname)s: %(message)s'
-CELERYD_TASK_LOG_FORMAT = '[%(asctime)s] %(levelname)s %(task_name)s: %(message)s'
-CELERY_TIMEZONE = 'UTC'
-CELERYD_HIJACK_ROOT_LOGGER = False
 
 EXTERNAL_DIR = {
     "BASE": os.path.join(BASE_DIR, 'ext'),
