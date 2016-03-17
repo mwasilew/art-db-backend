@@ -27,7 +27,9 @@ def set_testjob_results(self, testjob):
 
     netloc = urlparse.urlsplit(testjob.testrunnerurl).netloc
     username, password = settings.CREDENTIALS[netloc]
-    tester = getattr(testminer, testjob.testrunnerclass)(testjob.testrunnerurl, username, password)
+    tester = getattr(testminer, testjob.testrunnerclass)(
+        testjob.testrunnerurl, username, password
+    )
 
     testjob.status = tester.get_test_job_status(testjob.id)
     testjob.url = tester.get_job_url(testjob.id)
@@ -36,7 +38,6 @@ def set_testjob_results(self, testjob):
         testjob.testrunnerclass = tester.get_result_class_name(testjob.id)
         testjob.initialized = True
         testjob.save()
-        tester = getattr(testminer, testjob.testrunnerclass)(testjob.testrunnerurl, username, password)
 
     if testjob.status not in ["Complete", "Incomplete", "Canceled"]:
         testjob.save()
@@ -46,8 +47,6 @@ def set_testjob_results(self, testjob):
     testjob.completed = True
     if testjob.status in ["Incomplete", "Canceled"]:
         testjob.save()
-
-        update_jenkins.delay(testjob.result)
         return
 
     test_results = tester.get_test_job_results(testjob.id)
@@ -88,8 +87,6 @@ def set_testjob_results(self, testjob):
 
     testjob.save()
     tester.cleanup()
-
-    update_jenkins.delay(testjob.result)
 
     # ToDo: not implemented yet. DO NOT REMOVE
     # for result in test_results['test']:
@@ -171,13 +168,14 @@ def update_jenkins(self, result):
 
 @celery_app.task(bind=True)
 def check_result_completeness(self):
-    for result in models.Result.objects.filter(completed=True, reported=False):
+    for result in models.Result.objects.filter(reported=False):
+        update_jenkins.apply_async(args=[result])
+        if result.completed:
+            report_email.apply_async(args=[result])
+            report_gerrit.apply_async(args=[result])
 
-        report_email.apply_async(args=[result])
-        report_gerrit.apply_async(args=[result])
-
-        result.reported = True
-        result.save()
+            result.reported = True
+            result.save()
 
 
 @celery_app.task(bind=True)
