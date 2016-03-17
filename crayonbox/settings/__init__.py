@@ -176,6 +176,34 @@ CELERYBEAT_SCHEDULE = {
     }
 }
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'simple': {
+            'format': u'[%(asctime)s] %(levelname)-8s %(message)s',
+        }
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'celery': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'tasks': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        }
+    }
+}
+
 EXTERNAL_DIR = {
     "BASE": os.path.join(BASE_DIR, 'ext'),
     "REPOSITORIES": [("art-testing", "https://android-review.linaro.org/linaro/art-testing")]
