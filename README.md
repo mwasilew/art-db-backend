@@ -5,10 +5,10 @@
 1) required system packages
 
 ```
-sudo apt-get install python-dev python-pip libffi-dev libssl-dev git
+sudo apt-get install python-dev python-pip libffi-dev libssl-dev git wget
 ```
 
-1) postgresql
+2) postgresql
 
 ```
 wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
@@ -17,18 +17,18 @@ sudo apt-get update
 sudo apt-get install postgresql-9.5 postgresql-contrib-9.5 libpq-dev
 ```
 
-1) required python packages
+3) required python packages
 
 ```
 sudo pip install -U pip virtualenv
 ```
 
-1) project packages
+4) project packages
 
 ```
 virtualenv .virtualenv/
 source .virtualenv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 ```
 
 
@@ -94,9 +94,6 @@ exit
 ```
 python manage.py migrate
 ```
-
-3) setup external repos (ext)
-
 
 ### development server
 ```
