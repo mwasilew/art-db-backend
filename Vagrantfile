@@ -2,12 +2,7 @@
 # vi: set ft=ruby :
 
 Vagrant.configure(2) do |config|
-
-  config.vm.box = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
-  config.vm.hostname = "art-reports.linaro.org"
-  config.vm.network "private_network", ip:  ENV['VAGRANT_IP'] || "10.0.0.100"
-  config.vm.define "art-reports.linaro.org" do |artreports|
-  end
+  config.vm.box = "ubuntu/trusty64"
 
   config.vm.provider "virtualbox" do |v|
     v.memory = 3024
@@ -15,11 +10,9 @@ Vagrant.configure(2) do |config|
     v.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
   end
 
-   config.vm.synced_folder ".", "/vagrant", type: "nfs"
-
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "ansible/site.yml"
-  end
+  end if ENV['ANSIBLE']
 
   config.ssh.forward_agent = true
 end
