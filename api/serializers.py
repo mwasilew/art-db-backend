@@ -141,6 +141,7 @@ class BranchSerializer(serializers.ModelSerializer):
 
 class ResultDataSerializer(serializers.ModelSerializer):
     benchmark = serializers.CharField(source='benchmark.name', read_only=True)
+    build_id = serializers.CharField(source='result.build_id', read_only=True)
 
     class Meta:
         model = benchmarks_models.ResultData

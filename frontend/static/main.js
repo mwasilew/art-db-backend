@@ -237,11 +237,15 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                 return {
                     name: name,
                     data: _.map(data, function(data) {
-                        return [Date.parse(data.created_at), data.measurement];
+                        return {
+                            x: Date.parse(data.created_at),
+                            y: data.measurement,
+                            result_id: data.result,
+                            build_id: data.build_id
+                        };
                     })
                 };
             });
-
 
             Highcharts.chart(
                 document.getElementById('charts'), {
@@ -256,6 +260,13 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                         },
                         title: {
                             text: 'Date'
+                        }
+                    },
+                    tooltip: {
+                        useHTML: true,
+                        pointFormatter: function() {
+                            return '<br/><p><strong><span style="color: ' + this.series.color + '">'+ this.series.name + ':</span> ' + this.y + '</strong></p>' +
+                                '<p><a href="#/build/' + this.result_id + '">See details for build #' + this.build_id + '</a></p>'
                         }
                     },
                     series: series
