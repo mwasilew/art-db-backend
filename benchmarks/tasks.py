@@ -118,7 +118,6 @@ def check_testjob_completeness(self):
 
 @celery_app.task(bind=True)
 def update_jenkins(self, result):
-
     host = urlparse.urlsplit(result.build_url).netloc
 
     if host not in settings.CREDENTIALS.keys():
@@ -156,26 +155,39 @@ def update_jenkins(self, result):
         "Content-Type": "application/x-www-form-urlencoded"
     }
 
-    url = result.build_url + "/submitDescription"
+    url = result.build_url + "submitDescription"
 
-    response = requests.post(url, data=data, headers=headers, auth=auth, verify=True)
+    response = requests.post(url,
+                             data=data,
+                             headers=headers,
+                             auth=auth,
+                             verify=True)
 
     if response.status_code == 200:
         logger.info("Jenkins updated for {0}".format(result))
-    else:
-        logger.error(u"Jenkins update fail for {0}: {1}".format(result, response.text))
+        return
+    if response.status_code == 404:
+        logger.warning("Jenkins result not longer available {0}".format(result))
+        result.completed = True
+        result.reported = True
+        result.save()
+        return
+
+    logger.error(u"Jenkins update fail for {0}: {1}".format(result, response.text))
+    response.raise_for_status()
 
 
 @celery_app.task(bind=True)
 def check_result_completeness(self):
     for result in models.Result.objects.filter(reported=False):
-        update_jenkins.apply_async(args=[result])
         if result.completed:
             report_email.apply_async(args=[result])
             report_gerrit.apply_async(args=[result])
 
             result.reported = True
             result.save()
+
+        update_jenkins.apply_async(args=[result])
 
 
 @celery_app.task(bind=True)
