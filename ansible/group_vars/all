@@ -1,6 +1,6 @@
 apache_user: www-data
 
-git_repo: "{{ repo | default('https://git.linaro.org/people/milosz.wasilewski/art-db-backend.git') }}"
+git_repo: "{{ repo | default('https://github.com/Linaro/art-reports.git') }}"
 git_tag: "{{ branch | default('master') }}"
 
 db_name: "{{inventory_hostname}}"
