@@ -269,6 +269,21 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                                 '<p><a href="#/build/' + this.result_id + '">See details for build #' + this.build_id + '</a></p>'
                         }
                     },
+                    plotOptions: {
+                        series: {
+                            cursor: 'pointer',
+                            point: {
+                                events: {
+                                    click: function (e) {
+                                        location.href = '#/build/' + this.result_id;
+                                    }
+                                }
+                            },
+                            marker: {
+                                lineWidth: 1
+                            }
+                        }
+                    },
                     series: series
                 });
 
