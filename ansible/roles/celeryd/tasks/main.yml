@@ -1,3 +1,4 @@
+
 ---
 - name: Install Supervisor
   pip: name=supervisor
@@ -31,6 +32,7 @@
   with_items:
     - { src: 'templates/supervisor.celerycam.conf', dest: '{{supervisor_config_dir}}/{{hostname}}.celerycam.conf' }
     - { src: 'templates/supervisor.celeryd.conf', dest: '{{supervisor_config_dir}}/{{hostname}}.celeryd.conf' }
+    - { src: 'templates/supervisor.celerybeat.conf', dest: '{{supervisor_config_dir}}/{{hostname}}.celerybeat.conf' }    
   tags:
     - install
     - update
