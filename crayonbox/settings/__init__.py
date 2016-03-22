@@ -147,7 +147,6 @@ CELERYBEAT_SCHEDULE_FILENAME = "/tmp/celery-beat"
 CELERYD_LOG_FORMAT = '[%(asctime)s] %(levelname)s: %(message)s'
 CELERYD_TASK_LOG_FORMAT = '[%(asctime)s] %(levelname)s %(task_name)s: %(message)s'
 CELERY_TIMEZONE = 'UTC'
-CELERYD_HIJACK_ROOT_LOGGER = False
 
 CELERYBEAT_SCHEDULE = {
     'Update External Repositories': {
