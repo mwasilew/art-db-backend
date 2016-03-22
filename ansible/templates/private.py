@@ -74,8 +74,8 @@ LOGGING = {
             'class': 'django.utils.log.AdminEmailHandler'
         },
         'file': {
-            'level':'DEBUG',
-            'class':'logging.handlers.TimedRotatingFileHandler',
+            'level': 'DEBUG',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
             'filename': '{{logs_base}}/django.log',
             'backupCount': 5,
             'when': 'midnight',
@@ -84,7 +84,7 @@ LOGGING = {
 
         },
         'console': {
-            'level':'DEBUG',
+            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'simple'
         },
