@@ -650,7 +650,7 @@ class ArtWATestResults(LavaTestSystem):
                     test_result = test_result_dict[row[1]]
                     test_result['subscore'].append({
                             'name': row[2],
-                            'measurement': row[3]
+                            'measurement': float(row[3])
                         })
                 else:
                     test_result = {}
@@ -660,7 +660,7 @@ class ArtWATestResults(LavaTestSystem):
                     test_result['benchmark_name'] = row[1]
                     test_result['subscore'] = [{
                             'name': row[2],
-                            'measurement': row[3]
+                            'measurement': float(row[3])
                         }]
                     test_result_dict[row[1]] = test_result
             os.unlink(db_file_name)
