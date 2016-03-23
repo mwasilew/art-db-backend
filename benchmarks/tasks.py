@@ -157,9 +157,16 @@ def update_jenkins(self, result):
 
     url = result.build_url + "submitDescription"
 
+    response = None
+
     for _ in range(3):  # retry
-        response = requests.post(url, data=data, headers=headers,
-                                 auth=auth, verify=True)
+        try:
+            response = requests.post(url, data=data, headers=headers,
+                                     auth=auth, verify=True)
+
+        except requests.exceptions.RequestException:
+            continue
+
         if response.status_code == 200:
             logger.info("Jenkins updated for {0}".format(result))
             return
@@ -171,9 +178,10 @@ def update_jenkins(self, result):
             return
         logger.warning("Jenkins updated failed, retrying")
 
-    logger.error(u"Jenkins update fail for {0}: {1}".format(result, response.status_code))
+    logger.error(u"Jenkins update fail for {0}".format(result))
 
-    response.raise_for_status()
+    if response:
+        response.raise_for_status()
 
 
 @celery_app.task(bind=True)
