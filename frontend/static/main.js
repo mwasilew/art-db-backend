@@ -233,18 +233,46 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
 
         $http.get('/api/stats/', options).then(function(response) {
 
-            var series = _.map(_.groupBy(response.data, "name"), function(data, name) {
-                return {
+            var series = [];
+            var i = 0;
+            _.each(_.groupBy(response.data, "name"), function(data, name) {
+
+                // data itself
+                series.push({
                     name: name,
+                    color: Highcharts.getOptions().colors[i],
+                    zIndex: 1,
                     data: _.map(data, function(data) {
                         return {
                             x: Date.parse(data.created_at),
                             y: data.measurement,
+                            stdev: data.stdev,
                             result_id: data.result,
                             build_id: data.build_id
                         };
                     })
-                };
+                });
+
+                // range of values, based on the standard deviation
+                series.push({
+                    name: name + ' stdev',
+                    type: 'arearange',
+                    color: Highcharts.getOptions().colors[i],
+                    lineWidth: 0,
+                    linkedTo: ':previous',
+                    fillOpacity: 0.3,
+                    zIndex: 0,
+                    data: _.map(data, function(point) {
+                        return [
+                            Date.parse(point.created_at),
+                            // 99.73% of values are in the range (mean ± 3 * stdev)
+                            point.measurement - 3 * point.stdev,
+                            point.measurement + 3 * point.stdev
+                        ]
+                    })
+                });
+
+                i++;
             });
 
             Highcharts.chart(
@@ -265,8 +293,19 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                     tooltip: {
                         useHTML: true,
                         pointFormatter: function() {
-                            return '<br/><p><strong><span style="color: ' + this.series.color + '">'+ this.series.name + ':</span> ' + this.y + '</strong></p>' +
-                                '<p><a href="#/build/' + this.result_id + '">See details for build #' + this.build_id + '</a></p>'
+                            var y = this.y.toFixed(2);
+                            var range = (3 * this.stdev).toFixed(2);
+                            var stdev = this.stdev.toFixed(2);
+                            var html = [
+                                '<br/><p><strong>',
+                                '<span style="color: ' + this.series.color + '">' + this.series.name + ':</span> ',
+                                y + ' ± ' + range + ' (st. dev.: ' + stdev + ')',
+                                '</strong></p>',
+                                '<p>',
+                                '<a href="#/build/' + this.result_id + '">See details for build #' + this.build_id + '</a>',
+                                '</p>'
+                            ]
+                            return _.join(html, '');
                         }
                     },
                     plotOptions: {
