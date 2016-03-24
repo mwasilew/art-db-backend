@@ -118,6 +118,7 @@ class StatsViewSet(viewsets.ModelViewSet):
             return self.queryset.none()
 
         return self.queryset.filter(benchmark__name__in=benchmarks,
+                                    result__gerrit_change_number=None,
                                     result__branch_name=branch)
 
 
