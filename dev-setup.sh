@@ -15,7 +15,9 @@ sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main"
 sudo apt-get update
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -qy postgresql-9.5 postgresql-contrib-9.5 libpq-dev
 
-cd /vagrant
+if [ -d /vagrant ]; then
+  cd /vagrant
+fi
 virtualenv .virtualenv
 .virtualenv/bin/pip install -r requirements-dev.txt
 
@@ -24,8 +26,8 @@ if [ ! -f crayonbox/settings/private.py ]; then
 fi
 
 # create database and user
-sudo -u postgres createuser --createdb vagrant || true
-sudo -u postgres psql -c "ALTER USER vagrant WITH PASSWORD 'test'"
+sudo -u postgres createuser --createdb "$USER" || true
+sudo -u postgres psql -c "ALTER USER $USER WITH PASSWORD 'test'"
 createdb art-reports || true
 .virtualenv/bin/python ./manage.py migrate
 
@@ -118,7 +120,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'art-reports',
-        'USER': 'vagrant',
+        'USER': '$USER',
         'HOST': 'localhost',
         'PASSWORD': 'test',
     }
@@ -130,7 +132,7 @@ LOGGING['loggers']['qinspect'] = { 'handlers': ['console'], 'level': 'DEBUG',
 CELERY_ALWAYS_EAGER = True
 CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
 
-EMAIL_REPORTS_TO = [ "vagrant@localhost.localdomain", ]
+EMAIL_REPORTS_TO = [ "$USER@localhost.localdomain", ]
 
 EMAIL_HOST = "localhost"
 
