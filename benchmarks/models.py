@@ -65,9 +65,11 @@ class ResultManager(models.Manager):
             current = resultdata
             previous = measurement_previous.get(resultdata.name)
 
-            if previous.measurement:
+            if previous and previous.measurement:
                 change = current.measurement / previous.measurement * 100
                 change = (change - 100) * -1
+            else:
+                change = None
 
             results.append({
                 "current": current,
