@@ -106,6 +106,8 @@ POSTGRESQL_KEY
 : <<DEVELOPMENT_SETTINGS
 from . import *
 
+URL = 'http://localhost:8000'
+
 SECRET_KEY = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 QUERY_INSPECT_ENABLED = True
