@@ -388,3 +388,34 @@ class ResultDataTestCase(TestCase):
           measurement=10)
 
         self.assertEqual(result_1.to_compare(), result_3)
+
+    def test_to_compare_for_baseline_builds(self):
+
+        now = timezone.now()
+        then = now - relativedelta(days=7)
+
+        current_master = G(Result,
+                           manifest__manifest=MINIMAL_XML,
+                           branch_name="master",
+                           gerrit_change_number=None,
+                           created_at=now)
+
+        previous_master = G(Result,
+                            manifest__manifest=MINIMAL_XML,
+                            branch_name="master",
+                            gerrit_change_number=None,
+                            created_at=then)
+
+        G(ResultData,
+          result=current_master,
+          benchmark__name="load",
+          name="load-avg",
+          measurement=10)
+
+        G(ResultData,
+          result=previous_master,
+          benchmark__name="load",
+          name="load-avg",
+          measurement=10)
+
+        self.assertEqual(previous_master, current_master.to_compare())

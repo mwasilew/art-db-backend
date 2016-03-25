@@ -166,23 +166,29 @@ class Result(models.Model):
     def permalink(self):
         return "%s/#/build/%s" % (settings.URL, self.id)
 
+    __baseline__ = False
+
     @property
     def baseline(self):
-        return (self._default_manager.filter(
+        # basic per-instance caching
+        if self.__baseline__ != False:
+            return self.__baseline__
+
+        self.__baseline__ = self._default_manager.annotate(
+            data_count=Count('data')
+        ).filter(
+            data_count__gt=0,
             created_at__lt=self.created_at,
             branch_name=self.branch_name,
             gerrit_change_number=None,
-            manifest__reduced__hash=self.manifest.reduced.hash)).first()
+            manifest__reduced__hash=self.manifest.reduced.hash
+        ).order_by('-created_at').first()
+
+        return self.__baseline__
 
     def to_compare(self, results=True):
-        if self.gerrit_change_number and self.data.count():
-            return (self._default_manager
-                    .annotate(data_count=Count('data'))
-                    .filter(data_count__gt=0,
-                            created_at__lt=self.created_at,
-                            branch_name=self.branch_name,
-                            gerrit_change_number=None,
-                            manifest__reduced__hash=self.manifest.reduced.hash)).first()
+        if self.data.count() and self.baseline:
+            return self.baseline
         return None
 
     def __unicode__(self):
