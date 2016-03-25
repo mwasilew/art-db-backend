@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from django_dynamic_fixture import G
 
-from benchmarks.models import Result, ResultData, TestJob, Manifest
+from benchmarks.models import Result, ResultData, TestJob, Manifest, Benchmark
 
 
 MINIMAL_XML = '<?xml version="1.0" encoding="UTF-8"?><body></body>'
@@ -42,6 +42,47 @@ class ResultTestCase(TestCase):
         self.assertEqual(result.completed, False)
         testjob.completed = True
         self.assertEqual(result.completed, False)
+
+class ResultManagerTestCase(TestCase):
+
+    def test_compare_against_baseline_with_some_missing_benchmarks(self):
+        new_build = G(
+            Result,
+            manifest__manifest=MINIMAL_XML,
+            branch_name='master',
+            gerrit_change_number=123,
+        )
+
+        baseline = G(
+            Result,
+            manifest__manifest=MINIMAL_XML,
+            branch_name='master',
+            gerrit_change_number=None,
+        )
+
+        benchmark1 = G(Benchmark)
+        benchmark2 = G(Benchmark)
+
+        G(ResultData,
+          result=new_build,
+          benchmark=benchmark1,
+          name="load-avg",
+          measurement=5)
+        G(ResultData,
+          result=new_build,
+          benchmark=benchmark2,
+          name="cpu-usage",
+          measurement=5)
+
+        # baseline missing result for benchmark2
+        G(ResultData,
+          result=baseline,
+          benchmark=benchmark1,
+          name="load-avg",
+          measurement=5)
+
+        # should just not crash
+        Result.objects.compare(new_build, baseline)
 
 
 class ResultDataTestCase(TestCase):
@@ -347,3 +388,34 @@ class ResultDataTestCase(TestCase):
           measurement=10)
 
         self.assertEqual(result_1.to_compare(), result_3)
+
+    def test_to_compare_for_baseline_builds(self):
+
+        now = timezone.now()
+        then = now - relativedelta(days=7)
+
+        current_master = G(Result,
+                           manifest__manifest=MINIMAL_XML,
+                           branch_name="master",
+                           gerrit_change_number=None,
+                           created_at=now)
+
+        previous_master = G(Result,
+                            manifest__manifest=MINIMAL_XML,
+                            branch_name="master",
+                            gerrit_change_number=None,
+                            created_at=then)
+
+        G(ResultData,
+          result=current_master,
+          benchmark__name="load",
+          name="load-avg",
+          measurement=10)
+
+        G(ResultData,
+          result=previous_master,
+          benchmark__name="load",
+          name="load-avg",
+          measurement=10)
+
+        self.assertEqual(previous_master, current_master.to_compare())

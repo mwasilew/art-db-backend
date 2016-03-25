@@ -4,6 +4,8 @@ from mock import patch
 from django_dynamic_fixture import G
 from django.contrib.auth.models import User
 from rest_framework.test import APITestCase
+from django.utils import timezone
+from dateutil.relativedelta import relativedelta
 
 from benchmarks import models
 
@@ -490,3 +492,48 @@ class CompareTests(APITestCase):
         self.assertEqual(response.data['cpu']['load']['stddev']['base'], 0)
         self.assertEqual(response.data['cpu']['load']['stddev']['target'], 0)
         self.assertEqual(response.data['cpu']['load']['stddev']['diff'], 0)
+
+class StatsTest(APITestCase):
+
+    def setUp(self):
+        user = User.objects.create_superuser('test', 'email@test.com', 'test')
+        self.client.force_authenticate(user=user)
+
+    def test_only_baseline_changes(self):
+
+	now = timezone.now()
+	yesterday = now - relativedelta(days=1)
+
+	baseline = G(models.Result,
+	      manifest__manifest=MINIMAL_XML,
+	      branch_name='master',
+	      created_at=yesterday,
+	      gerrit_change_number=None)
+
+	patched = G(models.Result,
+	     manifest__manifest=MINIMAL_XML,
+	     branch_name='master',
+	     created_at=now,
+	     gerrit_change_number=123)
+
+	benchmark = G(models.Benchmark, name="TheBenchmark")
+
+        G(models.ResultData,
+          result=baseline,
+          benchmark=benchmark,
+          name="TheBenchmark",
+          measurement=5)
+
+        G(models.ResultData,
+          result=patched,
+          benchmark=benchmark,
+          name="TheBenchmark",
+          measurement=10)
+
+        response = self.client.get('/api/stats/', {
+            'branch': 'master',
+            'benchmark': 'TheBenchmark',
+        })
+
+        self.assertEqual(len(response.data), 1)
+	self.assertEqual(response.data[0]['measurement'], 5)

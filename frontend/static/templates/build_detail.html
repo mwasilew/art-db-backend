@@ -109,8 +109,8 @@
 	    ({{ item.current.stdev.toFixed(2) }})
 	  </td>
 	  <td class="text-right">
-	    {{ item.previous.measurement.toFixed(2) }}<br/>
-	    ({{ item.previous.stdev.toFixed(2) }})
+	    {{ item.previous.measurement ? item.previous.measurement.toFixed(2) : "N/A" }}<br/>
+	    {{ item.previous.stdev ? "(" + item.previous.stdev.toFixed(2) + ")": "" }}
 	  </td>
 	  <td class="text-right">
 	    <b>
@@ -121,6 +121,9 @@
 	      {{ item.change.toFixed(2) }} %
 	    </span>
 	    </b>
+	    <span ng-if="item.change === null">
+	      N/A
+	    </span>
 	  </td>
 	</tr>
 
