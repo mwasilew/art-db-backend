@@ -293,6 +293,9 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                     tooltip: {
                         useHTML: true,
                         pointFormatter: function() {
+                            if (this.series.type == 'arearange') {
+                                return '';
+                            }
                             var y = this.y.toFixed(2);
                             var range = (3 * this.stdev).toFixed(2);
                             var stdev = this.stdev.toFixed(2);
