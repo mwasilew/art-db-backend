@@ -18,7 +18,9 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install -qy postgresql-9.5 postgresq
 if [ -d /vagrant ]; then
   cd /vagrant
 fi
-virtualenv .virtualenv
+if [ ! -f .virtualenv/bin/python ]; then
+  virtualenv .virtualenv
+fi
 .virtualenv/bin/pip install -r requirements-dev.txt
 
 if [ ! -f crayonbox/settings/private.py ]; then
