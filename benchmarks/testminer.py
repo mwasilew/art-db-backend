@@ -12,6 +12,9 @@ from copy import deepcopy
 
 from subprocess import Popen, PIPE, STDOUT
 
+from celery.utils.log import get_task_logger
+logger = get_task_logger("testminer")
+
 try:
     from subprocess import DEVNULL # py3k
 except ImportError:
@@ -497,6 +500,7 @@ class LavaTestSystem(GenericLavaTestSystem):
 class ArtMicrobenchmarksTestResults(LavaTestSystem):
     def get_test_job_results(self, test_job_id):
 
+        logger.info("Fetch microbenchmark results")
         status = self.call_xmlrpc('scheduler.job_status', test_job_id)
 
         if not ('bundle_sha1' in status and status['bundle_sha1']):
@@ -505,6 +509,7 @@ class ArtMicrobenchmarksTestResults(LavaTestSystem):
         test_result_list = []
 
         sha1 = status['bundle_sha1']
+        logger.debug("Bundle SHA1: {0}".format(sha1))
         result_bundle = self.call_xmlrpc('dashboard.get', sha1)
         bundle = json.loads(result_bundle['content'])
 
@@ -523,6 +528,7 @@ class ArtMicrobenchmarksTestResults(LavaTestSystem):
         # The test name and test results are in the attachmented pkl file
         # get test results for the attachment
         test_mode = ast.literal_eval(src['test_params'])['MODE']
+        logger.debug("Test mode: {0}".format(test_mode))
         json_attachments = [a['content'] for a in host['attachments'] if a['pathname'].endswith('json')]
 
         if not json_attachments:
@@ -551,6 +557,7 @@ class ArtMicrobenchmarksTestResults(LavaTestSystem):
             #                    }]
             #            test_result_dict[benchmark] = test_result
             #return [value for key, value in test_result_dict.iteritems()]
+            logger.debug("JSON attachments missing")
             return []
 
 
