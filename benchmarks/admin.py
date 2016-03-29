@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from .models import Manifest, Result, ResultData, TestJob
-
+from .tasks import set_testjob_results
 
 @admin.register(Manifest)
 class ManifestAdmin(admin.ModelAdmin):
@@ -18,7 +18,12 @@ class ResultAdmin(admin.ModelAdmin):
 @admin.register(TestJob)
 class TestJobAdmin(admin.ModelAdmin):
     list_display = ('id', 'url', 'status', 'completed', 'created_at')
+    actions = ['force_fetch_results']
 
+    def force_fetch_results(self, request, queryset):
+        for testjob in queryset.all():
+            set_testjob_results.delay(testjob)
+    force_fetch_results.short_description = "Force fetch results"
 
 @admin.register(ResultData)
 class ResultDataAdmin(admin.ModelAdmin):

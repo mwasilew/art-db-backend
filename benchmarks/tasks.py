@@ -38,17 +38,26 @@ def set_testjob_results(self, testjob):
         testjob.testrunnerclass = tester.get_result_class_name(testjob.id)
         testjob.initialized = True
         testjob.save()
+        tester = getattr(testminer, testjob.testrunnerclass)(
+            testjob.testrunnerurl, username, password
+        )
 
     if testjob.status not in ["Complete", "Incomplete", "Canceled"]:
+        logger.debug("Saving job({0}) status: {1}".format(testjob.id, testjob.status))
         testjob.save()
         return
 
     testjob.definition = tester.get_test_job_details(testjob.id)['definition']
     testjob.completed = True
+    logger.debug("Test job({0}) completed: {1}".format(testjob.id, testjob.completed))
     if testjob.status in ["Incomplete", "Canceled"]:
+        logger.debug("Saving job({0}) status: {1}".format(testjob.id, testjob.status))
         testjob.save()
         return
 
+    logger.debug("Calling testminer")
+    logger.debug("Tester class:{0}".format(tester.__class__.__name__))
+    logger.debug("Testjob:{0}".format(testjob.id))
     test_results = tester.get_test_job_results(testjob.id)
 
     if not test_results and testjob.testrunnerclass != "GenericLavaTestSystem":
