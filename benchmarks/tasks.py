@@ -133,7 +133,7 @@ def update_jenkins(self, result):
         logger.error("No credentials found for %s" % host)
         return
 
-    key = settings.CREDENTIALS[host][1]
+    username, password = settings.CREDENTIALS[host]
 
     description = render_to_string("jenkins_update.html", {
         "host": settings.URL,
@@ -141,29 +141,56 @@ def update_jenkins(self, result):
         "testjobs": models.TestJob.objects.filter(result=result)
     })
 
-    jenkins_client_call(
-        host,
-        key,
-        [
-            "set-build-description",
-            result.name,
-            str(result.build_id),
-            description,
-        ]
-    )
+    auth = requests.auth.HTTPBasicAuth(username, password)
 
+    crumb_url = ("https://{0}/jenkins/crumbIssuer/api/xml"
+                 "?xpath=concat(//crumbRequestField,%22:%22,//crumb)".format(host))
 
-jenkins_cli_client = os.path.dirname(__file__) + '/jenkins-cli.jar'
+    crumb_response = requests.get(crumb_url, auth=auth)
 
+    if crumb_response.status_code != 200:
+        logger.error("crumb retrieval failed with status {0}".format(crumb_response.status_code))
+        logger.error(crumb_response.text)
+        return
 
-def jenkins_client_call(host, key, args):
-    cmd = [
-        'java', '-jar', jenkins_cli_client,
-        '-s', 'https://{0}/jenkins'.format(host),
-        '-i', key,
-    ] + args
+    crumb = crumb_response.text
+    logger.info("crumb received")
 
-    subprocess.check_call(cmd)
+    data = urlencode({'description': description, "crumb": crumb.split(":")[1]})
+
+    headers = {
+        crumb.split(":")[0]: crumb.split(":")[1],
+        "Content-Length": len(data),
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+
+    url = result.build_url + "submitDescription"
+
+    response = None
+
+    for _ in range(3):  # retry
+        try:
+            response = requests.post(url, data=data, headers=headers,
+                                     auth=auth, verify=True)
+
+        except requests.exceptions.RequestException:
+            continue
+
+        if response.status_code == 200:
+            logger.info("Jenkins updated for {0}".format(result))
+            return
+        if response.status_code == 404:
+            logger.warning("Jenkins result not longer available {0}".format(result))
+            result.completed = True
+            result.reported = True
+            result.save()
+            return
+        logger.warning("Jenkins updated failed, retrying")
+
+    logger.error(u"Jenkins update fail for {0}".format(result))
+
+    if response:
+        response.raise_for_status()
 
 
 @celery_app.task(bind=True)
