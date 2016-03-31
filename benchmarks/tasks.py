@@ -1,5 +1,6 @@
 import os
 import urlparse
+import re
 import requests
 import subprocess
 
@@ -141,16 +142,28 @@ def update_jenkins(self, result):
         "testjobs": models.TestJob.objects.filter(result=result)
     })
 
-    jenkins_client_call(
-        host,
-        key,
-        [
-            "set-build-description",
-            result.name,
-            str(result.build_id),
-            description,
-        ]
-    )
+    try:
+        jenkins_client_call(
+            host,
+            key,
+            [
+                "set-build-description",
+                result.name,
+                str(result.build_id),
+                description,
+            ]
+        )
+    except subprocess.CalledProcessError as error:
+        # FIXME the Jenkins CLI tool does not provide any way of checking
+        # whether a build exists or not, it will just crash on
+        # NullPointerException if the build we are trying to update does not
+        # exist.
+        if re.match('NullPointerException', error.message) and \
+           re.match('hudson.cli.SetBuildDescriptionCommand.run', error.message):
+            logger.warning("Exception when updating build description - build not found")
+            logger.warning(error.message)
+        else:
+            raise
 
 
 jenkins_cli_client = os.path.dirname(__file__) + '/jenkins-cli.jar'
