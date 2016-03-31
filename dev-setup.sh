@@ -7,7 +7,7 @@ get_data() {
   sed -e '1,/<<'$key'$/ d; /^'$key'/,$ d' $0
 }
 
-sudo DEBIAN_FRONTEND=noninteractive apt-get -qy install python-dev python-pip libffi-dev libssl-dev git wget python-virtualenv
+sudo DEBIAN_FRONTEND=noninteractive apt-get -qy install python-dev python-pip libffi-dev libssl-dev git wget python-virtualenv openjdk-7-jre-headless
 
 get_data POSTGRESQL_KEY | sudo apt-key add -
 
