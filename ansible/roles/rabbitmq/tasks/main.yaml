@@ -12,3 +12,10 @@
   tags:
     - install
     - update
+
+- name: rabbitmq vhost
+  shell: sudo rabbitmqctl add_vhost {{hostname}}
+  ignore_errors: on
+
+- name: rabbitmq vhost permissions
+  shell: rabbitmqctl set_permissions -p {{hostname}} guest ".*" ".*" ".*"

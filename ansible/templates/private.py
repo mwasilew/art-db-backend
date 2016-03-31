@@ -3,6 +3,7 @@ from . import *
 
 URL = "https://{{ hostname }}"
 CELERY_SEND_TASK_ERROR_EMAILS = True
+BROKER_URL = 'amqp://guest:guest@localhost:5672/{{hostname}}'
 
 AUTH_CROWD_ALWAYS_UPDATE_USER = False
 AUTH_CROWD_ALWAYS_UPDATE_GROUPS = False
