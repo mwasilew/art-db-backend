@@ -153,9 +153,7 @@ class ResultViewSet(viewsets.ModelViewSet):
     @detail_route()
     def benchmarks(self, request, pk=None):
         result = self.get_object()
-        benchmarks = (benchmarks_models.ResultData.objects
-                      .filter(result=result)
-                      .select_related("benchmark"))
+        benchmarks = result.data.select_related("benchmark").all()
 
         serializer = serializers.ResultDataSerializer(benchmarks, many=True)
         return response.Response(serializer.data)
