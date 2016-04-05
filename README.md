@@ -116,6 +116,12 @@ python manage.py test
 
 Those can be changed with `-e` option
 
+Controlling the celery daemons:
+
+```
+sudo -u www-data supervisorctl -c /srv/supervisor/config.conf COMMAND [ARGS]
+``
+
 ### staging
 
 ```bash
