@@ -163,7 +163,7 @@ def update_jenkins(self, result):
             logger.warning("Exception when updating build description - build not found")
             logger.warning(error.message)
         else:
-            raise
+            logger.error(error.output)
 
 
 jenkins_cli_client = os.path.dirname(__file__) + '/jenkins-cli.jar'
@@ -176,7 +176,7 @@ def jenkins_client_call(host, key, args):
         '-i', key,
     ] + args
 
-    subprocess.check_call(cmd)
+    subprocess.check_output(cmd, stderr=subprocess.STDOUT)
 
 
 @celery_app.task(bind=True)
