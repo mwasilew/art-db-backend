@@ -21,11 +21,12 @@
     <dt>Gerrit Patchset Number</dt>
     <dd>{{ build.gerrit_patchset_number || "not set" }}</dd>
 
-    <dt ng-show="baseline">Baseline</dt>
-    <dd ng-show="baseline">
-      <a ng-href="{{ baseline.permalink }}" target="_blank">
-	{{ baseline.build_id }}#{{ baseline.name }}
+    <dt>Baseline</dt>
+    <dd>
+      <a ng-show="baseline" ng-href="{{ baseline.permalink }}" target="_blank">
+	#{{ baseline.build_id }} {{ baseline.name }}
       </a>
+      <em ng-hide="baseline">No baseline build</em>
     </dd>
   </dl>
 
