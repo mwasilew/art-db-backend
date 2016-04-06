@@ -419,3 +419,9 @@ class ResultDataTestCase(TestCase):
           measurement=10)
 
         self.assertEqual(previous_master, current_master.to_compare())
+
+class TestJobTestCase(TestCase):
+
+    def test_metadata_is_empty_by_default(self):
+        job = TestJob()
+        self.assertEqual({}, job.metadata)

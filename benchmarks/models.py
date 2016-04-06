@@ -6,6 +6,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.db.models import Count
 from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.fields import HStoreField
 
 
 class ManifestReduced(models.Model):
@@ -210,6 +211,8 @@ class TestJob(models.Model):
     testrunnerurl = models.CharField(blank=True, default="https://validation.linaro.org/", max_length=256)
 
     created_at = models.DateTimeField(default=timezone.now)
+
+    metadata = HStoreField(default=dict)
 
     def save(self, *args, **kwargs):
         super(TestJob, self).save(*args, **kwargs)
