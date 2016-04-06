@@ -3,6 +3,7 @@ import urlparse
 import re
 import requests
 import subprocess
+import traceback
 
 from dateutil.relativedelta import relativedelta
 from urllib import urlencode
@@ -163,7 +164,7 @@ def update_jenkins(self, result):
             logger.warning("Exception when updating build description - build not found")
             logger.warning(error.message)
         else:
-            logger.error(error.output)
+            logger.error(error.output + "\n" + traceback.format_exc(error))
 
 
 jenkins_cli_client = os.path.dirname(__file__) + '/jenkins-cli.jar'
