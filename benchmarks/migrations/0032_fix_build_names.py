@@ -21,5 +21,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(fix_build_names),
+        migrations.RunPython(
+            fix_build_names,
+            reverse_code=migrations.RunPython.noop,
+        ),
     ]
