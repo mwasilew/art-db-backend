@@ -419,3 +419,57 @@ class ResultDataTestCase(TestCase):
           measurement=10)
 
         self.assertEqual(previous_master, current_master.to_compare())
+
+class TestJobTestCase(TestCase):
+
+    def test_metadata_is_empty_by_default(self):
+        job = TestJob()
+        self.assertEqual({}, job.metadata)
+
+    def test_invalid_json(self):
+        job = TestJob(definition='//')
+        job.__extract_metadata__()
+        self.assertEqual({}, job.metadata)
+
+    def test_extract_metadata_from_empty_definition(self):
+        job = TestJob(definition=None)
+        job.__extract_metadata__() # just not crashing is good enough here
+
+    def test_extract_metadata_from_json_definition(self):
+        job = TestJob(definition='{ "metadata" : { "foo": "bar", "baz": "qux" } }')
+        job.__extract_metadata__()
+
+        self.assertEqual(job.metadata['foo'], 'bar')
+        self.assertEqual(job.metadata['baz'], 'qux')
+
+    def test_extract_metadata_from_nested_metadata(self):
+        job = TestJob(definition='{ "something": { "name": "foobar", "metadata" : { "foo": "bar", "baz": "qux" } } }')
+        job.__extract_metadata__()
+
+        self.assertEqual(job.metadata['foo'], 'bar')
+        self.assertEqual(job.metadata['baz'], 'qux')
+
+    def test_extract_metadata_from_lava_job(self):
+        job = TestJob(definition=u'{"actions": [{"command": "dummy_deploy", "metadata": {"foo": "bar"}}]}')
+        job.__extract_metadata__()
+        self.assertEqual(job.metadata['foo'], 'bar')
+
+    def test_extract_metadata_from_lava_job_with_multiple_actions(self):
+        job = TestJob(definition=u'{"actions": [{"command": "dummy_deploy", "metadata": {"foo": "bar"}}, {"command": "dummy_deploy", "metadata": {"baz": "qux"}}]}')
+        job.__extract_metadata__()
+        self.assertEqual(job.metadata['foo'], 'bar')
+        self.assertEqual(job.metadata['baz'], 'qux')
+
+    def test_extracts_metadata_before_saving(self):
+        result = G(Result, manifest__manifest=MINIMAL_XML)
+        job = TestJob(result=result, definition='{"metadata": { "foo" : "bar"}}')
+        job.save()
+        self.assertEqual("bar", job.metadata['foo'])
+
+    def test_remove_tag(self):
+        result = G(Result, manifest__manifest=MINIMAL_XML)
+        job = G(TestJob, result=result, definition='{"metadata": { "foo" : "bar"}}')
+        self.assertEqual("bar", job.metadata['foo'])
+        job.definition = "{}"
+        job.save()
+        self.assertFalse("foo" in job.metadata.keys())

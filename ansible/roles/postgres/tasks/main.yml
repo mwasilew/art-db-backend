@@ -32,13 +32,13 @@
   tags:
     - database
 
-#- name: Alter postgresql database template for extension hstore
-#  command: psql {{db_name}} -c 'create extension if not exists hstore;'
-#  register: psql_hstore
-#  sudo: yes
-#  sudo_user: postgres
-#  ignore_errors: True
-#  changed_when: not psql_hstore.stderr
-#  when: setting_hstore_extension == true
-#  tags:
-#    - database
+- name: Alter postgresql database template for extension hstore
+  command: psql {{db_name}} -c 'create extension if not exists hstore;'
+  register: psql_hstore
+  sudo: yes
+  sudo_user: postgres
+  ignore_errors: True
+  changed_when: not psql_hstore.stderr
+  when: setting_hstore_extension == true
+  tags:
+    - database

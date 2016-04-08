@@ -11,6 +11,7 @@ env:
 - DJANGO_SETTINGS_MODULE=crayonbox.settings.travis
 
 before_install:
+  - psql -d template1 -c 'create extension hstore;' -U postgres
   - psql -c 'create database "art-reports";' -U postgres
 
 install:

@@ -30,6 +30,7 @@ fi
 # create database and user
 sudo -u postgres createuser --createdb "$USER" || true
 sudo -u postgres psql -c "ALTER USER $USER WITH PASSWORD 'test'"
+sudo -u postgres psql -d 'template1' -c "CREATE EXTENSION IF NOT EXISTS hstore;"
 createdb art-reports || true
 .virtualenv/bin/python ./manage.py migrate
 
