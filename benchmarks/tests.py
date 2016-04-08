@@ -454,6 +454,12 @@ class TestJobTestCase(TestCase):
         job.__extract_metadata__()
         self.assertEqual(job.metadata['foo'], 'bar')
 
+    def test_extract_metadata_from_lava_job_with_multiple_actions(self):
+        job = TestJob(definition=u'{"actions": [{"command": "dummy_deploy", "metadata": {"foo": "bar"}}, {"command": "dummy_deploy", "metadata": {"baz": "qux"}}]}')
+        job.__extract_metadata__()
+        self.assertEqual(job.metadata['foo'], 'bar')
+        self.assertEqual(job.metadata['baz'], 'qux')
+
     def test_extracts_metadata_before_saving(self):
         result = G(Result, manifest__manifest=MINIMAL_XML)
         job = TestJob(result=result, definition='{"metadata": { "foo" : "bar"}}')
