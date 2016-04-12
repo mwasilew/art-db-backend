@@ -22,6 +22,11 @@ a:hover {
     text-decoration: none;
 }
 
+a.toggle-button {
+	cursor: pointer;
+	color: #babdb6
+}
+
 .nav-pills > li > a {
 	border-radius: 0 !important;
 	padding: 8px 12px;
