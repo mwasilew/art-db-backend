@@ -163,6 +163,8 @@ app.controller('BuildDetail', ['$scope', '$http', '$routeParams', '$q', '$routeP
 
     $scope.queryBenchmarks = $routeParams.benchmarks || "";
 
+    $scope.isEmpty = _.isEmpty;
+
     $q.all([
         $http.get('/api/result/' + $routeParams.buildId + '/'),
         $http.get('/api/result/' + $routeParams.buildId + '/benchmarks/'),
