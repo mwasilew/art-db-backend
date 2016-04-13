@@ -164,9 +164,6 @@ class LavaTestSystem(GenericLavaTestSystem):
         if self.repo_prefix and os.path.exists(self.repo_home):
             shutil.rmtree(self.repo_home)
 
-    def get_test_job_results(self, job_id):
-        return None
-
     def _extract_test_repos(self, testdef_repo_list):
         return_list = []
         for index, repo in enumerate(testdef_repo_list):
