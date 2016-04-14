@@ -45,8 +45,23 @@
       <tbody>
 	<tr ng-repeat="test in build.test_jobs">
 	  <td>
-	    <a href="{{ test.url }}" target="_blank">
-	      {{ test.id }}</a>
+	    <a href="{{ test.url }}" target="_blank">{{ test.id }}</a>
+	    <a class='toggle-button' ng-hide='isEmpty(test.metadata)' ng-click='display = !display'>
+	      <span ng-hide='display' class='fa fa-plus-square'></span>
+	      <span ng-show='display' class='fa fa-minus-square'></span>
+	    </a>
+
+	    <div ng-show='display'>
+	      <table class='table'>
+		<tr>
+		  <th colspan='2'><strong>Test Job Metadata</strong></th>
+		</tr>
+		<tr ng-repeat='(key, value) in test.metadata'>
+		  <td><tt>{{key}}</tt></td>
+		  <td><tt>{{value}}</tt></td>
+		</tr>
+	      </table>
+	    </div>
 	  </td>
 	  <td class="text-right">
 	    <ng-include src="'/static/templates/_test_job_status.html'" />
