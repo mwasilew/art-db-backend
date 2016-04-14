@@ -39,6 +39,5 @@
   sudo_user: postgres
   ignore_errors: True
   changed_when: not psql_hstore.stderr
-  when: setting_hstore_extension == true
   tags:
     - database
