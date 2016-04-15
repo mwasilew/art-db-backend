@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [ ! -f vault.gpg ]; then
+  # create a new password file
+  openssl rand -hex 32 | gpg --encrypt --output secrets/vault.gpg
+fi
+
+gpg --quiet --batch --use-agent --decrypt secrets/vault.gpg

@@ -124,14 +124,19 @@ Controlling the celery daemons:
 sudo -u www-data supervisorctl -c /srv/supervisor/config.conf COMMAND [ARGS]
 ``
 
+### deploying
+
+Clone secrets repository from ssh://git@dev-private-git.linaro.org/qa/art-reports-secrets.git
+The destination directory should be ansible/secrets
+
 ### staging
 
 ```bash
-ansible-playbook ansible/site.yml -i ansible/hosts -l staging-art-reports.linaro.org -u {{ USER }} --ask-become-pass [[-e branch=oter-branch] [-e repo=other-repo]]
+ansible-playbook --vault-password-file='vault-passwd' ansible/site.yml -i ansible/hosts -l staging-art-reports.linaro.org -u {{ USER }} --ask-become-pass [[-e branch=oter-branch] [-e repo=other-repo]]
 ```
 
 ### production
 
 ```bash
-ansible-playbook ansible/site.yml -i ansible/hosts -l art-reports.linaro.org -u {{ USER }} --ask-become-pass [[-e branch=oter-branch] [-e repo=other-repo]]
+ansible-playbook --vault-password-file='vault-passwd' ansible/site.yml -i ansible/hosts -l art-reports.linaro.org -u {{ USER }} --ask-become-pass [[-e branch=oter-branch] [-e repo=other-repo]]
 ```
