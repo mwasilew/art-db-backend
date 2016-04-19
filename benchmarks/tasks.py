@@ -173,8 +173,8 @@ def update_jenkins(self, result):
         # whether a build exists or not, it will just crash on
         # NullPointerException if the build we are trying to update does not
         # exist.
-        if re.match('NullPointerException', error.message) and \
-           re.match('hudson.cli.SetBuildDescriptionCommand.run', error.message):
+        if re.match('NullPointerException', error.output) and \
+           re.match('hudson.cli.SetBuildDescriptionCommand.run', error.output):
             logger.warning("Exception when updating build description - build not found")
             logger.warning(error.message)
         else:
