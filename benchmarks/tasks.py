@@ -37,6 +37,9 @@ def set_testjob_results(self, testjob):
 def store_testjob_data(testjob, test_results):
     testjob.save()
 
+    if testjob.results_loaded:
+        return
+
     if not test_results:
         return
 
@@ -60,6 +63,9 @@ def store_testjob_data(testjob, test_results):
                 result=testjob.result,
                 benchmark=benchmark
             )
+
+    testjob.results_loaded = True
+    testjob.save()
 
 
 def get_testjob_data(testjob):

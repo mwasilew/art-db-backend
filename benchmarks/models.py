@@ -213,6 +213,8 @@ class TestJob(models.Model):
     testrunnerclass = models.CharField(blank=True, default="GenericLavaTestSystem", max_length=128)
     testrunnerurl = models.CharField(blank=True, default="https://validation.linaro.org/", max_length=256)
 
+    results_loaded = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(default=timezone.now)
 
     metadata = HStoreField(default=dict)

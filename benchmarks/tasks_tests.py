@@ -21,6 +21,40 @@ def set_status(status):
         testjob.status = status
     return f
 
+
+def populate_successful_job(job):
+    job.status = 'Complete'
+    job.completed = True
+    job.definition = '{ "metadata" : { "foo": "bar" } }'
+
+    test_results = [
+        {
+            "board": "good-board",
+            "benchmark_name": "MyBenchmark",
+            "subscore": [
+                {
+                    "name": "MyBenchmark1",
+                    "measurement": 1.5,
+                },
+                {
+                    "name": "MyBenchmark1",
+                    "measurement": 1.7,
+                },
+                {
+                    "name": "MyBenchmark2",
+                    "measurement": 3.0,
+                },
+                {
+                    "name": "MyBenchmark2",
+                    "measurement": 3.2,
+                },
+            ]
+        },
+    ]
+
+    return test_results
+
+
 class LavaFetchTest(TestCase):
 
     @patch("benchmarks.tasks.get_testjob_data", lava_xmlrpc_503)
@@ -38,3 +72,13 @@ class LavaFetchTest(TestCase):
         testjob_from_db = TestJob.objects.get(pk=testjob.id)
         self.assertEqual("Complete", testjob_from_db.status)
 
+
+    @patch("benchmarks.tasks.get_testjob_data", populate_successful_job)
+    def test_dont_duplicate_test_results(self):
+        result = G(Result, manifest__manifest=MINIMAL_XML)
+        testjob = G(TestJob, result=result, status='Submitted')
+
+        set_testjob_results.apply(args=[testjob])
+        set_testjob_results.apply(args=[testjob])
+
+        self.assertEqual(2, result.data.count())
