@@ -1,5 +1,4 @@
 import hashlib
-import json
 import xml.etree.ElementTree as ET
 
 from django.db import models
@@ -8,6 +7,9 @@ from django.utils import timezone
 from django.db.models import Count
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.fields import HStoreField
+
+
+from benchmarks.metadata import extract_metadata
 
 
 class ManifestReduced(models.Model):
@@ -216,7 +218,7 @@ class TestJob(models.Model):
     metadata = HStoreField(default=dict)
 
     def save(self, *args, **kwargs):
-        self.__extract_metadata__()
+        self.metadata = extract_metadata(self.definition)
         super(TestJob, self).save(*args, **kwargs)
         test_jobs = self.result.test_jobs
         self.result.completed = (test_jobs.count() == test_jobs.filter(completed=True).count())
@@ -227,32 +229,6 @@ class TestJob(models.Model):
 
     def __unicode__(self):
         return '<%s %s#%s %s>' % (self.id, self.result.build_id, self.result.name, self.status)
-
-    def __extract_metadata__(self):
-        if self.definition:
-            possible_loaders = [
-                json.loads,
-            ]
-            for loader in possible_loaders:
-                try:
-                    data = loader(self.definition)
-                    self.metadata = {}
-                    self.__extract_metadata_recursively__(data)
-                    return
-                except ValueError:
-                    pass
-
-    def __extract_metadata_recursively__(self, data):
-        if type(data) is dict:
-            for key in data:
-                if key == 'metadata':
-                    for k in data[key]:
-                        self.metadata[k] = data[key][k]
-                else:
-                    self.__extract_metadata_recursively__(data[key])
-        elif type(data) is list:
-            for item in data:
-                self.__extract_metadata_recursively__(item)
 
 
 class Benchmark(models.Model):
