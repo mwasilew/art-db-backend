@@ -203,14 +203,21 @@ def jenkins_client_call(host, key, args):
 @celery_app.task(bind=True)
 def check_result_completeness(self):
     for result in models.Result.objects.filter(reported=False):
+        save = False
+
         if result.completed:
             report_email.apply_async(args=[result])
             report_gerrit.apply_async(args=[result])
-
             result.reported = True
+            save = True
+
+        if result.testjobs_updated:
+            update_jenkins.apply_async(args=[result])
+            save = True
+
+        if save:
             result.save()
 
-        update_jenkins.apply_async(args=[result])
 
 
 @celery_app.task(bind=True)

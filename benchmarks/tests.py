@@ -44,6 +44,28 @@ class ResultTestCase(TestCase):
         testjob.completed = True
         self.assertEqual(result.completed, False)
 
+    def test_updated_at_on_creation(self):
+        result = G(Result, manifest__manifest=MINIMAL_XML)
+        self.assertTrue(result.updated_at is not None)
+
+    def test_testjobs_updated(self):
+
+        present = timezone.now()
+        past = present - relativedelta(days=1)
+
+        result = G(Result, manifest__manifest=MINIMAL_XML)
+        testjob = G(TestJob, result=result, completed=False, updated_at=present)
+
+        result.updated_at = past
+        self.assertEqual(True, result.testjobs_updated)
+
+        result.updated_at = present
+        self.assertEqual(False, result.testjobs_updated)
+
+        result.updated_at = None
+        result.testjobs_updated # we are happy it this just doesn't crash
+
+
 class ResultManagerTestCase(TestCase):
 
     def test_compare_against_baseline_with_some_missing_benchmarks(self):
