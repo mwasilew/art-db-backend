@@ -32,12 +32,16 @@ class GenericLavaTestSystemTest(TestCase):
 class LavaServerExceptionTest(TestCase):
 
     def test_status_code(self):
-        ex = LavaServerException(200)
+        ex = LavaServerException('http://example.com/', 200)
         self.assertEqual(200, ex.status_code)
 
     def test_status_code_as_string(self):
-        ex = LavaServerException("404")
+        ex = LavaServerException('http://example.com/', "404")
         self.assertEqual(404, ex.status_code)
+
+    def test_includes_hostname_and_status_code_in_error_message(self):
+        ex = LavaServerException('http://example.com/', 500)
+        self.assertTrue(re.match('http://example.com.*500', ex.message) is not None)
 
 
 class LavaResponseExceptionTest(TestCase):

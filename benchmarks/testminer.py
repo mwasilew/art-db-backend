@@ -58,9 +58,10 @@ class TestSystem(object):
 
 
 class LavaServerException(Exception):
-    def __init__(self, status_code):
+    def __init__(self, url, status_code):
         self.status_code = int(status_code)
-        super(Exception, self).__init__("HTTP status = " + str(status_code))
+        message = "%s returned status code %d" % (url, self.status_code)
+        super(Exception, self).__init__(message)
 
 
 class LavaResponseException(Exception):
@@ -145,7 +146,7 @@ class GenericLavaTestSystem(TestSystem):
                     e.faultCode, e.faultString, payload)
                 raise LavaResponseException(message)
         else:
-            raise LavaServerException(response.status_code)
+            raise LavaServerException(self.xmlrpc_url, response.status_code)
 
 
 class LavaTestSystem(GenericLavaTestSystem):
