@@ -158,6 +158,7 @@ class Result(models.Model):
     gerrit_change_id = models.CharField(max_length=42, blank=True, default="")
 
     created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
 
     completed = models.BooleanField(default=False)
     reported = models.BooleanField(default=False)
@@ -195,6 +196,13 @@ class Result(models.Model):
             return self.baseline
         return None
 
+    @property
+    def testjobs_updated(self):
+        if not self.updated_at:
+            return True
+        jobs = self.test_jobs.filter(updated_at__gt=self.updated_at)
+        return jobs.exists()
+
     def __unicode__(self):
         return "%s - %s" % (self.pk, self.build_url)
 
@@ -213,7 +221,10 @@ class TestJob(models.Model):
     testrunnerclass = models.CharField(blank=True, default="GenericLavaTestSystem", max_length=128)
     testrunnerurl = models.CharField(blank=True, default="https://validation.linaro.org/", max_length=256)
 
+    results_loaded = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
 
     metadata = HStoreField(default=dict)
 

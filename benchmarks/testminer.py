@@ -58,11 +58,14 @@ class TestSystem(object):
 
 
 class LavaServerException(Exception):
-    def __init__(self, *args):
-        self.args = args
+    def __init__(self, url, status_code):
+        self.status_code = int(status_code)
+        message = "%s returned status code %d" % (url, self.status_code)
+        super(Exception, self).__init__(message)
 
-    def __str__(self):
-        return self.args
+
+class LavaResponseException(Exception):
+    pass
 
 
 class GenericLavaTestSystem(TestSystem):
@@ -141,9 +144,9 @@ class GenericLavaTestSystem(TestSystem):
             except xmlrpclib.Fault as e:
                 message = "Fault code: %d, Fault string: %s\n %s" % (
                     e.faultCode, e.faultString, payload)
-                raise LavaServerException(message)
+                raise LavaResponseException(message)
         else:
-            raise LavaServerException(response.status_code)
+            raise LavaServerException(self.xmlrpc_url, response.status_code)
 
 
 class LavaTestSystem(GenericLavaTestSystem):
@@ -163,9 +166,6 @@ class LavaTestSystem(GenericLavaTestSystem):
             shutil.rmtree(repo_dir)
         if self.repo_prefix and os.path.exists(self.repo_home):
             shutil.rmtree(self.repo_home)
-
-    def get_test_job_results(self, job_id):
-        return None
 
     def _extract_test_repos(self, testdef_repo_list):
         return_list = []
