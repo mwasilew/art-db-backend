@@ -30,6 +30,7 @@ def set_testjob_results(self, testjob):
     except testminer.LavaServerException as ex:
         if ex.status_code == 503:
             # server is too busy or in maintaince; bail out, will try again later
+            logger.info(ex.message)
             return
         else:
             raise
