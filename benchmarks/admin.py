@@ -22,6 +22,9 @@ class TestJobAdmin(admin.ModelAdmin):
 
     def force_fetch_results(self, request, queryset):
         for testjob in queryset.all():
+            testjob.initialized = False
+            testjob.completed = False
+            testjob.results_loaded = False
             set_testjob_results.delay(testjob)
     force_fetch_results.short_description = "Force fetch results"
 

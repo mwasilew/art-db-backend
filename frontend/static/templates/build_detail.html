@@ -45,7 +45,7 @@
       <tbody>
 	<tr ng-repeat="test in build.test_jobs">
 	  <td>
-	    <a href="{{ test.url }}" target="_blank">{{ test.id }}</a>
+        <a href="{{ test.url }}" target="_blank">{{ test.id }}</a> {{ test.name }}
 	    <a class='toggle-button' ng-hide='isEmpty(test.metadata)' ng-click='display = !display'>
 	      <span ng-hide='display' class='fa fa-plus-square'></span>
 	      <span ng-show='display' class='fa fa-minus-square'></span>

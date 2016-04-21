@@ -6,12 +6,18 @@ def extract_metadata(definition):
     parser.parse()
     return parser.metadata
 
+def extract_name(definition):
+    parser = MetadataParser(definition)
+    parser.parse()
+    return parser.name
+
 
 class MetadataParser(object):
 
     def __init__(self, definition):
         self.definition = definition
         self.metadata = {}
+        self.name = ""
 
     def parse(self):
         if self.definition:
@@ -33,6 +39,8 @@ class MetadataParser(object):
                 if key == 'metadata':
                     for k in data[key]:
                         self.metadata[k] = data[key][k]
+                elif key == 'job_name':
+                    self.name = data[key]
                 else:
                     self.__extract_metadata_recursively__(data[key])
         elif type(data) is list:

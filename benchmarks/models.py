@@ -9,7 +9,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.fields import HStoreField
 
 
-from benchmarks.metadata import extract_metadata
+from benchmarks.metadata import extract_metadata, extract_name
 
 
 class ManifestReduced(models.Model):
@@ -212,6 +212,7 @@ class TestJob(models.Model):
 
     id = models.CharField(primary_key=True, max_length=100, blank=False)
 
+    name = models.CharField(blank=True, default="", max_length=512)
     url = models.URLField(blank=True, null=True)
     status = models.CharField(blank=True, default="", max_length=16)
     definition = models.TextField(blank=True, null=True)
@@ -230,6 +231,7 @@ class TestJob(models.Model):
 
     def save(self, *args, **kwargs):
         self.metadata = extract_metadata(self.definition)
+        self.name = extract_name(self.definition)
         super(TestJob, self).save(*args, **kwargs)
         test_jobs = self.result.test_jobs
         self.result.completed = (test_jobs.count() == test_jobs.filter(completed=True).count())

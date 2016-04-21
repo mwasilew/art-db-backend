@@ -125,6 +125,12 @@ class GenericLavaTestSystem(TestSystem):
                             return "ArtMicrobenchmarksTestResults"
                         if test_repo['testdef'].endswith("wa2host_postprocessing.yaml"):
                             return "ArtWATestResults"
+                        if test_repo['testdef'].endswith("lava-android-benchmark-host.yaml"):
+                            return "AndroidMultinodeBenchmarkResults"
+                        if test_repo['testdef'].endswith("application-benchmark-host.yaml"):
+                            return "AndroidApplicationsBenchmarkResults"
+                        if test_repo['testdef'].endswith("cts-host.yaml"):
+                            return "AndroidCtsTestResults"
         return "GenericLavaTestSystem"
 
     def call_xmlrpc(self, method_name, *method_params):
@@ -694,3 +700,73 @@ class ArtWATestResults(LavaTestSystem):
             return (None, None)
         return (db_attachments[0][0], base64.b64decode(db_attachments[0][1]))
 
+
+class AndroidMultinodeBenchmarkResults(LavaTestSystem):
+    def __init__(self, *args):
+        self.host_test_id = "lava-android-benchmark-host"
+        super(AndroidMultinodeBenchmarkResults, self).__init__(*args)
+
+    def get_test_job_results(self, test_job_id):
+        if self.host_test_id == None:
+            return []
+        logger.debug("Multinode measurement parsing from: {0}".format(self.host_test_id))
+
+        status = self.call_xmlrpc('scheduler.job_status', test_job_id)
+
+        if not ('bundle_sha1' in status and status['bundle_sha1']):
+            return []
+
+        test_result_list = []
+
+        sha1 = status['bundle_sha1']
+        result_bundle = self.call_xmlrpc('dashboard.get', sha1)
+        bundle = json.loads(result_bundle['content'])
+
+        target = [t for t in bundle['test_runs'] if t['test_id'] == 'multinode-target']
+        if target:
+            target = iter(target).next()
+        else:
+            return test_result_list
+        host = [t for t in bundle['test_runs'] if t['test_id'] == self.host_test_id]
+        if host:
+            host = iter(host).next()
+        else:
+            return test_result_list
+        src = (s for s in host['software_context']['sources'] if 'test_params' in s).next()
+
+        if 'test_results' not in host.keys():
+            return []
+        test_result_dict = {}
+        for test in host['test_results']:
+            if 'measurement' in test.keys():
+                benchmark, test_case_name = test['test_case_id'].split("_", 1)
+                if benchmark in test_result_dict.keys():
+                    test_result = test_result_dict[benchmark]
+                    test_result['subscore'].append(
+                            {"name": test_case_name,
+                             "measurement": float(test['measurement'])
+                            })
+                else:
+                    test_result = {}
+                    test_result['board'] = target['attributes']['target']
+                    test_result['board_config'] = target['attributes']['target']
+                    # benchmark iteration
+                    test_result['benchmark_name'] = benchmark
+                    test_result['subscore'] = [
+                            {"name": test_case_name,
+                             "measurement": float(test['measurement'])
+                            }]
+                    test_result_dict[benchmark] = test_result
+        return [value for key, value in test_result_dict.iteritems()]
+
+
+class AndroidApplicationsBenchmarkResults(AndroidMultinodeBenchmarkResults):
+    def __init__(self, *args):
+        super(AndroidApplicationsBenchmarkResults, self).__init__(*args)
+        self.host_test_id = "application-benchmark-host"
+
+
+class AndroidCtsTestResults(AndroidMultinodeBenchmarkResults):
+    def __init__(self, *args):
+        super(AndroidCtsTestResults, self).__init__(*args)
+        self.host_test_id = "cts-host"
