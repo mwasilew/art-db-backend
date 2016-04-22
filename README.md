@@ -1,5 +1,23 @@
 # art-reports
 
+## quick start with vagrant
+
+```
+vagrant up
+vagrant ssh
+```
+
+Inside the VM, you need to start the development server manually:
+
+```
+cd /vagrant
+source .virtualenv/bin/activate
+./manage.py runserver 0.0.0.0:0000
+```
+
+Then the web UI will be available from your host machine at
+http://localhost:8000/
+
 ## setup (ubuntu)
 
 1) required system packages
