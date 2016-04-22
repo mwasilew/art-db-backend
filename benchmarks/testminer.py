@@ -512,8 +512,6 @@ class ArtMicrobenchmarksTestResults(LavaTestSystem):
         if not ('bundle_sha1' in status and status['bundle_sha1']):
             return []
 
-        test_result_list = []
-
         sha1 = status['bundle_sha1']
         logger.debug("Bundle SHA1: {0}".format(sha1))
         result_bundle = self.call_xmlrpc('dashboard.get', sha1)
@@ -521,15 +519,15 @@ class ArtMicrobenchmarksTestResults(LavaTestSystem):
 
         target = [t for t in bundle['test_runs'] if t['test_id'] == 'multinode-target']
         if target:
-            target = iter(target).next()
+            target = target[0]
         else:
-            return test_result_list
+            return []
         host = [t for t in bundle['test_runs'] if t['test_id'] == 'art-microbenchmarks']
         if host:
-            host = iter(host).next()
+            host = host[0]
         else:
-            return test_result_list
-        src = (s for s in host['software_context']['sources'] if 'test_params' in s).next()
+            return []
+        src = [s for s in host['software_context']['sources'] if 'test_params' in s].next()
         # This is an art-microbenchmarks test
         # The test name and test results are in the attachmented pkl file
         # get test results for the attachment
