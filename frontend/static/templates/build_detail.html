@@ -24,7 +24,7 @@
     <dt>Baseline</dt>
     <dd>
       <a ng-show="baseline" ng-href="{{ baseline.permalink }}" target="_blank">
-	#{{ baseline.build_id }} {{ baseline.name }}
+        #{{ baseline.build_id }} {{ baseline.name }}
       </a>
       <em ng-hide="baseline">No baseline build</em>
     </dd>
@@ -36,56 +36,56 @@
 
     <table class="table table-striped" ng-show="build.test_jobs.length">
       <thead>
-	<tr>
-	  <th>job id</th>
-	  <th class="text-right">status</th>
-	  <th class="text-right">resubmit</th>
-	</tr>
+        <tr>
+          <th>job id</th>
+          <th class="text-right">status</th>
+          <th class="text-right">resubmit</th>
+        </tr>
       </thead>
       <tbody>
-	<tr ng-repeat="test in build.test_jobs">
-	  <td>
-        <a href="{{ test.url }}" target="_blank">{{ test.id }}</a> {{ test.name }}
-	    <a class='toggle-button' ng-hide='isEmpty(test.metadata)' ng-click='display = !display'>
-	      <span ng-hide='display' class='fa fa-plus-square'></span>
-	      <span ng-show='display' class='fa fa-minus-square'></span>
-	    </a>
+        <tr ng-repeat="test in build.test_jobs">
+          <td>
+            <a href="{{ test.url }}" target="_blank">{{ test.id }}</a> {{ test.name }}
+            <a class='toggle-button' ng-hide='isEmpty(test.metadata)' ng-click='display = !display'>
+              <span ng-hide='display' class='fa fa-plus-square'></span>
+              <span ng-show='display' class='fa fa-minus-square'></span>
+            </a>
 
-	    <div ng-show='display'>
-	      <table class='table'>
-		<tr>
-		  <th colspan='2'><strong>Test Job Metadata</strong></th>
-		</tr>
-		<tr ng-repeat='(key, value) in test.metadata'>
-		  <td><tt>{{key}}</tt></td>
-		  <td><tt>{{value}}</tt></td>
-		</tr>
-	      </table>
-	    </div>
-	  </td>
-	  <td class="text-right">
-	    <ng-include src="'/static/templates/_test_job_status.html'" />
-	  </td>
-	  <td class="text-right" style="width: 100px">
+            <div ng-show='display'>
+              <table class='table'>
+                <tr>
+                  <th colspan='2'><strong>Test Job Metadata</strong></th>
+                </tr>
+                <tr ng-repeat='(key, value) in test.metadata'>
+                  <td><tt>{{key}}</tt></td>
+                  <td><tt>{{value}}</tt></td>
+                </tr>
+              </table>
+            </div>
+          </td>
+          <td class="text-right">
+            <ng-include src="'/static/templates/_test_job_status.html'" />
+          </td>
+          <td class="text-right" style="width: 100px">
 
-	    <span ng-hide="{{ test.status==='Complete' || test.status==='Running' || test.status==='Submitted'}}">
-	       <button type="button" class="btn btn-default" ng-hide="test.refresh"
-		       ng-click="test.refresh = true" ng-disabled="testJobUpdate">
-		 <span class="fa fa-refresh"></span>
-	       </button>
+            <span ng-hide="{{ test.status==='Complete' || test.status==='Running' || test.status==='Submitted'}}">
+               <button type="button" class="btn btn-default" ng-hide="test.refresh"
+                       ng-click="test.refresh = true" ng-disabled="testJobUpdate">
+                 <span class="fa fa-refresh"></span>
+               </button>
 
-	       <div class="btn-group" role="group" ng-show="test.refresh">
-		 <button type="button" class="btn btn-success" ng-click="test.refresh = false">
-		   <i class="fa fa-times"></i>
-		 </button>
-		 <button type="button" class="btn btn-warning" ng-click="resubmit(test)">
-		   <i class="fa fa-check"></i>
-		 </button>
-	       </div>
-	    </span>
+               <div class="btn-group" role="group" ng-show="test.refresh">
+                 <button type="button" class="btn btn-success" ng-click="test.refresh = false">
+                   <i class="fa fa-times"></i>
+                 </button>
+                 <button type="button" class="btn btn-warning" ng-click="resubmit(test)">
+                   <i class="fa fa-check"></i>
+                 </button>
+               </div>
+            </span>
 
-	  </td>
-	</tr>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
@@ -100,48 +100,48 @@
 
     <form>
       <div class="form-group">
-	<input type="text" ng-model="queryBenchmarks" class="form-control input-sm" placeholder="filter">
+        <input type="text" ng-model="queryBenchmarks" class="form-control input-sm" placeholder="filter">
       </div>
     </form>
 
     <table class="table table-striped benchmarks">
       <thead>
-	<tr>
-	  <th style="width: 60%">name (sample size)</th>
-	  <th class="text-right">current (stdev)</th>
-	  <th class="text-right">previous (stdev)</th>
-	  <th class="text-right">change</th>
-	</tr>
+        <tr>
+          <th style="width: 60%">name (sample size)</th>
+          <th class="text-right">current (stdev)</th>
+          <th class="text-right">previous (stdev)</th>
+          <th class="text-right">change</th>
+        </tr>
       </thead>
       <tbody>
 
-	<tr ng-repeat="item in benchmarksCompare | filter:filterBenchmarksCompared(queryBenchmarks)">
-	  <td>
-	    {{ item.current.benchmark }} / <b>{{ item.current.name }}</b>
-	    ({{ item.current.values.length }})
-	  </td>
-	  <td class="text-right">
-	    {{ item.current.measurement.toFixed(2) }}<br/>
-	    ({{ item.current.stdev.toFixed(2) }})
-	  </td>
-	  <td class="text-right">
-	    {{ item.previous.measurement ? item.previous.measurement.toFixed(2) : "N/A" }}<br/>
-	    {{ item.previous.stdev ? "(" + item.previous.stdev.toFixed(2) + ")": "" }}
-	  </td>
-	  <td class="text-right">
-	    <b>
-	    <span ng-if="item.change > 0" style="color:#77DD77">
-	      {{ item.change.toFixed(2) }} %
-	    </span>
-	    <span ng-if="item.change < 0" style="color:#FF6961">
-	      {{ item.change.toFixed(2) }} %
-	    </span>
-	    </b>
-	    <span ng-if="item.change === null">
-	      N/A
-	    </span>
-	  </td>
-	</tr>
+        <tr ng-repeat="item in benchmarksCompare | filter:filterBenchmarksCompared(queryBenchmarks)">
+          <td>
+            {{ item.current.benchmark }} / <b>{{ item.current.name }}</b>
+            ({{ item.current.values.length }})
+          </td>
+          <td class="text-right">
+            {{ item.current.measurement.toFixed(2) }}<br/>
+            ({{ item.current.stdev.toFixed(2) }})
+          </td>
+          <td class="text-right">
+            {{ item.previous.measurement ? item.previous.measurement.toFixed(2) : "N/A" }}<br/>
+            {{ item.previous.stdev ? "(" + item.previous.stdev.toFixed(2) + ")": "" }}
+          </td>
+          <td class="text-right">
+            <b>
+            <span ng-if="item.change > 0" style="color:#77DD77">
+              {{ item.change.toFixed(2) }} %
+            </span>
+            <span ng-if="item.change < 0" style="color:#FF6961">
+              {{ item.change.toFixed(2) }} %
+            </span>
+            </b>
+            <span ng-if="item.change === null">
+              N/A
+            </span>
+          </td>
+        </tr>
 
       </tbody>
     </table>
@@ -154,31 +154,31 @@
 
     <form>
       <div class="form-group">
-	<input type="text" ng-model="queryBenchmarks" class="form-control input-sm" placeholder="filter">
+        <input type="text" ng-model="queryBenchmarks" class="form-control input-sm" placeholder="filter">
       </div>
     </form>
 
     <table class="table table-striped benchmarks">
       <thead>
-	<tr>
-	  <th style="width: 60%">name (sample size)</th>
-	  <th class="text-right">measurement</th>
-	  <th class="text-right">stdev</th>
-	</tr>
+        <tr>
+          <th style="width: 60%">name (sample size)</th>
+          <th class="text-right">measurement</th>
+          <th class="text-right">stdev</th>
+        </tr>
       </thead>
       <tbody>
-	<tr ng-repeat="item in benchmarks | filter:filterBenchmarks(queryBenchmarks)">
-	  <td>
-	    {{ item.benchmark }} / <b>{{ item.name }}</b>
-	    ({{ item.values.length }})
-	  </td>
-	  <td class="text-right">
-	    {{ item.measurement.toFixed(2)}}
-	  </td>
-	  <td class="text-right">
-	    {{ item.stdev.toFixed(2) }}
-	  </td>
-	</tr>
+        <tr ng-repeat="item in benchmarks | filter:filterBenchmarks(queryBenchmarks)">
+          <td>
+            {{ item.benchmark }} / <b>{{ item.name }}</b>
+            ({{ item.values.length }})
+          </td>
+          <td class="text-right">
+            {{ item.measurement.toFixed(2)}}
+          </td>
+          <td class="text-right">
+            {{ item.stdev.toFixed(2) }}
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>

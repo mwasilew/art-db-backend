@@ -4,8 +4,8 @@
   <form>
     <div class="form-group">
       <input type="text" ng-change="makeSearch()"
-	     ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 500, 'blur': 0 } }"
-	     ng-model="search" class="form-control" placeholder="search">
+             ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 500, 'blur': 0 } }"
+             ng-model="search" class="form-control" placeholder="search">
     </div>
   </form>
 
@@ -14,30 +14,30 @@
   <table class="table table-striped">
     <thead>
       <tr>
-	<th style="width: 10%;">#</th>
-	<th style="width: 40%;">build name</th>
-	<th style="width: 35%;">LAVA jobs</th>
-	<th style="width: 15%;">created at</th>
+        <th style="width: 10%;">#</th>
+        <th style="width: 40%;">build name</th>
+        <th style="width: 35%;">LAVA jobs</th>
+        <th style="width: 15%;">created at</th>
       </tr>
     </thead>
     <tbody>
       <tr ng-repeat="build in page.results">
 
-	<td><a ng-href="#/build/{{ build.id }}">#{{ build.build_id }}</a></td>
+        <td><a ng-href="#/build/{{ build.id }}">#{{ build.build_id }}</a></td>
 
-	<td>
-	  <a ng-href="#/build/{{ build.id }}">{{ build.name }}</a> <br/>
-	  <a style="color:#999" href="{{ build.url }}">{{ build.url }}</a>
-	</td>
+        <td>
+          <a ng-href="#/build/{{ build.id }}">{{ build.name }}</a> <br/>
+          <a style="color:#999" href="{{ build.url }}">{{ build.url }}</a>
+        </td>
 
-	<td>
-	  <div ng-repeat="test in build.test_jobs">
+        <td>
+          <div ng-repeat="test in build.test_jobs">
             (<a href="{{ test.url }}" target="_blank">#{{ test.id }}</a>
-	    <ng-include src="'/static/templates/_test_job_status.html'"></ng-include>)
+            <ng-include src="'/static/templates/_test_job_status.html'"></ng-include>)
       </div>
-	</td>
+        </td>
 
-	<td>{{ build.created_at }}</td>
+        <td>{{ build.created_at }}</td>
       </tr>
     </tbody>
   </table>
