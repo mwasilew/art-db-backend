@@ -512,6 +512,8 @@ class ArtMicrobenchmarksTestResults(LavaTestSystem):
         if not ('bundle_sha1' in status and status['bundle_sha1']):
             return []
 
+        test_result_list = []
+
         sha1 = status['bundle_sha1']
         logger.debug("Bundle SHA1: {0}".format(sha1))
         result_bundle = self.call_xmlrpc('dashboard.get', sha1)
@@ -521,12 +523,12 @@ class ArtMicrobenchmarksTestResults(LavaTestSystem):
         if target:
             target = target[0]
         else:
-            return []
+            return test_result_list
         host = [t for t in bundle['test_runs'] if t['test_id'] == 'art-microbenchmarks']
         if host:
             host = host[0]
         else:
-            return []
+            return test_result_list
         src = [s for s in host['software_context']['sources'] if 'test_params' in s].next()
         # This is an art-microbenchmarks test
         # The test name and test results are in the attachmented pkl file
@@ -608,7 +610,7 @@ class ArtMicrobenchmarksTestResults(LavaTestSystem):
 
         host = [t for t in bundle['test_runs'] if t['test_id'] == 'art-microbenchmarks']
         if host:
-            host = iter(host).next()
+            host = host[0]
         else:
             return (None, None)
         json_attachments = [(a['pathname'], a['content']) for a in host['attachments'] if a['pathname'].endswith('json')]
@@ -626,23 +628,21 @@ class ArtWATestResults(LavaTestSystem):
         if not ('bundle_sha1' in status and status['bundle_sha1']):
             return []
 
-        test_result_list = []
-
         sha1 = status['bundle_sha1']
         result_bundle = self.call_xmlrpc('dashboard.get', sha1)
         bundle = json.loads(result_bundle['content'])
 
         target = [t for t in bundle['test_runs'] if t['test_id'] == 'wa2-target']
         if target:
-            target = iter(target).next()
+            target = target[0]
         else:
-            return test_result_list
+            return []
         host = [t for t in bundle['test_runs'] if t['test_id'] == 'wa2-host-postprocessing']
         if host:
-            host = iter(host).next()
+            host = host[0]
         else:
-            return test_result_list
-        src = (s for s in host['software_context']['sources'] if 'test_params' in s).next()
+            return []
+        src = [s for s in host['software_context']['sources'] if 'test_params' in s].next()
         db_attachments = [a['content'] for a in host['attachments'] if a['pathname'].endswith('db')]
 
         # select iteration, workload, metric, value from results;
@@ -714,23 +714,21 @@ class AndroidMultinodeBenchmarkResults(LavaTestSystem):
         if not ('bundle_sha1' in status and status['bundle_sha1']):
             return []
 
-        test_result_list = []
-
         sha1 = status['bundle_sha1']
         result_bundle = self.call_xmlrpc('dashboard.get', sha1)
         bundle = json.loads(result_bundle['content'])
 
         target = [t for t in bundle['test_runs'] if t['test_id'] == 'multinode-target']
         if target:
-            target = iter(target).next()
+            target = target[0]
         else:
-            return test_result_list
+            return []
         host = [t for t in bundle['test_runs'] if t['test_id'] == self.host_test_id]
         if host:
-            host = iter(host).next()
+            host = host[0]
         else:
-            return test_result_list
-        src = (s for s in host['software_context']['sources'] if 'test_params' in s).next()
+            return []
+        src = [s for s in host['software_context']['sources'] if 'test_params' in s].next()
 
         if 'test_results' not in host.keys():
             return []
