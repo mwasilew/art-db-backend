@@ -642,7 +642,6 @@ class ArtWATestResults(LavaTestSystem):
             host = host[0]
         else:
             return []
-        src = [s for s in host['software_context']['sources'] if 'test_params' in s].next()
         db_attachments = [a['content'] for a in host['attachments'] if a['pathname'].endswith('db')]
 
         # select iteration, workload, metric, value from results;
@@ -728,7 +727,6 @@ class AndroidMultinodeBenchmarkResults(LavaTestSystem):
             host = host[0]
         else:
             return []
-        src = [s for s in host['software_context']['sources'] if 'test_params' in s].next()
 
         if 'test_results' not in host.keys():
             return []
