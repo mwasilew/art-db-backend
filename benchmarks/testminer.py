@@ -700,8 +700,8 @@ class ArtWATestResults(LavaTestSystem):
 
 class AndroidMultinodeBenchmarkResults(LavaTestSystem):
     def __init__(self, *args):
-        super(AndroidMultinodeBenchmarkResults, self).__init__(*args)
         self.host_test_id = "lava-android-benchmark-host"
+        super(AndroidMultinodeBenchmarkResults, self).__init__(*args)
 
     def get_test_job_results(self, test_job_id):
         if self.host_test_id == None:
@@ -717,7 +717,7 @@ class AndroidMultinodeBenchmarkResults(LavaTestSystem):
         result_bundle = self.call_xmlrpc('dashboard.get', sha1)
         bundle = json.loads(result_bundle['content'])
 
-        target = [t for t in bundle['test_runs'] if t['test_id'] in ['multinode-target', 'lava-android-benchmark-target']]
+        target = [t for t in bundle['test_runs'] if t['test_id'] in ['multinode-target', 'lava-android-benchmark-target', 'target-stop']]
         if target:
             target = target[0]
         else:
@@ -733,7 +733,14 @@ class AndroidMultinodeBenchmarkResults(LavaTestSystem):
         test_result_dict = {}
         for test in host['test_results']:
             if 'measurement' in test.keys():
-                benchmark, test_case_name = test['test_case_id'].split("_", 1)
+                if "_" in test['test_case_id']:
+                    benchmark, test_case_name = test['test_case_id'].split("_", 1)
+                elif "-" in test['test_case_id']:
+                    #workaround for benchmarks that don't preserve naming convention
+                    benchmark, test_case_name = test['test_case_id'].split("-", 1)
+                else:
+                    benchmark = test['test_case_id']
+                    test_case_name = "Score"
                 if benchmark in test_result_dict.keys():
                     test_result = test_result_dict[benchmark]
                     test_result['subscore'].append(
