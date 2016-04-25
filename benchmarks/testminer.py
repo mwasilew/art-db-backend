@@ -700,8 +700,8 @@ class ArtWATestResults(LavaTestSystem):
 
 class AndroidMultinodeBenchmarkResults(LavaTestSystem):
     def __init__(self, *args):
-        self.host_test_id = "lava-android-benchmark-host"
         super(AndroidMultinodeBenchmarkResults, self).__init__(*args)
+        self.host_test_id = "lava-android-benchmark-host"
 
     def get_test_job_results(self, test_job_id):
         if self.host_test_id == None:
@@ -717,7 +717,7 @@ class AndroidMultinodeBenchmarkResults(LavaTestSystem):
         result_bundle = self.call_xmlrpc('dashboard.get', sha1)
         bundle = json.loads(result_bundle['content'])
 
-        target = [t for t in bundle['test_runs'] if t['test_id'] == 'multinode-target']
+        target = [t for t in bundle['test_runs'] if t['test_id'] in ['multinode-target', 'lava-android-benchmark-target']]
         if target:
             target = target[0]
         else:
