@@ -139,5 +139,7 @@ EMAIL_REPORTS_TO = [ "$USER@localhost.localdomain", ]
 
 EMAIL_HOST = "localhost"
 
+MEDIA_ROOT = "/var/tmp/art-reports-dev/media"
+
 DEVELOPMENT_SETTINGS
 
