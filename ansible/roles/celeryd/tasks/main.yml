@@ -6,6 +6,15 @@
     - install
     - update
 
+- name: ensuring required supervisor directories
+  file: path={{item}}
+        state=directory
+        owner={{apache_user}} group={{apache_user}}
+  with_items:
+    - '{{supervisor_dir}}'
+    - '{{supervisor_config_dir}}'
+    - '{{supervisor_log_dir}}'
+
 - name: Copy supervisord.conf
   sudo_user: "{{apache_user}}"
   when: supervisord_conf is defined
@@ -16,13 +25,6 @@
     - install
     - update
     - celery
-
-- name: ensuring required supervisor directories
-  file: path={{item}}
-        state=directory
-        owner={{apache_user}} group={{apache_user}}
-  with_items:
-    - '{{supervisor_config_dir}}'
 
 - name: Copy supervisor service files
   sudo_user: "{{apache_user}}"
