@@ -1,4 +1,5 @@
 - name: Run syncdb command
+  sudo_user: "{{apache_user}}"
   django_manage: app_path={{django_app_root}}
                  settings={{django_settings}}
                  command=syncdb
