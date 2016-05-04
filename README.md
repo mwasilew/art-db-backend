@@ -147,6 +147,14 @@ sudo -u www-data supervisorctl -c /srv/supervisor/config.conf COMMAND [ARGS]
 Clone secrets repository from ssh://git@dev-private-git.linaro.org/qa/art-reports-secrets.git
 The destination directory should be ansible/secrets
 
+basic steps:
+
+```
+cd ansible/
+git clone ssh://git@dev-private-git.linaro.org/qa/art-reports-secrets.git secrets
+./ansible-playbook --sudo-ask-pass -l production # or -l staging etc
+```
+
 ### staging
 
 ```bash
