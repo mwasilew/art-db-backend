@@ -2,10 +2,13 @@
 
 set -exu
 
+latest_git_tag=$(git tag | sort -V | tail -1)
+
 basedir=$(dirname $0)
 exec ansible-playbook \
     --vault-password-file=$basedir/vault-passwd \
     --inventory-file=$basedir/hosts \
     --verbose \
+    --extra-vars=latest_git_tag=${latest_git_tag} \
     "$@" \
     $basedir/site.yml

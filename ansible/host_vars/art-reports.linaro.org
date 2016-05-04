@@ -1,3 +1,5 @@
+git_tag: "{{ latest_git_tag }}"
+
 ssl_key: /etc/ssl/private/wildcard.linaro.org.key
 ssl_cert: /etc/ssl/certs/wildcard.linaro.org.crt
 ssl_ca: /etc/ssl/certs/gd_bundle-g2-g1.pem
