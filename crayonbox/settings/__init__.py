@@ -26,6 +26,8 @@ SECRET_KEY = 'very-secret-password'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+TEST_RUNNER = 'crayonbox.settings.test_runner.NoLoggingTestRunner'
+
 ALLOWED_HOSTS = []
 APPEND_SLASH = False
 
