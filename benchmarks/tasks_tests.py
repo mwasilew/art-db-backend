@@ -13,7 +13,11 @@ MINIMAL_XML = '<?xml version="1.0" encoding="UTF-8"?><body></body>'
 
 
 def lava_xmlrpc_503(jid):
-    raise LavaServerException(503)
+    raise LavaServerException('http://example.com/', 503)
+
+
+def lava_xmlrpc_502(jid):
+    raise LavaServerException('http://example.com/', 502)
 
 
 def set_status(status):
@@ -62,6 +66,10 @@ class LavaFetchTest(TestCase):
         set_testjob_results.apply(args=[None])
         # just not crashing is good enough
 
+    @patch("benchmarks.tasks.get_testjob_data", lava_xmlrpc_502)
+    def test_ignores_lava_502(self):
+        set_testjob_results.apply(args=[None])
+        # just not crashing is good enough
 
     @patch("benchmarks.tasks.get_testjob_data", set_status("Complete"))
     def test_set_testjob_result_saves_testjob(self):

@@ -28,8 +28,9 @@ def set_testjob_results(self, testjob):
         test_results = get_testjob_data(testjob)
         store_testjob_data(testjob, test_results)
     except testminer.LavaServerException as ex:
-        if ex.status_code == 503:
-            # server is too busy or in maintaince; bail out, will try again later
+        if ex.status_code / 100 == 5:
+            # HTTP 50x (internal server errors): server is too busy, in
+            # maintaince, or broken; will try again later
             logger.info(ex.message)
             return
         else:
