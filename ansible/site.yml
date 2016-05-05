@@ -3,6 +3,7 @@
   hosts: all
   sudo: yes
   vars_files:
+    - "secrets/art-reports-bot.key.yml"
     - "secrets/{{inventory_hostname}}"
 
   roles:
