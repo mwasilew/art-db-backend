@@ -18,3 +18,7 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
+EMAIL_REPORTS_TO = [ "root@localhost.localdomain", ]
+
+URL = 'http://localhost'
