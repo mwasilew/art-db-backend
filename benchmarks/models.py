@@ -172,6 +172,7 @@ class Result(models.Model):
         return "%s/#/build/%s" % (settings.URL, self.id)
 
     __baseline__ = False
+    __to_compare__ = False
 
     @property
     def baseline(self):
@@ -179,10 +180,7 @@ class Result(models.Model):
         if self.__baseline__ != False:
             return self.__baseline__
 
-        self.__baseline__ = self._default_manager.annotate(
-            data_count=Count('data')
-        ).filter(
-            data_count__gt=0,
+        self.__baseline__ = self._default_manager.filter(
             created_at__lt=self.created_at,
             branch_name=self.branch_name,
             gerrit_change_number=None,
@@ -192,9 +190,26 @@ class Result(models.Model):
         return self.__baseline__
 
     def to_compare(self, results=True):
-        if self.data.count() and self.baseline:
-            return self.baseline
-        return None
+        # basic per-instance caching
+        if self.__to_compare__ != False:
+            return self.__to_compare___
+
+        if self.data.count() == 0:
+            self.__to_compare__ = None
+            return self.__to_compare__
+
+        self.__to_compare__ = self._default_manager.annotate(
+            data_count=Count('data')
+        ).filter(
+            data_count__gt=0,
+            created_at__lt=self.created_at,
+            branch_name=self.branch_name,
+            gerrit_change_number=None,
+            manifest__reduced__hash=self.manifest.reduced.hash
+        ).order_by('-created_at').first()
+
+        return self.__to_compare__
+
 
     @property
     def testjobs_updated(self):
