@@ -4,42 +4,58 @@ from django.template.loader import render_to_string
 
 
 def result_progress(current, results):
-    time = current.created_at
+    _send_results(
+        current=current,
+        template='result_progress.html',
+        results=results,
+        baseline=current.baseline,
+        header="Art - Benchmark Progress for %s" % current.name,
+        subject_template="%s [%s]",
+    )
 
-    header = "Art - Benchmark Progress for %s" % current.name
+def result_progress_baseline_missing(current):
+    _send_results(
+        current=current,
+        template='result_progress_baseline_missing.html',
+        header="Art - Benchmark Progress for %s" % current.name,
+        subject_template='%s, missing baseline - %s',
+    )
+
+
+def result_progress_baseline_no_results(current):
+    _send_results(
+        current=current,
+        baseline=current.baseline,
+        template='result_progress_baseline_no_results.html',
+        header="Art - Benchmark Progress for %s" % current.name,
+        subject_template='%s, baseline missing results - %s',
+    )
+
+
+def result_progress_no_results(current):
+    _send_results(
+        current=current,
+        baseline=current.baseline,
+        template='result_progress_no_results.html',
+        header="Art - Benchmark Progress for %s" % current.name,
+        subject_template="%s, missing results - %s"
+    )
+
+
+def _send_results(current, template, header, subject_template, results=None, baseline=None):
+    time = current.created_at.strftime("%d-%m-%Y %H:%M:%S")
 
     context = {
         "header": header,
         "time": time,
         "results": results,
         "current": current,
-        "baseline": current.baseline
+        "baseline": baseline,
     }
 
-    message = render_to_string('result_progress.html', context)
+    message = render_to_string(template, context)
 
-    subject = "%s [%s]" % (context['header'], context['time'])
-
-    from_email = settings.DEFAULT_FROM_EMAIL
-    to_email = settings.EMAIL_REPORTS_TO
-
-    send_mail(subject, None, from_email, to_email, html_message=message)
-
-
-def result_progress_baseline_missing(current):
-    time = current.created_at.strftime("%d-%m-%Y %H:%M:%S")
-
-    header = "Art - Benchmark Progress for %s" % current.name
-
-    context = {
-        "header": header,
-        "time": time,
-        "current": current,
-    }
-
-    message = render_to_string('result_progress_baseline_missing.html', context)
-
-    subject = "%s, missing baseline - %s" % (context['header'], context['time'])
+    subject = subject_template % (header, time)
 
     attachments = [("manifest.xml", current.manifest.manifest, "application/xml")]
 
@@ -51,63 +67,6 @@ def result_progress_baseline_missing(current):
 
     email.content_subtype = "html"
     email.send()
-
-
-def result_progress_baseline_no_results(current):
-    time = current.created_at.strftime("%d-%m-%Y %H:%M:%S")
-
-    header = "Art - Benchmark Progress for %s" % current.name
-
-    context = {
-        "header": header,
-        "time": time,
-        "current": current,
-        "baseline": current.baseline,
-    }
-
-    message = render_to_string('result_progress_baseline_no_results.html', context)
-
-    subject = "%s, Baseline missing results - %s" % (context['header'], context['time'])
-
-    attachments = [("manifest.xml", current.manifest.manifest, "application/xml")]
-
-    email = EmailMessage(subject,
-                         message,
-                         settings.DEFAULT_FROM_EMAIL,
-                         settings.EMAIL_REPORTS_TO,
-                         attachments=attachments)
-
-    email.content_subtype = "html"
-    email.send()
-
-
-def result_progress_no_results(current):
-    time = current.created_at.strftime("%d-%m-%Y %H:%M:%S")
-
-    header = "Art - Benchmark Progress for %s" % current.name
-
-    context = {
-        "header": header,
-        "time": time,
-        "current": current,
-        "baseline": current.baseline,
-    }
-
-    message = render_to_string('result_progress_no_results.html', context)
-
-    subject = "%s, missing results - %s" % (context['header'], context['time'])
-
-    attachments = [("manifest.xml", current.manifest.manifest, "application/xml")]
-
-    email = EmailMessage(subject,
-                         message,
-                         settings.DEFAULT_FROM_EMAIL,
-                         settings.EMAIL_REPORTS_TO,
-                         attachments=attachments)
-
-    email.content_subtype = "html"
-    email.send()
-
 
 
 def _benchmark_progress(context):
