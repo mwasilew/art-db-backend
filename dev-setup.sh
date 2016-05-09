@@ -18,6 +18,11 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install -qy postgresql-9.5 postgresq
 if [ -d /vagrant ]; then
   cd /vagrant
 fi
+
+if [ ! -d ext/art-testing ]; then
+  git clone "https://android-review.linaro.org/linaro/art-testing" ext/art-testing
+fi
+
 if [ ! -f .virtualenv/bin/python ]; then
   virtualenv .virtualenv
 fi
