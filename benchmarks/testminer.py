@@ -121,16 +121,17 @@ class GenericLavaTestSystem(TestSystem):
             if action['command'] == "lava_test_shell":
                 if 'testdef_repos' in action['parameters'].keys():
                     for test_repo in action['parameters']['testdef_repos']:
-                        if test_repo['testdef'].endswith("art-microbenchmarks.yaml"):
-                            return "ArtMicrobenchmarksTestResults"
-                        if test_repo['testdef'].endswith("wa2host_postprocessing.yaml"):
-                            return "ArtWATestResults"
-                        if test_repo['testdef'].endswith("lava-android-benchmark-host.yaml"):
-                            return "AndroidMultinodeBenchmarkResults"
-                        if test_repo['testdef'].endswith("application-benchmark-host.yaml"):
-                            return "AndroidApplicationsBenchmarkResults"
-                        if test_repo['testdef'].endswith("cts-host.yaml"):
-                            return "AndroidCtsTestResults"
+                        if 'testdef' in test_repo.keys():
+                            if test_repo['testdef'].endswith("art-microbenchmarks.yaml"):
+                                return "ArtMicrobenchmarksTestResults"
+                            if test_repo['testdef'].endswith("wa2host_postprocessing.yaml"):
+                                return "ArtWATestResults"
+                            if test_repo['testdef'].endswith("lava-android-benchmark-host.yaml"):
+                                return "AndroidMultinodeBenchmarkResults"
+                            if test_repo['testdef'].endswith("application-benchmark-host.yaml"):
+                                return "AndroidApplicationsBenchmarkResults"
+                            if test_repo['testdef'].endswith("cts-host.yaml"):
+                                return "AndroidCtsTestResults"
         return "GenericLavaTestSystem"
 
     def call_xmlrpc(self, method_name, *method_params):
