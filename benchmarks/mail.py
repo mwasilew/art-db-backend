@@ -3,11 +3,14 @@ from django.core.mail import send_mail, EmailMessage
 from django.template.loader import render_to_string
 
 
-def result_progress(current, results):
+from benchmarks.comparison import render_comparison
+
+
+def result_progress(current, baseline):
     _send_results(
         current=current,
         template='result_progress.html',
-        results=results,
+        comparison=render_comparison(baseline.data.all(), current.data.all()),
         baseline=current.baseline,
         header="Art - Benchmark Progress for %s" % current.name,
         subject_template="%s [%s]",
@@ -42,13 +45,13 @@ def result_progress_no_results(current):
     )
 
 
-def _send_results(current, template, header, subject_template, results=None, baseline=None):
+def _send_results(current, template, header, subject_template, comparison=None, baseline=None):
     time = current.created_at.strftime("%d-%m-%Y %H:%M:%S")
 
     context = {
         "header": header,
         "time": time,
-        "results": results,
+        "comparison": comparison,
         "current": current,
         "baseline": baseline,
     }
@@ -68,7 +71,6 @@ def _send_results(current, template, header, subject_template, results=None, bas
     email.content_subtype = "html"
     email.send()
 
-
 def _benchmark_progress(context):
     message = render_to_string('benchmark_progress.html', context)
 
@@ -80,6 +82,14 @@ def _benchmark_progress(context):
     send_mail(subject, None, from_email, to_email, html_message=message)
 
 
+def _render_comparisons(results):
+    comparisons = {}
+    if results:
+        for branch, result_pair in results.items():
+            comparisons[branch] = render_comparison(result_pair[0], result_pair[1])
+    return comparisons
+
+
 def daily_benchmark_progress(now, then, results):
     header = "Art - Daily Benchmark Progress"
     time = now.strftime('%d %m %Y')
@@ -88,7 +98,7 @@ def daily_benchmark_progress(now, then, results):
         "now": now,
         "header": header,
         "time": time,
-        "results": results
+        "comparisons": _render_comparisons(results)
     }
 
     _benchmark_progress(context)
@@ -102,7 +112,7 @@ def monthly_benchmark_progress(now, then, results):
         "now": now,
         "header": header,
         "time": time,
-        "results": results
+        "comparisons": _render_comparisons(results)
     }
 
     _benchmark_progress(context)
@@ -116,7 +126,7 @@ def weekly_benchmark_progress(now, then, results):
         "now": now,
         "header": header,
         "time": time,
-        "results": results
+        "comparisons": _render_comparisons(results)
     }
 
     _benchmark_progress(context)

@@ -83,29 +83,6 @@ class ResultManager(models.Manager):
 
         return results
 
-    def compare_benchmarks(self, current, previous):
-        current_results = {"%s / %s" % (i.benchmark.name, i.name): i.measurement for i in current}
-        previous_results = {"%s / %s" % (i.benchmark.name, i.name): i.measurement for i in previous}
-
-        results = []
-
-        for name, current_measurement in current_results.items():
-            previous_measurement = previous_results.get(name)
-
-            if previous_measurement:
-                change = current_measurement / previous_measurement * 100
-                change = (change - 100) * -1
-            else:
-                change = None
-
-            results.append({
-                "name": name,
-                "current": current_measurement,
-                "previous": previous_measurement,
-                "change": change,
-            })
-
-        return sorted(results, key=lambda x: x['name'])
 
     def compare_progress(self, now, interval):
         then = now - interval
@@ -133,9 +110,7 @@ class ResultManager(models.Manager):
                         .distinct("benchmark", "name"))
 
             if current and previous:
-                results_by_branch[branch_name] = self.compare_benchmarks(
-                    current, previous
-                )
+                results_by_branch[branch_name] = (previous, current)
         return results_by_branch
 
 

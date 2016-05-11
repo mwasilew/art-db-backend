@@ -2,11 +2,18 @@ from django.test import TestCase as DjangoTestCase
 from django_dynamic_fixture import G
 from unittest import TestCase
 from mock import patch
+from django.core import mail
+from dateutil.relativedelta import relativedelta
+from django.utils import timezone
 
+from benchmarks.models import Benchmark
 from benchmarks.models import Result
+from benchmarks.models import ResultData
 from benchmarks.models import TestJob
 from benchmarks.testminer import LavaServerException
 from benchmarks.tasks import set_testjob_results
+
+from benchmarks.tasks import report_email
 
 
 MINIMAL_XML = '<?xml version="1.0" encoding="UTF-8"?><body></body>'
@@ -90,3 +97,43 @@ class LavaFetchTest(TestCase):
         set_testjob_results.apply(args=[testjob])
 
         self.assertEqual(2, result.data.count())
+
+
+class EmailTasksTest(TestCase):
+
+    def test_report_email(self):
+        now = timezone.now()
+        past = now - relativedelta(days=1)
+        baseline = G(
+            Result,
+            manifest__manifest=MINIMAL_XML,
+            branch_name='master',
+            gerrit_change_number=None,
+            created_at=past
+        )
+        current = G(
+            Result,
+            manifest__manifest=MINIMAL_XML,
+            branch_name='master',
+            gerrit_change_number=123,
+            gerrit_change_id='I8adbccfe4b39a1e849b5d7a976fd4cdc',
+            created_at=now
+        )
+        benchmark1 = G(Benchmark)
+        G(
+            ResultData,
+            result=baseline,
+            benchmark=benchmark1,
+            name="benchmark1",
+            measurement=5
+        )
+        G(
+            ResultData,
+            result=current,
+            benchmark=benchmark1,
+            name="benchmark1",
+            measurement=6
+        )
+
+        report_email.apply(args=[current])
+        self.assertEqual(1, len(mail.outbox))
