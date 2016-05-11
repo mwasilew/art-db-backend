@@ -340,13 +340,13 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
         $http.get('/api/benchmark/')
     ]).then(function(response) {
 
-        var defaults = {
-            branch: $routeParams.branch || "master",
-            benchmark: $routeParams.benchmark || "NBody"
-        };
-
         $scope.branchList = response[0].data;
         $scope.benchmarkList = response[1].data;
+
+        var defaults = {
+            branch: $routeParams.branch || $scope.branchList[0]['branch_name'],
+            benchmark: $routeParams.benchmark || $scope.benchmarkList[0]['name']
+        };
 
         $scope.branch = _.find($scope.branchList, ['branch_name', defaults.branch]);
         $scope.benchmark = _.find($scope.benchmarkList, ['name', defaults.benchmark]);
