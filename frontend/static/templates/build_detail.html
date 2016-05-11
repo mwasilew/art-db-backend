@@ -68,7 +68,7 @@
           </td>
           <td class="text-right" style="width: 100px">
 
-            <span ng-hide="{{ test.status==='Complete' || test.status==='Running' || test.status==='Submitted'}}">
+            <span ng-show="test.can_resubmit">
                <button type="button" class="btn btn-default" ng-hide="test.refresh"
                        ng-click="test.refresh = true" ng-disabled="testJobUpdate">
                  <span class="fa fa-refresh"></span>

@@ -218,6 +218,7 @@ class TestJob(models.Model):
     definition = models.TextField(blank=True, null=True)
     initialized = models.BooleanField(default=False)
     completed = models.BooleanField(default=False)
+    resubmitted = models.BooleanField(default=False)
     data = models.FileField(null=True, blank=True)
     testrunnerclass = models.CharField(blank=True, default="GenericLavaTestSystem", max_length=128)
     testrunnerurl = models.CharField(blank=True, default="https://validation.linaro.org/", max_length=256)
@@ -243,6 +244,21 @@ class TestJob(models.Model):
     def __unicode__(self):
         return '<%s %s#%s %s>' % (self.id, self.result.build_id, self.result.name, self.status)
 
+    def can_resubmit(self):
+        # check if job already was resubmitted
+        if self.resubmitted:
+            return False
+        # check status
+        if self.status in ['Complete', 'Running', 'Submitted', '']:
+            return False
+        # check if this is single node
+        if '.' not in self.id:
+            return True
+        # check if this is 'target' of multinode
+        # assume that multinode jobs have the same ID before 'dot'
+        if self.id.split('.')[1] != "0" :
+            return False
+        return True
 
 class Benchmark(models.Model):
     name = models.CharField(max_length=64)

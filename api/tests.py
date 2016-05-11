@@ -23,15 +23,45 @@ class TestJobTests(APITestCase):
     @patch('benchmarks.tasks.update_jenkins.delay', lambda *x, **y: None)
     @patch('benchmarks.tasks.set_testjob_results.apply', lambda *x, **y: None)
     @patch.dict('django.conf.settings.CREDENTIALS', {'validation.linaro.org': ("hej", "ho")})
-    def test_resubmit_1(self):
-        testjob = G(models.TestJob, id="000", result__manifest__manifest=MINIMAL_XML)
+    def test_resubmit_incomplete(self):
+        testjob = G(models.TestJob, id="000", status="Incomplete", result__manifest__manifest=MINIMAL_XML)
 
         response = self.client.get('/api/testjob/%s/resubmit/' % testjob.id)
 
         self.assertEqual(response.data[0]['id'], "111")
 
-        self.assertEqual(models.TestJob.objects.count(), 1)
-        self.assertEqual(models.TestJob.objects.filter(id="000").exists(), False)
+        self.assertEqual(models.TestJob.objects.count(), 2)
+        self.assertEqual(models.TestJob.objects.filter(id="000").exists(), True)
+        self.assertEqual(models.TestJob.objects.filter(id="111").exists(), True)
+
+    @patch('benchmarks.testminer.GenericLavaTestSystem.call_xmlrpc', lambda *x, **y: "111")
+    @patch('benchmarks.tasks.update_jenkins.delay', lambda *x, **y: None)
+    @patch('benchmarks.tasks.set_testjob_results.apply', lambda *x, **y: None)
+    @patch.dict('django.conf.settings.CREDENTIALS', {'validation.linaro.org': ("hej", "ho")})
+    def test_resubmit_canceled(self):
+        testjob = G(models.TestJob, id="000", status="Canceled", result__manifest__manifest=MINIMAL_XML)
+
+        response = self.client.get('/api/testjob/%s/resubmit/' % testjob.id)
+
+        self.assertEqual(response.data[0]['id'], "111")
+
+        self.assertEqual(models.TestJob.objects.count(), 2)
+        self.assertEqual(models.TestJob.objects.filter(id="000").exists(), True)
+        self.assertEqual(models.TestJob.objects.filter(id="111").exists(), True)
+
+    @patch('benchmarks.testminer.GenericLavaTestSystem.call_xmlrpc', lambda *x, **y: "111")
+    @patch('benchmarks.tasks.update_jenkins.delay', lambda *x, **y: None)
+    @patch('benchmarks.tasks.set_testjob_results.apply', lambda *x, **y: None)
+    @patch.dict('django.conf.settings.CREDENTIALS', {'validation.linaro.org': ("hej", "ho")})
+    def test_resubmit_resultsmissing(self):
+        testjob = G(models.TestJob, id="000", status="Results Missing", result__manifest__manifest=MINIMAL_XML)
+
+        response = self.client.get('/api/testjob/%s/resubmit/' % testjob.id)
+
+        self.assertEqual(response.data[0]['id'], "111")
+
+        self.assertEqual(models.TestJob.objects.count(), 2)
+        self.assertEqual(models.TestJob.objects.filter(id="000").exists(), True)
         self.assertEqual(models.TestJob.objects.filter(id="111").exists(), True)
 
     @patch('benchmarks.testminer.GenericLavaTestSystem.call_xmlrpc', lambda *x, **y: "111")
@@ -46,7 +76,7 @@ class TestJobTests(APITestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(models.TestJob.objects.count(), 1)
-        self.assertEqual(models.TestJob.objects.filter(id="000").exists(), False)
+        self.assertEqual(models.TestJob.objects.filter(id="111").exists(), False)
 
     @patch('benchmarks.testminer.GenericLavaTestSystem.call_xmlrpc', lambda *x, **y: "111")
     @patch('benchmarks.tasks.update_jenkins.delay', lambda *x, **y: None)
@@ -60,7 +90,7 @@ class TestJobTests(APITestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(models.TestJob.objects.count(), 1)
-        self.assertEqual(models.TestJob.objects.filter(id="000").exists(), False)
+        self.assertEqual(models.TestJob.objects.filter(id="111").exists(), False)
 
     @patch('benchmarks.testminer.GenericLavaTestSystem.call_xmlrpc', lambda *x, **y: "111")
     @patch('benchmarks.tasks.update_jenkins.delay', lambda *x, **y: None)
@@ -74,7 +104,7 @@ class TestJobTests(APITestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(models.TestJob.objects.count(), 1)
-        self.assertEqual(models.TestJob.objects.filter(id="000").exists(), False)
+        self.assertEqual(models.TestJob.objects.filter(id="111").exists(), False)
 
 
 class ResultTests(APITestCase):

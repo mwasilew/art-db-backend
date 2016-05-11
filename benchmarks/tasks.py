@@ -224,6 +224,8 @@ def check_result_completeness(self):
 
 @celery_app.task(bind=True)
 def report_gerrit(self, current):
+    if settings.IGNORE_GERRIT:
+        return
     if not current.gerrit_change_id:
         return
 

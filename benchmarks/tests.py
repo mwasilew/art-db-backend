@@ -455,3 +455,66 @@ class TestJobTestCase(TestCase):
         job = TestJob(result=result, definition='{"metadata": { "foo" : "bar"}}')
         job.save()
         self.assertEqual("bar", job.metadata['foo'])
+
+    def test_can_resubmit_test_single_node(self):
+        result = G(Result, manifest__manifest=MINIMAL_XML)
+        job = TestJob(result=result)
+        job.save()
+        self.assertFalse(job.can_resubmit())
+        job.status = "Complete"
+        job.save()
+        self.assertFalse(job.can_resubmit())
+        job.status = "Running"
+        job.save()
+        self.assertFalse(job.can_resubmit())
+        job.status = "Incomplete"
+        job.save()
+        self.assertTrue(job.can_resubmit())
+        job.status = "Canceled"
+        job.save()
+        self.assertTrue(job.can_resubmit())
+        job.status = "Results Missing"
+        job.save()
+        self.assertTrue(job.can_resubmit())
+
+    def test_can_resubmit_test_multi_node_host(self):
+        result = G(Result, manifest__manifest=MINIMAL_XML)
+        job = TestJob(result=result, id="12345.0")
+        job.save()
+        self.assertFalse(job.can_resubmit())
+        job.status = "Complete"
+        job.save()
+        self.assertFalse(job.can_resubmit())
+        job.status = "Running"
+        job.save()
+        self.assertFalse(job.can_resubmit())
+        job.status = "Incomplete"
+        job.save()
+        self.assertTrue(job.can_resubmit())
+        job.status = "Canceled"
+        job.save()
+        self.assertTrue(job.can_resubmit())
+        job.status = "Results Missing"
+        job.save()
+        self.assertTrue(job.can_resubmit())
+
+    def test_can_resubmit_test_multi_node_target(self):
+        result = G(Result, manifest__manifest=MINIMAL_XML)
+        job = TestJob(result=result, id="12345.1")
+        job.save()
+        self.assertFalse(job.can_resubmit())
+        job.status = "Complete"
+        job.save()
+        self.assertFalse(job.can_resubmit())
+        job.status = "Running"
+        job.save()
+        self.assertFalse(job.can_resubmit())
+        job.status = "Incomplete"
+        job.save()
+        self.assertFalse(job.can_resubmit())
+        job.status = "Canceled"
+        job.save()
+        self.assertFalse(job.can_resubmit())
+        job.status = "Results Missing"
+        job.save()
+        self.assertFalse(job.can_resubmit())
