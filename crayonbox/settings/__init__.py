@@ -35,6 +35,13 @@ LOGIN_REDIRECT_URL = "/"
 LOGIN_URL = "/login"
 LOGOUT_URL = "/logout"
 
+# Ignore the presence of gerrit variable as builds are trigerred from
+# gerrit by default which means they are actually a 'baseline'
+# Default is False meaning that presence of gerrit variables equals to
+# 'patched' build. When the variable is set to True, gerrit is also not
+# commented with test results.
+IGNORE_GERRIT = False
+
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )

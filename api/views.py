@@ -222,11 +222,12 @@ class TestJobViewSet(viewsets.ModelViewSet):
     def resubmit(self, request, pk=None):
         # fixme: this should not happen on GET
 
-        forbidden_statuses = ['Complete', 'Running', 'Submitted']
+        forbidden_statuses = ['Complete', 'Running', 'Submitted', '']
 
         testjob = self.get_object()
 
-        if testjob.status in forbidden_statuses:
+        if testjob.status in forbidden_statuses or\
+                testjob.resubmitted:
 
             serializer = serializers.TestJobSerializer(testjob.result.test_jobs.all(), many=True)
             return response.Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
@@ -239,7 +240,8 @@ class TestJobViewSet(viewsets.ModelViewSet):
         testjobs = tester.call_xmlrpc('scheduler.resubmit_job', testjob.id)
         result = testjob.result
 
-        testjob.delete()
+        testjob.resubmitted = True
+        testjob.save()
 
         if not isinstance(testjobs, (list, tuple)):
             testjobs = [testjobs]

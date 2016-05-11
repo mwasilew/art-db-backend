@@ -41,6 +41,7 @@ class ReducedManifestSerializer(DynamicFieldsMixin, serializers.ModelSerializer)
 
 
 class TestJobSerializer(serializers.ModelSerializer):
+    can_resubmit = serializers.BooleanField()
 
     class Meta:
         model = benchmarks_models.TestJob
