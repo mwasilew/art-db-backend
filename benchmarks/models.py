@@ -83,29 +83,6 @@ class ResultManager(models.Manager):
 
         return results
 
-    def compare_benchmarks(self, current, previous):
-        current_results = {"%s / %s" % (i.benchmark.name, i.name): i.measurement for i in current}
-        previous_results = {"%s / %s" % (i.benchmark.name, i.name): i.measurement for i in previous}
-
-        results = []
-
-        for name, current_measurement in current_results.items():
-            previous_measurement = previous_results.get(name)
-
-            if previous_measurement:
-                change = current_measurement / previous_measurement * 100
-                change = (change - 100) * -1
-            else:
-                change = None
-
-            results.append({
-                "name": name,
-                "current": current_measurement,
-                "previous": previous_measurement,
-                "change": change,
-            })
-
-        return sorted(results, key=lambda x: x['name'])
 
     def compare_progress(self, now, interval):
         then = now - interval
@@ -133,9 +110,7 @@ class ResultManager(models.Manager):
                         .distinct("benchmark", "name"))
 
             if current and previous:
-                results_by_branch[branch_name] = self.compare_benchmarks(
-                    current, previous
-                )
+                results_by_branch[branch_name] = (previous, current)
         return results_by_branch
 
 
@@ -172,6 +147,7 @@ class Result(models.Model):
         return "%s/#/build/%s" % (settings.URL, self.id)
 
     __baseline__ = False
+    __to_compare__ = False
 
     @property
     def baseline(self):
@@ -179,10 +155,7 @@ class Result(models.Model):
         if self.__baseline__ != False:
             return self.__baseline__
 
-        self.__baseline__ = self._default_manager.annotate(
-            data_count=Count('data')
-        ).filter(
-            data_count__gt=0,
+        self.__baseline__ = self._default_manager.filter(
             created_at__lt=self.created_at,
             branch_name=self.branch_name,
             gerrit_change_number=None,
@@ -192,9 +165,26 @@ class Result(models.Model):
         return self.__baseline__
 
     def to_compare(self, results=True):
-        if self.data.count() and self.baseline:
-            return self.baseline
-        return None
+        # basic per-instance caching
+        if self.__to_compare__ != False:
+            return self.__to_compare___
+
+        if self.data.count() == 0:
+            self.__to_compare__ = None
+            return self.__to_compare__
+
+        self.__to_compare__ = self._default_manager.annotate(
+            data_count=Count('data')
+        ).filter(
+            data_count__gt=0,
+            created_at__lt=self.created_at,
+            branch_name=self.branch_name,
+            gerrit_change_number=None,
+            manifest__reduced__hash=self.manifest.reduced.hash
+        ).order_by('-created_at').first()
+
+        return self.__to_compare__
+
 
     @property
     def testjobs_updated(self):

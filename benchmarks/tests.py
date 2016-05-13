@@ -143,25 +143,25 @@ class ResultDataTestCase(TestCase):
                       gerrit_change_number=None,
                       created_at=then)
 
-        G(ResultData,
+        result_data_1a = G(ResultData,
           result=result_1a,
           benchmark__name="load-a",
           name="load-avg",
           measurement=5)
 
-        G(ResultData,
+        result_data_2a = G(ResultData,
           result=result_2a,
           benchmark__name="load-a",
           name="load-avg",
           measurement=10)
 
-        G(ResultData,
+        result_data_1b = G(ResultData,
           result=result_1b,
           benchmark__name="load-b",
           name="load-avg",
           measurement=5)
 
-        G(ResultData,
+        result_data_2b = G(ResultData,
           result=result_2b,
           benchmark__name="load-b",
           name="load-avg",
@@ -169,68 +169,10 @@ class ResultDataTestCase(TestCase):
 
         compare = Result.objects.compare_progress(now, timedelta(days=7))
 
-        self.assertEqual(compare['master'][0]['current'], 5)
-        self.assertEqual(compare['master'][0]['previous'], 10)
-        self.assertEqual(compare['master'][0]['change'], 50.0)
-
-    def test_compare_progress_2(self):
-
-        now = timezone.now()
-        then = now - relativedelta(days=7)
-
-        result_1a = G(Result,
-                      name="name1",
-                      manifest__manifest=MINIMAL_XML,
-                      branch_name="master",
-                      gerrit_change_number=None,
-                      created_at=now)
-
-        result_1b = G(Result,
-                      name="name2",
-                      manifest__manifest=MINIMAL_XML,
-                      branch_name="master",
-                      gerrit_change_number=None,
-                      created_at=now)
-
-        result_2a = G(Result,
-                      name="name1",
-                      manifest__manifest=MINIMAL_XML,
-                      branch_name="master",
-                      gerrit_change_number=None,
-                      created_at=then)
-
-        G(ResultData,
-          result=result_1a,
-          benchmark__name="load-a",
-          name="load-avg",
-          measurement=5)
-
-        G(ResultData,
-          result=result_2a,
-          benchmark__name="load-a",
-          name="load-avg",
-          measurement=10)
-
-        G(ResultData,
-          result=result_1b,
-          benchmark__name="load-b",
-          name="load-avg",
-          measurement=5)
-
-        compare = Result.objects.compare_progress(now, timedelta(days=7))
-
-        master = [
-            {'change': 50.0,
-             'current': 5.0,
-             'name': u'load-a / load-avg',
-             'previous': 10.0},
-
-            {'change': None,
-             'current': 5.0,
-             'name': u'load-b / load-avg',
-             'previous': None}]
-
-        self.assertEqual(compare['master'], master)
+        self.assertEqual(compare['master'][0][0], result_data_2a)
+        self.assertEqual(compare['master'][0][1], result_data_2b)
+        self.assertEqual(compare['master'][1][0], result_data_1a)
+        self.assertEqual(compare['master'][1][1], result_data_1b)
 
     def test_compare_progress_missing_past(self):
         now = timezone.now()

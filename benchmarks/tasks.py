@@ -264,8 +264,7 @@ def report_email(self, current):
     if not current.baseline.data.count():
         return mail.result_progress_baseline_no_results(current)
 
-    results = models.Result.objects.compare(current, current.baseline)
-    return mail.result_progress(current, results)
+    return mail.result_progress(current, current.baseline)
 
 
 def _sync_external_repos():

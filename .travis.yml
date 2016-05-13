@@ -16,6 +16,7 @@ before_install:
 
 install:
   - pip install -r requirements-dev.txt
+  - "mkdir -p ext && git clone https://android-review.linaro.org/linaro/art-testing ext/art-testing"
 
 script:
   - python manage.py test --noinput -v 2

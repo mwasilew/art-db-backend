@@ -49,6 +49,12 @@ source .virtualenv/bin/activate
 pip install -r requirements-dev.txt
 ```
 
+5) auxiliar sub-project
+
+```
+mkdir -p ext
+git clone https://android-review.linaro.org/linaro/art-testing ext/art-testing
+```
 
 ## configure
 

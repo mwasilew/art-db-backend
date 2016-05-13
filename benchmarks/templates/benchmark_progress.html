@@ -9,34 +9,11 @@
 
     <hr>
 
-    {% for branch, result in results.items %}
+    {% for branch, comparison in comparisons.items %}
         <h3>branch: {{ branch }}</h3>
-
-        <table class="benchmarks-results">
-            <tr>
-                <td style="width: 80%">benchmark name</td>
-                <td style="text-align:right; width:100%">Current</td>
-                <td style="text-align:right">Last</td>
-                <td style="text-align:right">change</td>
-            </tr>
-
-            {% for benchmark in result %}
-                <tr>
-                    <td style="width: 80%">{{ benchmark.name }}</td>
-                    <td align="right" style="text-align:right; width:100%">{{ benchmark.current|floatformat:2 }}</td>
-                    <td align="right" style="text-align:right; min-width: 100px;">{{ benchmark.previous|floatformat:2 }}</td>
-                    <td align="right" style="text-align:right; min-width: 100px;">
-                        {% if benchmark.change > 0 %}
-                            <span style="color:#77DD77">{{ benchmark.change|floatformat:3 }}% </span>
-                        {% elif result.change < 0 %}
-                            <span style="color:#FF6961">{{ benchmark.change|floatformat:3 }}% </span>
-                        {% else %}
-                            ---
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-        </table>
+        <pre>
+        {{ comparison }}
+        </pre>
 
     {% endfor %}
 

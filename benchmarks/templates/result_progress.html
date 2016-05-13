@@ -24,43 +24,8 @@
 
     <h3>Benchmarks</h3>
 
-    <table class="benchmarks-results">
-        <tr>
-            <td style="width: 60%; border-bottom: 1px solid #ccc;">benchmark name (sample size)</td>
-            <td style="text-align:right; width:100%; border-bottom: 1px solid #ccc;">
-                Current (stdev)
-            </td>
-            <td style="text-align:right; border-bottom: 1px solid #ccc;">
-                Last (stdev)
-            </td>
-            <td style="text-align:right; border-bottom: 1px solid #ccc;">change</td>
-        </tr>
-
-        {% for result in results %}
-            <tr style="border-bottom: 1px solid #ddd;">
-                <td style="width: 60%">
-                    {{ result.current.benchmark.name }} / <b>{{ result.current.name }}</b>
-                    ({{ result.current.values | length }})
-                </td>
-                <td align="right" style="text-align:right; width:100%">
-                    {{ result.current.measurement|floatformat:2 }} <br/>
-                    ({{ result.current.stdev|floatformat:2 }})
-                </td>
-                <td align="right" style="text-align:right; min-width: 100px;">
-                    {{ result.previous.measurement|floatformat:2 }} <br/>
-                    ({{ result.previous.stdev|floatformat:2 }})
-                </td>
-                <td align="right" style="text-align:right; min-width: 100px;">
-                    {% if result.change > 0 %}
-                        <span style="color:#77DD77">{{ result.change|floatformat:3 }}%</span>
-                    {% elif result.change < 0 %}
-                        <span style="color:#FF6961">{{ result.change|floatformat:3 }}%</span>
-                    {% else %}
-                        ---
-                    {% endif %}
-                </td>
-            </tr>
-        {% endfor %}
-    </table>
+    <pre>
+    {{ comparison }}
+    </pre>
 
 {% endblock %}
