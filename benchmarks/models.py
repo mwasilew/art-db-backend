@@ -111,6 +111,11 @@ class ResultManager(models.Manager):
         return results_by_branch
 
 
+class Environment(models.Model):
+    identifier = models.CharField(max_length=128, unique=True)
+    name = models.CharField(max_length=128)
+
+
 class Result(models.Model):
 
     objects = ResultManager()
