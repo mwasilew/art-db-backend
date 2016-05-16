@@ -9,4 +9,6 @@ email_reports_to:
   - "stuart.monteith@linaro.org"
   - "serban.constantinescu@linaro.org"
   - "milosz.wasilewski@linaro.org"
-  - "sebastian.pawlus@linaro.org"
+  - "alexandre.rames@linaro.org"
+  - "scott.wakeling@linaro.org"
+  - "antonio.terceiro@linaro.org"
