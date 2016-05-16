@@ -529,6 +529,7 @@ class StatsTest(APITestCase):
         user = User.objects.create_superuser('test', 'email@test.com', 'test')
         self.client.force_authenticate(user=user)
 
+    @patch('django.conf.settings.IGNORE_GERRIT', False)
     def test_only_baseline_changes(self):
 
 	now = timezone.now()
@@ -567,3 +568,44 @@ class StatsTest(APITestCase):
 
         self.assertEqual(len(response.data), 1)
 	self.assertEqual(response.data[0]['measurement'], 5)
+
+    @patch('django.conf.settings.IGNORE_GERRIT', True)
+    def test_only_baseline_changes_ignore_gerrit(self):
+
+	now = timezone.now()
+	yesterday = now - relativedelta(days=1)
+
+	baseline = G(models.Result,
+	      manifest__manifest=MINIMAL_XML,
+	      branch_name='master',
+	      created_at=yesterday,
+	      gerrit_change_number=None)
+
+	patched = G(models.Result,
+	     manifest__manifest=MINIMAL_XML,
+	     branch_name='master',
+	     created_at=now,
+	     gerrit_change_number=123)
+
+	benchmark = G(models.Benchmark, name="TheBenchmark")
+
+        G(models.ResultData,
+          result=baseline,
+          benchmark=benchmark,
+          name="TheBenchmark",
+          measurement=5)
+
+        G(models.ResultData,
+          result=patched,
+          benchmark=benchmark,
+          name="TheBenchmark",
+          measurement=10)
+
+        response = self.client.get('/api/stats/', {
+            'branch': 'master',
+            'benchmark': 'TheBenchmark',
+        })
+
+        self.assertEqual(len(response.data), 2)
+	self.assertEqual(response.data[0]['measurement'], 5)
+	self.assertEqual(response.data[1]['measurement'], 10)
