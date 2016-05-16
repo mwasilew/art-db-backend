@@ -116,10 +116,13 @@ class StatsViewSet(viewsets.ModelViewSet):
 
         if not (benchmarks and branch):
             return self.queryset.none()
-
-        return self.queryset.filter(benchmark__name__in=benchmarks,
-                                    result__gerrit_change_number=None,
-                                    result__branch_name=branch)
+        if settings.IGNORE_GERRIT:
+            return self.queryset.filter(benchmark__name__in=benchmarks,
+                                        result__branch_name=branch)
+        else:
+            return self.queryset.filter(benchmark__name__in=benchmarks,
+                                        result__gerrit_change_number=None,
+                                        result__branch_name=branch)
 
 
 # result
