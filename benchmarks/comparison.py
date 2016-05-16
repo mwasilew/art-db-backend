@@ -6,7 +6,7 @@ import tempfile
 
 from django.conf import settings
 
-compare_script = os.path.join(os.path.dirname(__file__), '../ext/art-testing/compare.py')
+compare_script = os.path.join(settings.EXTERNAL_DIR['BASE'], 'art-testing', 'compare.py')
 
 def render_comparison(results_before, results_after):
     tmpdir = export_data(results_before, results_after)
