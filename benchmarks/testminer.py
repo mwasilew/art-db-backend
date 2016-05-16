@@ -530,11 +530,15 @@ class ArtMicrobenchmarksTestResults(LavaTestSystem):
             host = host[0]
         else:
             return test_result_list
-        src = [s for s in host['software_context']['sources'] if 'test_params' in s].next()
+        src = [s for s in host['software_context']['sources'] if 'test_params' in s]
+        if src:
+            src = src[0]
         # This is an art-microbenchmarks test
         # The test name and test results are in the attachmented pkl file
         # get test results for the attachment
-        test_mode = ast.literal_eval(src['test_params'])['MODE']
+        test_mode = "unknown"
+        if src:
+            test_mode = ast.literal_eval(src['test_params'])['MODE']
         logger.debug("Test mode: {0}".format(test_mode))
         json_attachments = [a['content'] for a in host['attachments'] if a['pathname'].endswith('json')]
 
