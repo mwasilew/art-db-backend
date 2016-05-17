@@ -9,9 +9,6 @@ from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.fields import HStoreField
 
 
-from benchmarks.metadata import extract_metadata, extract_name
-
-
 class ManifestReduced(models.Model):
     hash = models.CharField(primary_key=True, max_length=40)
 
@@ -221,8 +218,6 @@ class TestJob(models.Model):
     metadata = HStoreField(default=dict, blank=True)
 
     def save(self, *args, **kwargs):
-        self.metadata = extract_metadata(self.definition)
-        self.name = extract_name(self.definition)
         super(TestJob, self).save(*args, **kwargs)
         test_jobs = self.result.test_jobs
         self.result.completed = (test_jobs.count() == test_jobs.filter(completed=True).count())

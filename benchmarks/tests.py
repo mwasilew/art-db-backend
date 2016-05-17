@@ -391,13 +391,6 @@ class TestJobTestCase(TestCase):
         job = TestJob()
         self.assertEqual({}, job.metadata)
 
-    @patch("benchmarks.metadata.extract_metadata", { "foo": "bar" })
-    def test_extracts_metadata_before_saving(self):
-        result = G(Result, manifest__manifest=MINIMAL_XML)
-        job = TestJob(result=result, definition='{"metadata": { "foo" : "bar"}}')
-        job.save()
-        self.assertEqual("bar", job.metadata['foo'])
-
     def test_can_resubmit_test_single_node(self):
         result = G(Result, manifest__manifest=MINIMAL_XML)
         job = TestJob(result=result)

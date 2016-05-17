@@ -3,12 +3,10 @@ import json
 
 def extract_metadata(definition):
     parser = MetadataParser(definition)
-    parser.parse()
     return parser.metadata
 
 def extract_name(definition):
     parser = MetadataParser(definition)
-    parser.parse()
     return parser.name
 
 
@@ -18,23 +16,10 @@ class MetadataParser(object):
         self.definition = definition
         self.metadata = {}
         self.name = ""
-
-    def parse(self):
-        if self.definition:
-            possible_loaders = [
-                json.loads,
-            ]
-            for loader in possible_loaders:
-                try:
-                    data = loader(self.definition)
-                    self.metadata = {}
-                    self.__extract_metadata_recursively__(data)
-                    return
-                except ValueError:
-                    pass
+        self.__extract_metadata_recursively__(self.definition)
 
     def __extract_metadata_recursively__(self, data):
-        if type(data) is dict:
+        if isinstance(data, dict):
             for key in data:
                 if key == 'metadata':
                     for k in data[key]:
@@ -43,6 +28,6 @@ class MetadataParser(object):
                     self.name = data[key]
                 else:
                     self.__extract_metadata_recursively__(data[key])
-        elif type(data) is list:
+        elif isinstance(data, list):
             for item in data:
                 self.__extract_metadata_recursively__(item)
