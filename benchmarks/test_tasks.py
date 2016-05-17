@@ -69,11 +69,13 @@ def populate_successful_job(job):
 class LavaFetchTest(TestCase):
 
     @patch("benchmarks.tasks.get_testjob_data", lava_xmlrpc_503)
+    @patch("benchmarks.models.TestJob.objects.get", lambda **kw: TestJob())
     def test_ignores_lava_503(self):
         set_testjob_results.apply(args=[None])
         # just not crashing is good enough
 
     @patch("benchmarks.tasks.get_testjob_data", lava_xmlrpc_502)
+    @patch("benchmarks.models.TestJob.objects.get", lambda **kw: TestJob())
     def test_ignores_lava_502(self):
         set_testjob_results.apply(args=[None])
         # just not crashing is good enough
@@ -82,7 +84,7 @@ class LavaFetchTest(TestCase):
     def test_set_testjob_result_saves_testjob(self):
         result = G(Result, manifest__manifest=MINIMAL_XML)
         testjob = G(TestJob, result=result, status='Submitted')
-        set_testjob_results.apply(args=[testjob])
+        set_testjob_results.apply(args=[testjob.id])
 
         testjob_from_db = TestJob.objects.get(pk=testjob.id)
         self.assertEqual("Complete", testjob_from_db.status)
@@ -93,8 +95,8 @@ class LavaFetchTest(TestCase):
         result = G(Result, manifest__manifest=MINIMAL_XML)
         testjob = G(TestJob, result=result, status='Submitted')
 
-        set_testjob_results.apply(args=[testjob])
-        set_testjob_results.apply(args=[testjob])
+        set_testjob_results.apply(args=[testjob.id])
+        set_testjob_results.apply(args=[testjob.id])
 
         self.assertEqual(2, result.data.count())
 
