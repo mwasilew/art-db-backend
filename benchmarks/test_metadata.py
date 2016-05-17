@@ -2,6 +2,7 @@ from django.test import TestCase
 
 
 from benchmarks.metadata import extract_metadata
+from benchmarks.metadata import extract_name
 
 
 class MetadataParserTestCase(TestCase):
@@ -32,3 +33,7 @@ class MetadataParserTestCase(TestCase):
         metadata = extract_metadata(u'{"actions": [{"command": "dummy_deploy", "metadata": {"foo": "bar"}}, {"command": "dummy_deploy", "metadata": {"baz": "qux"}}]}')
         self.assertEqual(metadata['foo'], 'bar')
         self.assertEqual(metadata['baz'], 'qux')
+
+    def test_extract_name_simple(self):
+        name = extract_name(u'{"job_name": "foobar"}')
+        self.assertEqual(name, 'foobar')
