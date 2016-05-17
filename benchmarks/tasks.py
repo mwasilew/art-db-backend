@@ -23,7 +23,8 @@ logger = get_task_logger("tasks")
 
 
 @celery_app.task(bind=True)
-def set_testjob_results(self, testjob):
+def set_testjob_results(self, testjob_id):
+    testjob = models.TestJob.objects.get(pk=testjob_id)
     try:
         test_results = get_testjob_data(testjob)
         store_testjob_data(testjob, test_results)
@@ -146,7 +147,7 @@ def check_testjob_completeness(self):
     logger.info("Fetch incomplete TestJobs results, count=%s" % incompleted.count())
 
     for testjob in models.TestJob.objects.filter(completed=False):
-        set_testjob_results.apply_async(args=[testjob])
+        set_testjob_results.apply_async(args=[testjob.id])
 
 
 @celery_app.task(bind=True)

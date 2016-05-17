@@ -25,7 +25,8 @@ class TestJobAdmin(admin.ModelAdmin):
             testjob.initialized = False
             testjob.completed = False
             testjob.results_loaded = False
-            set_testjob_results.delay(testjob)
+            testjob.save()
+            set_testjob_results.delay(testjob.id)
     force_fetch_results.short_description = "Force fetch results"
 
 @admin.register(ResultData)
