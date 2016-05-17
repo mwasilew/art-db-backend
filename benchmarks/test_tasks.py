@@ -5,15 +5,17 @@ from mock import patch
 from django.core import mail
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
+import re
 
 from benchmarks.models import Benchmark
 from benchmarks.models import Result
 from benchmarks.models import ResultData
 from benchmarks.models import TestJob
 from benchmarks.testminer import LavaServerException
-from benchmarks.tasks import set_testjob_results
 
+from benchmarks.tasks import set_testjob_results
 from benchmarks.tasks import report_email
+from benchmarks.tasks import report_gerrit
 
 
 MINIMAL_XML = '<?xml version="1.0" encoding="UTF-8"?><body></body>'
@@ -99,41 +101,64 @@ class LavaFetchTest(TestCase):
         self.assertEqual(2, result.data.count())
 
 
-class EmailTasksTest(TestCase):
+class FakeGerrit(object):
+    def __init__(self):
+        self.__reports__ = []
+    def report(self, current, message):
+        self.__reports__.append((current, message))
+    @property
+    def reports(self):
+        return self.__reports__
+    def clear(self):
+        self.__reports__ = []
 
-    def test_report_email(self):
-        now = timezone.now()
-        past = now - relativedelta(days=1)
-        baseline = G(
+
+fake_gerrit = FakeGerrit()
+
+
+class ReportsTest(TestCase):
+
+    def setUp(self):
+        self.now = timezone.now()
+        self.past = self.now - relativedelta(days=1)
+        self.baseline = G(
             Result,
             manifest__manifest=MINIMAL_XML,
             branch_name='master',
             gerrit_change_number=None,
-            created_at=past
+            created_at=self.past
         )
-        current = G(
+        self.current = G(
             Result,
             manifest__manifest=MINIMAL_XML,
             branch_name='master',
             gerrit_change_number=123,
             gerrit_change_id='I8adbccfe4b39a1e849b5d7a976fd4cdc',
-            created_at=now
+            created_at=self.now
         )
         benchmark1 = G(Benchmark)
         G(
             ResultData,
-            result=baseline,
+            result=self.baseline,
             benchmark=benchmark1,
             name="benchmark1",
             measurement=5
         )
         G(
             ResultData,
-            result=current,
+            result=self.current,
             benchmark=benchmark1,
             name="benchmark1",
             measurement=6
         )
 
-        report_email.apply(args=[current])
+        fake_gerrit.clear()
+
+    def test_report_email(self):
+        report_email.apply(args=[self.current])
         self.assertEqual(1, len(mail.outbox))
+
+    @patch('benchmarks.gerrit.update', fake_gerrit.report)
+    def test_report_gerrit(self):
+        report_gerrit.apply(args=[self.current])
+        self.assertTrue('branch:' in fake_gerrit.reports[0][1])
