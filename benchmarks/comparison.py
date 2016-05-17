@@ -4,6 +4,8 @@ import shutil
 import subprocess
 import tempfile
 
+from collections import OrderedDict
+
 from django.conf import settings
 
 compare_script = os.path.join(settings.EXTERNAL_DIR['BASE'], 'art-testing', 'compare.py')
@@ -30,8 +32,8 @@ def export_data(results_before, results_after):
 
 
 def export_result(results, filename):
-    benchmarks = {}
-    for benchmark in results:
+    benchmarks = OrderedDict()
+    for benchmark in results.order_by("name"):
         benchmarks[benchmark.name] = benchmark.values
 
     with open(filename, 'w') as export:
