@@ -6,6 +6,7 @@ import requests
 from benchmarks.testminer import GenericLavaTestSystem
 from benchmarks.testminer import LavaServerException
 from benchmarks.testminer import LavaResponseException
+from benchmarks.testminer import ArtMicrobenchmarksTestResults
 
 class MockResponse(object):
 
@@ -49,3 +50,19 @@ class LavaResponseExceptionTest(TestCase):
     def test_message(self):
         ex = LavaResponseException("foo is FUBAR")
         self.assertEqual("foo is FUBAR", ex.message)
+
+
+class ArtMicrobenchmarksTestResultsTest(TestCase):
+
+    def test_environment_name_no_metadata(self):
+        tester = ArtMicrobenchmarksTestResults('https://example.com/')
+        self.assertTrue(tester.get_environment_name({}) is None)
+
+    def test_environment_name_full(self):
+        tester = ArtMicrobenchmarksTestResults('https://example.com/')
+        metadata = {
+            'device': 'nexus9',
+            'mode': 64, # an int, on purpose
+            'core': 'a57'
+        }
+        self.assertEqual(tester.get_environment_name(metadata), 'nexus9-64-a57')

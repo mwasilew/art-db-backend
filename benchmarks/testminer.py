@@ -54,6 +54,9 @@ class TestSystem(object):
     def get_result_data(self, job_id):
         return None, None
 
+    def get_environment_name(self, metadata):
+        return None
+
     @staticmethod
     def reduce_test_results(test_result_list):
         return None
@@ -625,6 +628,14 @@ class ArtMicrobenchmarksTestResults(LavaTestSystem):
         if not json_attachments:
             return (None, None)
         return (json_attachments[0][0], base64.b64decode(json_attachments[0][1]))
+
+    def get_environment_name(self, metadata):
+        wanted = ('device', 'mode', 'core')
+        data = [ str(metadata[key]) for key in wanted if key in metadata ]
+        if len(data) == len(wanted):
+            return '-'.join(data)
+        else:
+            return None
 
 
 class ArtWATestResults(LavaTestSystem):
