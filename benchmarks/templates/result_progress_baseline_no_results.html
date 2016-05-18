@@ -7,7 +7,7 @@
 
     <hr>
 
-    <h3 style="margin-bottom: 0px;">Change: <a href="{{ current.build_url }}">{{ current.build_id }}#{{ current.name }}</a></h3>
+    <h3 style="margin-bottom: 0px;">Change: <a href="{{ current.permalink }}">{{ current.build_id }}#{{ current.name }}</a></h3>
 
     <ul style="padding-left: 0; margin-top: 0;">
         <li>branch: {{ current.branch_name }}</li>
@@ -17,8 +17,10 @@
 
     <hr>
 
-    <h3>Baseline: <a href="{{ baseline.build_url }}">{{ baseline.build_id }}#{{ baseline.name }}</a></h3>
-
+    <h3>Baseline: <a href="{{ baseline.permalink }}">{{ baseline.build_id }}#{{ baseline.name }}</a></h3>
+    <ul style="padding-left: 0; margin-top: 0;">
+        <li>Jenkins build: <a href="{{ baseline.build_url }}">{{ baseline.build_number }}</a>
+    </ul>
     <i>Baseline tests didn't produce useful results. Please try to resubmit tests using ART Reports link.</i>
 
     <p>
@@ -30,8 +32,5 @@
             {% endfor %}
             </ul>
         {% endif %}
-
-        <h5 style="margin-bottom: 0px;">Art Reports:</h5>
-        <a href="{{ baseline.permalink }}">{{ baseline.permalink }}</a>
     </p>
 {% endblock %}
