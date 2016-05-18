@@ -7,7 +7,7 @@
 
     <hr>
 
-    <h3 style="margin-bottom: 0px;">Change: <a href="{{ current.build_url }}">{{ current.build_id }}#{{ current.name }}</a></h3>
+    <h3 style="margin-bottom: 0px;">Change: <a href="{{ current.permalink }}">{{ current.build_id }}#{{ current.name }}</a></h3>
 
     <ul style="padding-left: 0; margin-top: 0;">
         <li>branch: {{ current.branch_name }}</li>
@@ -28,8 +28,5 @@
             {% endfor %}
             </ul>
         {% endif %}
-
-        <h5 style="margin-bottom: 0px;">Art Reports:</h5>
-        <a href="{{ baseline.permalink }}">{{ current.permalink }}</a>
     </p>
 {% endblock %}
