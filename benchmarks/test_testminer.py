@@ -14,15 +14,15 @@ class MockResponse(object):
         self.content = content
 
     @classmethod
-    def promise(__class__, status_code):
-        f = lambda method, url, **whatever: __class__(500, '')
+    def http_error(__class__, status_code):
+        f = lambda method, url, **whatever: __class__(status_code, '')
         return f
 
 
 class GenericLavaTestSystemTest(TestCase):
 
 
-    @patch("requests.request", MockResponse.promise(500))
+    @patch("requests.request", MockResponse.http_error(500))
     def test_lava_server_request_handling(self):
         tester = GenericLavaTestSystem('http://example.com/')
         with self.assertRaises(LavaServerException):
