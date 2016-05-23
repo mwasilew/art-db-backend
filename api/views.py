@@ -115,7 +115,7 @@ class StatsViewSet(viewsets.ModelViewSet):
         project = self.request.query_params.get('project')
         benchmarks = self.request.query_params.getlist('benchmark')
 
-        if not (benchmarks and branch):
+        if not (benchmarks and branch and project):
             return self.queryset.none()
         if settings.IGNORE_GERRIT:
             return self.queryset.filter(benchmark__name__in=benchmarks,
