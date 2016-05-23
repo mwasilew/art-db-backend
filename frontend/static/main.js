@@ -226,7 +226,8 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
 
         var params = {
             branch: $scope.branch.branch_name,
-            benchmark: $scope.benchmark.name
+            benchmark: $scope.benchmark.name,
+            project: $scope.project.name
         };
 
         $location.search(params);
@@ -337,19 +338,23 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
 
     $q.all([
         $http.get('/api/branch/'),
-        $http.get('/api/benchmark/')
+        $http.get('/api/benchmark/'),
+        $http.get('/api/projects/')
     ]).then(function(response) {
 
         $scope.branchList = response[0].data;
         $scope.benchmarkList = response[1].data;
+        $scope.projectList = response[2].data;
 
         var defaults = {
             branch: $routeParams.branch || $scope.branchList[0]['branch_name'],
-            benchmark: $routeParams.benchmark || $scope.benchmarkList[0]['name']
+            benchmark: $routeParams.benchmark || $scope.benchmarkList[0]['name'],
+            project: $routeParams.project || $scope.projectList[0]['name']
         };
 
         $scope.branch = _.find($scope.branchList, ['branch_name', defaults.branch]);
         $scope.benchmark = _.find($scope.benchmarkList, ['name', defaults.benchmark]);
+        $scope.project = _.find($scope.projectList, ['name', defaults.project]);
 
     }).then($scope.change);
 

@@ -23,5 +23,6 @@ router.register(r'settings', views.SettingsViewSet, base_name="settings")
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'details/', views.ResultDataForManifest.as_view()),
+    url(r'projects/', views.ProjectsView.as_view()),
 ]
 

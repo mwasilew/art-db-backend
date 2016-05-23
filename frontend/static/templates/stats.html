@@ -2,8 +2,16 @@
   <div class="col-md-12">
     <form>
       <div class="row">
+        <div class="col-md-4">
+          <div class="form-group">
+            <label>Project</label>
+            <select ng-disabled="disabled" ng-model="project" class="form-control"
+                    ng-change="change()"
+                    ng-options="item.name for item in projectList"></select>
+          </div>
+        </div>
 
-        <div class="col-md-6">
+        <div class="col-md-4">
           <div class="form-group">
             <label>Branch</label>
             <select ng-disabled="disabled" ng-model="branch" class="form-control"
@@ -12,7 +20,7 @@
           </div>
         </div>
 
-        <div class="col-md-6">
+        <div class="col-md-4">
           <div class="form-group">
             <label>Benchmark</label>
             <select ng-disabled="disabled" ng-model="benchmark" class="form-control"
