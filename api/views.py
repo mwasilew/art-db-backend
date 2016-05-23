@@ -112,17 +112,20 @@ class StatsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         branch = self.request.query_params.get('branch')
+        project = self.request.query_params.get('project')
         benchmarks = self.request.query_params.getlist('benchmark')
 
         if not (benchmarks and branch):
             return self.queryset.none()
         if settings.IGNORE_GERRIT:
             return self.queryset.filter(benchmark__name__in=benchmarks,
-                                        result__branch_name=branch)
+                                        result__branch_name=branch,
+                                        result__name=project)
         else:
             return self.queryset.filter(benchmark__name__in=benchmarks,
                                         result__gerrit_change_number=None,
-                                        result__branch_name=branch)
+                                        result__branch_name=branch,
+                                        result__name=project)
 
 
 # result
@@ -363,6 +366,16 @@ class SettingsViewSet(viewsets.ViewSet):
     @list_route()
     def manifest_settings(self, query):
         return response.Response(settings.BENCHMARK_MANIFEST_PROJECT_LIST)
+
+
+class ProjectsView(views.APIView):
+    # lists all project names in Result objects
+    def get_queryset(self):
+        print "I'm here"
+        return benchmarks_models.Result.objects.all().order_by("name").distinct("name")
+
+    def get(self, request):
+        return response.Response(self.get_queryset().values("name"))
 
 
 class CompareResults(viewsets.ViewSet):
