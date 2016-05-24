@@ -182,24 +182,18 @@ class ResultViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
 
         try:
             result = benchmarks_models.Result.objects.get(
-                build_id=serializer.validated_data['build_id'],
-                name=serializer.validated_data['name']
+                build_id=serializer.initial_data['build_id'],
+                name=serializer.initial_data['name']
             )
-
-            serializer = self.get_serializer(instance=result, data=request.data)
-            serializer.is_valid(raise_exception=True)
-
-            result.test_jobs.all().delete()
-            result.data.all().delete()
-
+            if not serializer.is_valid():
+                serializer = self.get_serializer(instance=result, data=request.data)
+                serializer.is_valid()
         except benchmarks_models.Result.DoesNotExist:
-            pass
-
-        result = serializer.save()
+            serializer.is_valid(raise_exception=True)
+            result = serializer.save()
 
         if request.data.get('test_jobs'):
 
