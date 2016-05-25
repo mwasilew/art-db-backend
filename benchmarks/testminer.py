@@ -51,6 +51,9 @@ class TestSystem(object):
     def get_result_class_name(self, job_id):
         return None
 
+    def get_result_class_name_from_definition(self, definition):
+        return None
+
     def get_result_data(self, job_id):
         return None, None
 
@@ -122,6 +125,9 @@ class GenericLavaTestSystem(TestSystem):
     def get_result_class_name(self, job_id):
         content = self.call_xmlrpc('scheduler.job_details', job_id)
         definition = json.loads(content['definition'])
+        return get_result_class_name_from_definition(definition)
+
+    def get_result_class_name_from_definition(self, definition):
         for action in definition['actions']:
             if action['command'] == "lava_test_shell":
                 if 'testdef_repos' in action['parameters'].keys():
