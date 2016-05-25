@@ -264,6 +264,7 @@ class ResultDataViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.ResultDataSerializer
     filter_fields = ('id',
                      'benchmark',
+                     'name',
                      'result',
                      'created_at')
 
