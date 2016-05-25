@@ -336,6 +336,36 @@ class ResultTests(APITestCase):
         self.assertEqual(models.Manifest.objects.count(), 1)
         self.assertEqual(models.TestJob.objects.count(), 3)
 
+    @patch('benchmarks.tasks.update_jenkins.delay', lambda x: None)
+    @patch('benchmarks.tasks.set_testjob_results.delay', lambda x: None)
+    def test_add_existing_test_jobs_to_existing_result_object(self):
+
+        initial_data = {
+            'build_url': 'http://linaro.org',
+            'name': u'linaro-art-stable-m-build-juno',
+            'url': u'http://dynamicfixture1.com',
+            'build_number': 200,
+            'build_id': 20,
+            'manifest': MINIMAL_XML,
+            'created_at': '2016-01-06 09:00:01',
+            'test_jobs': " 111, 222 "
+        }
+
+        response0 = self.client.post('/api/result/', data=initial_data)
+        self.assertEqual(response0.data['created_at'], '2016-01-06T09:00:01Z')
+
+        additional_data = {
+            'build_id': 20,
+            'name': u'linaro-art-stable-m-build-juno',
+            'test_jobs': " 111, 222 "
+        }
+        response = self.client.post('/api/result/', data=additional_data)
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(models.Result.objects.count(), 1)
+        self.assertEqual(models.Manifest.objects.count(), 1)
+        self.assertEqual(models.TestJob.objects.count(), 2)
+
     def test_baseline_1(self):
 
         baseline = G(models.Result,

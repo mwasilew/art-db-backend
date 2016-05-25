@@ -201,11 +201,12 @@ class ResultViewSet(viewsets.ModelViewSet):
 
             for testjob_id in test_jobs:
 
-                testjob = benchmarks_models.TestJob.objects.create(
+                testjob, testjob_created = benchmarks_models.TestJob.objects.get_or_create(
                     result=result,
                     id=testjob_id
                 )
-                tasks.set_testjob_results.delay(testjob)
+                if testjob_created:
+                    tasks.set_testjob_results.delay(testjob)
 
         tasks.update_jenkins.delay(result)
         return response.Response(serializer.data, status=status.HTTP_201_CREATED)
