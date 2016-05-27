@@ -9,3 +9,8 @@ class EnvironmentTest(TestCase):
         Environment(identifier='foo').save()
         with self.assertRaises(IntegrityError):
             Environment(identifier='foo').save()
+
+    def test_use_identifier_as_name_by_default(self):
+        e = Environment(identifier='foo')
+        e.save()
+        self.assertEquals(e.name, 'foo')

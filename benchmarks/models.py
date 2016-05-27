@@ -115,6 +115,11 @@ class Environment(models.Model):
     identifier = models.CharField(max_length=128, unique=True)
     name = models.CharField(max_length=128)
 
+    def save(self, **kwargs):
+        if self.name == '' or self.name is None:
+            self.name = self.identifier
+        return super(Environment, self).save(**kwargs)
+
 
 class Result(models.Model):
 
