@@ -3,6 +3,7 @@ from django.test import TestCase
 
 from benchmarks.metadata import extract_metadata
 from benchmarks.metadata import extract_name
+from benchmarks.metadata import extract_device
 
 
 class MetadataParserTestCase(TestCase):
@@ -37,3 +38,15 @@ class MetadataParserTestCase(TestCase):
     def test_extract_name_simple(self):
         name = extract_name({"job_name": "foobar"})
         self.assertEqual(name, 'foobar')
+
+    def test_extract_device(self):
+        device = extract_device({"requested_device_type_id": "mydevice"})
+        self.assertEqual(device, "mydevice")
+
+    def test_extract_device_from_multinode_job(self):
+        device = extract_device({ "device_group": [ { "role": "host", "device_type": "foo" }, { "role": "target", "device_type": "bar"} ]})
+        self.assertEqual(device, "bar")
+
+    def test_extract_device_from_multinode_job_without_mn_prefix(self):
+        device = extract_device({ "device_group": [ { "role": "host", "device_type": "foo" }, { "role": "target", "device_type": "mn-nexus5x"} ]})
+        self.assertEqual(device, "nexus5x")

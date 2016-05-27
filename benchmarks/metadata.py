@@ -1,4 +1,5 @@
 import json
+import re
 
 
 def extract_metadata(definition):
@@ -9,6 +10,13 @@ def extract_name(definition):
     parser = MetadataParser(definition)
     return parser.name
 
+def extract_device(definition):
+    parser = MetadataParser(definition)
+    return parser.device
+
+def __format_device_name__(device):
+    return re.sub('mn-', '', device)
+
 
 class MetadataParser(object):
 
@@ -16,6 +24,7 @@ class MetadataParser(object):
         self.definition = definition
         self.metadata = {}
         self.name = ""
+        self.device = None
         self.__extract_metadata_recursively__(self.definition)
 
     def __extract_metadata_recursively__(self, data):
@@ -26,6 +35,10 @@ class MetadataParser(object):
                         self.metadata[k] = data[key][k]
                 elif key == 'job_name':
                     self.name = data[key]
+                elif key == 'requested_device_type_id':
+                    self.device = __format_device_name__(data[key])
+                elif 'role' in data and 'device_type' in data and data['role'] == 'target':
+                    self.device = __format_device_name__(data['device_type'])
                 else:
                     self.__extract_metadata_recursively__(data[key])
         elif isinstance(data, list):

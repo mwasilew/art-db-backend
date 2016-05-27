@@ -12,7 +12,7 @@ from copy import deepcopy
 
 from subprocess import Popen, PIPE, STDOUT
 
-from benchmarks.metadata import extract_metadata, extract_name
+from benchmarks.metadata import extract_metadata, extract_name, extract_device
 
 from celery.utils.log import get_task_logger
 logger = get_task_logger("testminer")
@@ -115,7 +115,9 @@ class GenericLavaTestSystem(TestSystem):
             definition = json.loads(content['multinode_definition'])
         details.update({"definition": str(json.dumps(definition))})
         details['metadata'] = extract_metadata(definition)
+        details['metadata']['device'] = extract_device(definition)
         details['name'] = extract_name(definition)
+
         for action in definition['actions']:
             if action['command'].startswith("submit_results"):
                 if 'stream' in action['parameters'].keys():
