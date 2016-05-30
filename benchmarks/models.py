@@ -120,6 +120,9 @@ class Environment(models.Model):
             self.name = self.identifier
         return super(Environment, self).save(**kwargs)
 
+    def __unicode__(self):
+        return self.name
+
 
 class Result(models.Model):
 
