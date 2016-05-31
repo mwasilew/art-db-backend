@@ -638,10 +638,12 @@ class ArtMicrobenchmarksTestResults(LavaTestSystem):
         return (json_attachments[0][0], base64.b64decode(json_attachments[0][1]))
 
     def get_environment_name(self, metadata):
-        wanted = ('device', 'mode', 'core')
-        data = [ str(metadata[key]) for key in wanted if key in metadata ]
-        if len(data) == len(wanted):
-            return '-'.join(data)
+        wanted = ('device', 'mode', 'core', 'compiler-mode')
+        data = { 'compiler-mode': 'aot' } # defaults
+        data.update(metadata)
+        environment = [ str(data[key]) for key in wanted if key in data ]
+        if len(environment) == len(wanted):
+            return '-'.join(environment)
         else:
             return None
 

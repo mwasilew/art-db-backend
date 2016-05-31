@@ -65,4 +65,14 @@ class ArtMicrobenchmarksTestResultsTest(TestCase):
             'mode': 64, # an int, on purpose
             'core': 'a57'
         }
-        self.assertEqual(tester.get_environment_name(metadata), 'nexus9-64-a57')
+        self.assertEqual(tester.get_environment_name(metadata), 'nexus9-64-a57-aot')
+
+    def test_environment_name_with_explicit_compiler_mode(self):
+        tester = ArtMicrobenchmarksTestResults('https://example.com/')
+        metadata = {
+            'device': 'nexus9',
+            'mode': 64, # an int, on purpose
+            'core': 'a57',
+            'compiler-mode': 'jit',
+        }
+        self.assertEqual(tester.get_environment_name(metadata), 'nexus9-64-a57-jit')
