@@ -99,6 +99,7 @@ def get_testjob_data(testjob):
     testjob.definition = details['definition']
     testjob.metadata = details['metadata']
     testjob.name = details['name']
+    testjob.environment = tester.get_environment(testjob.metadata)
     testjob.completed = True
     logger.debug("Test job({0}) completed: {1}".format(testjob.id, testjob.completed))
     if testjob.status in ["Incomplete", "Canceled"]:

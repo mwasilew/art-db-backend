@@ -13,6 +13,7 @@ from copy import deepcopy
 from subprocess import Popen, PIPE, STDOUT
 
 from benchmarks.metadata import extract_metadata, extract_name, extract_device
+from benchmarks.models import Environment
 
 from celery.utils.log import get_task_logger
 logger = get_task_logger("testminer")
@@ -59,6 +60,14 @@ class TestSystem(object):
 
     def get_environment_name(self, metadata):
         return None
+
+    def get_environment(self, metadata, cls=Environment):
+        name = self.get_environment_name(metadata)
+        if name:
+            environment, _ = cls.objects.get_or_create(identifier=name)
+            return environment
+        else:
+            return None
 
     @staticmethod
     def reduce_test_results(test_result_list):
