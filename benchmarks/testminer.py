@@ -9,6 +9,7 @@ import subprocess
 import sys
 import xmlrpclib
 import yaml
+import tempfile
 import urlparse
 from copy import deepcopy
 
@@ -49,6 +50,9 @@ class TestSystem(object):
 
     def get_test_job_results(self, job_id):
         #return dict(boot=[], test=[])
+        return []
+
+    def parse_test_results(self, data):
         return []
 
     def get_test_job_details(self, job_id):
@@ -151,7 +155,7 @@ class GenericLavaTestSystem(TestSystem):
     def get_result_class_name(self, job_id):
         content = self.call_xmlrpc('scheduler.job_details', job_id)
         definition = json.loads(content['definition'])
-        return get_result_class_name_from_definition(definition)
+        return self.get_result_class_name_from_definition(definition)
 
     def get_result_class_name_from_definition(self, definition):
         for action in definition['actions']:
@@ -543,76 +547,15 @@ class LavaTestSystem(GenericLavaTestSystem):
 
 class ArtMicrobenchmarksTestResults(LavaTestSystem):
     def get_test_job_results(self, test_job_id):
-
-        logger.info("Fetch microbenchmark results")
-        status = self.call_xmlrpc('scheduler.job_status', test_job_id)
-
-        if not ('bundle_sha1' in status and status['bundle_sha1']):
+        (json_filename, json_text) = self.get_result_data(test_job_id)
+        if json_text:
+            return self.parse_test_results(json_text)
+        else:
             return []
 
+    def parse_test_results(self, json_text):
         test_result_list = []
 
-        sha1 = status['bundle_sha1']
-        logger.debug("Bundle SHA1: {0}".format(sha1))
-        result_bundle = self.call_xmlrpc('dashboard.get', sha1)
-        bundle = json.loads(result_bundle['content'])
-
-        target = [t for t in bundle['test_runs'] if t['test_id'] == 'multinode-target']
-        if target:
-            target = target[0]
-        else:
-            return test_result_list
-        host = [t for t in bundle['test_runs'] if t['test_id'] == 'art-microbenchmarks']
-        if host:
-            host = host[0]
-        else:
-            return test_result_list
-        src = [s for s in host['software_context']['sources'] if 'test_params' in s]
-        if src:
-            src = src[0]
-        # This is an art-microbenchmarks test
-        # The test name and test results are in the attachmented pkl file
-        # get test results for the attachment
-        test_mode = "unknown"
-        if src:
-            test_mode = ast.literal_eval(src['test_params'])['MODE']
-        logger.debug("Test mode: {0}".format(test_mode))
-        json_attachments = [a['content'] for a in host['attachments'] if a['pathname'].endswith('json')]
-
-        if not json_attachments:
-            #fixme retrieve test results from LAVA results
-            #if 'test_results' not in host.keys():
-            #    return []
-            #test_result_dict = {}
-            #for test in host['test_results']:
-            #    if 'measurement' in test.keys():
-            #        benchmark, test_case_name = test['test_case_id'].split("-", 1)
-            #        if benchmark in test_result_dict.keys():
-            #            test_result = test_result_dict[benchmark]
-            #            test_result['subscore'].append(
-            #                    {"name": test_case_name,
-            #                     "measurement": test['measurement']
-            #                    })
-            #        else:
-            #            test_result = {}
-            #            test_result['board'] = target['attributes']['target']
-            #            test_result['board_config'] = target['attributes']['target']
-            #            # benchmark iteration
-            #            test_result['benchmark_name'] = benchmark
-            #            test_result['subscore'] = [
-            #                    {"name": test_case_name,
-            #                     "measurement": test['measurement']
-            #                    }]
-            #            test_result_dict[benchmark] = test_result
-            #return [value for key, value in test_result_dict.iteritems()]
-            logger.debug("JSON attachments missing")
-            return []
-
-
-        json_text = base64.b64decode(json_attachments[0])
-        # save json file locally
-        #with open(self.result_file_name + "_" + str(test_mode) + ".json", "w") as json_file:
-        #    json_file.write(json_text)
         test_result_dict = json.loads(json_text)
         if 'benchmarks' in test_result_dict.keys():
             test_result_dict = test_result_dict['benchmarks']
@@ -622,8 +565,6 @@ class ArtMicrobenchmarksTestResults(LavaTestSystem):
         benchmark_list   = list(set(test_result_keys))
         for benchmark in benchmark_list:
             test_result = {}
-            test_result['board'] = target['attributes']['target']
-            test_result['board_config'] = target['attributes']['target']
             # benchmark iteration
             test_result['benchmark_name'] = benchmark
             test_result['subscore'] = []
@@ -631,9 +572,9 @@ class ArtMicrobenchmarksTestResults(LavaTestSystem):
             tests = ((k, test_result_dict[k]) for k in test_result_dict.keys() if k.find(key_word) > 0)
             for test in tests:
                 # subscore iteration
-                subscore = "%s_%s" % (test[0].split('.')[-1], test_mode)
+                test_name = test[0].split('.')[-1]
                 for i in test[1]:
-                    test_case = { "name": subscore,
+                    test_case = { "name": test_name,
                                   "measurement": i }
                     test_result['subscore'].append(test_case)
 
@@ -674,38 +615,22 @@ class ArtMicrobenchmarksTestResults(LavaTestSystem):
 
 class ArtWATestResults(LavaTestSystem):
     def get_test_job_results(self, test_job_id):
-        # extract postprocessing results only
-        status = self.call_xmlrpc('scheduler.job_status', test_job_id)
-
-        if not ('bundle_sha1' in status and status['bundle_sha1']):
-            return []
-
-        sha1 = status['bundle_sha1']
-        result_bundle = self.call_xmlrpc('dashboard.get', sha1)
-        bundle = json.loads(result_bundle['content'])
-
-        target = [t for t in bundle['test_runs'] if t['test_id'] == 'wa2-target']
-        if target:
-            target = target[0]
+        (db_filename, db_content) = self.get_result_data(test_job_id)
+        if db_content:
+            return self.parse_test_results(db_content)
         else:
             return []
-        host = [t for t in bundle['test_runs'] if t['test_id'] == 'wa2-host-postprocessing']
-        if host:
-            host = host[0]
-        else:
-            return []
-        db_attachments = [a['content'] for a in host['attachments'] if a['pathname'].endswith('db')]
 
+    def parse_test_results(self, db_content):
         # select iteration, workload, metric, value from results;
         test_result_dict = {}
-        if db_attachments:
+        if db_content:
             import sqlite3
 
-            db_file_name = "/tmp/%s.db" % test_job_id
-            db_file = open(db_file_name, "w")
-            db_file.write(base64.b64decode(db_attachments[0]))
+            db_file = tempfile.NamedTemporaryFile(delete=False)
+            db_file.write(db_content)
             db_file.close()
-            conn = sqlite3.connect(db_file_name)
+            conn = sqlite3.connect(db_file.name)
             cursor = conn.cursor()
             for row in cursor.execute("select iteration, workload, metric, value from results"):
                 if row[1] in test_result_dict.keys():
@@ -716,8 +641,6 @@ class ArtWATestResults(LavaTestSystem):
                         })
                 else:
                     test_result = {}
-                    test_result['board'] = target['attributes']['target']
-                    test_result['board_config'] = target['attributes']['target']
                     # benchmark iteration
                     test_result['benchmark_name'] = row[1]
                     test_result['subscore'] = [{
@@ -725,7 +648,7 @@ class ArtWATestResults(LavaTestSystem):
                             'measurement': float(row[3])
                         }]
                     test_result_dict[row[1]] = test_result
-            os.unlink(db_file_name)
+            os.unlink(db_file.name)
         return [value for key, value in test_result_dict.iteritems()]
 
     def get_result_data(self, test_job_id):
