@@ -9,6 +9,7 @@ addons:
 
 env:
 - DJANGO_SETTINGS_MODULE=crayonbox.settings.travis
+- COMPARE_SCRIPT=/bin/echo
 
 before_install:
   - psql -d template1 -c 'create extension hstore;' -U postgres
