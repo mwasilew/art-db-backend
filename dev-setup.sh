@@ -29,7 +29,7 @@ fi
 .virtualenv/bin/pip install -r requirements-dev.txt
 
 if [ ! -f crayonbox/settings/private.py ]; then
-  get_data DEVELOPMENT_SETTINGS > crayonbox/settings/private.py
+  get_data DEVELOPMENT_SETTINGS | sed -e "s/\$USER/$USER/g" > crayonbox/settings/private.py
 fi
 
 # create database and user
