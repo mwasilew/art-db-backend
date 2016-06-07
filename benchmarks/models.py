@@ -1,4 +1,5 @@
 import hashlib
+import urlparse
 import xml.etree.ElementTree as ET
 
 from django.db import models
@@ -7,6 +8,9 @@ from django.utils import timezone
 from django.db.models import Count
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.fields import HStoreField
+
+
+from benchmarks import testminer
 
 
 class ManifestReduced(models.Model):
@@ -258,6 +262,15 @@ class TestJob(models.Model):
         if self.id.split('.')[1] != "0" :
             return False
         return True
+
+    def get_tester(self):
+        baseurl = self.testrunnerurl
+        host = urlparse.urlsplit(self.testrunnerurl).netloc
+        (username, password) = settings.CREDENTIALS[host]
+
+        tester_class = getattr(testminer, self.testrunnerclass)
+        return tester_class(baseurl, username, password)
+
 
 class Benchmark(models.Model):
     name = models.CharField(max_length=64)

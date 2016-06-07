@@ -10,15 +10,11 @@ import sys
 import xmlrpclib
 import yaml
 import tempfile
-import urlparse
 from copy import deepcopy
 
 from subprocess import Popen, PIPE, STDOUT
 
 from benchmarks.metadata import extract_metadata, extract_name, extract_device
-from benchmarks.models import Environment
-
-from django.conf import settings
 
 from celery.utils.log import get_task_logger
 logger = get_task_logger("testminer")
@@ -28,17 +24,6 @@ try:
 except ImportError:
     import os
     DEVNULL = open(os.devnull, 'wb')
-
-
-def get_tester(testjob):
-    type_name = testjob.testrunnerclass
-    baseurl = testjob.testrunnerurl
-    host = urlparse.urlsplit(testjob.testrunnerurl).netloc
-    (username, password) = settings.CREDENTIALS[host]
-
-    __module__ = sys.modules[__name__]
-    tester_class = getattr(__module__, type_name)
-    return tester_class(baseurl, username, password)
 
 
 class TestSystem(object):
@@ -80,7 +65,7 @@ class TestSystem(object):
     def get_environment_name(self, metadata):
         return None
 
-    def get_environment(self, metadata, cls=Environment):
+    def get_environment(self, metadata, cls):
         name = self.get_environment_name(metadata)
         if name:
             environment, _ = cls.objects.get_or_create(identifier=name)

@@ -15,7 +15,7 @@ def create_environments(apps, schema_editor):
     for testjob in TestJob.objects.all():
         testerclass = getattr(testminer, testjob.testrunnerclass)
         tester = testerclass(testjob.testrunnerurl)
-        environment = tester.get_environment(testjob.metadata, cls=Environment)
+        environment = tester.get_environment(testjob.metadata, Environment)
         if environment:
             testjob.environment = environment
             testjob.save()

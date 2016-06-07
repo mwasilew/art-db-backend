@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 
 from benchmarks.tasks import store_testjob_data
-from benchmarks.testminer import get_tester
 
 
 def migrate(apps, schema_editor):
@@ -16,7 +15,7 @@ def migrate(apps, schema_editor):
         if testjob.data:
             try:
                 data = testjob.data.file.read()
-                tester = get_tester(testjob)
+                tester = testjob.get_tester()
                 test_results = tester.parse_test_results(data)
                 testjob.results_loaded = False
                 store_testjob_data(testjob, test_results, ResultData=ResultData, Benchmark=Benchmark)
