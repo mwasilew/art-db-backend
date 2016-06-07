@@ -46,7 +46,3 @@ class MetadataParserTestCase(TestCase):
     def test_extract_device_from_multinode_job(self):
         device = extract_device({ "device_group": [ { "role": "host", "device_type": "foo" }, { "role": "target", "device_type": "bar"} ]})
         self.assertEqual(device, "bar")
-
-    def test_extract_device_from_multinode_job_without_mn_prefix(self):
-        device = extract_device({ "device_group": [ { "role": "host", "device_type": "foo" }, { "role": "target", "device_type": "mn-nexus5x"} ]})
-        self.assertEqual(device, "nexus5x")
