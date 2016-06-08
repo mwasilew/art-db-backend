@@ -9,9 +9,23 @@ from benchmarks.tasks import store_testjob_data
 def migrate(apps, schema_editor):
     TestJob = apps.get_model('benchmarks', 'TestJob')
     ResultData = apps.get_model('benchmarks', 'ResultData')
-    ResultData.objects.all().delete()
     Benchmark = apps.get_model('benchmarks', 'Benchmark')
-    for testjob in TestJob.objects.all():
+
+    # act only on the testjobs for which we identified an environment
+    testjobs = TestJob.objects.exclude(environment=None)
+
+    # delete result data from the testjobs who have proper environment
+    # information
+    results_cleared = []
+    for testjob in testjobs.prefetch_related('result').all():
+        result = testjob.result
+        if result.id not in results_cleared:
+            result.data.all().delete()
+            results_cleared.append(result.id)
+
+    # recreate result data, this time linked back to the testjob that produced
+    # it.
+    for testjob in testjobs.all():
         if testjob.data:
             try:
                 data = testjob.data.file.read()
