@@ -544,24 +544,22 @@ class ArtMicrobenchmarksTestResults(LavaTestSystem):
         test_result_dict = json.loads(json_text)
         if 'benchmarks' in test_result_dict.keys():
             test_result_dict = test_result_dict['benchmarks']
+
         # Key Format: benchmarks/micro/<BENCHMARK_NAME>.<SUBSCORE>
         # Extract and unique them to form a benchmark name list
-        test_result_keys = list(bn.split('/')[-1].split('.')[0] for bn in test_result_dict.keys())
-        benchmark_list   = list(set(test_result_keys))
-        for benchmark in benchmark_list:
+        for full_benchmark_name, measurements in test_result_dict.iteritems():
             test_result = {}
             # benchmark iteration
-            test_result['benchmark_name'] = benchmark
+            benchmark_group = '/'.join(full_benchmark_name.split('/')[0:-1]) + '/'
+            benchmark = full_benchmark_name.split('/')[-1].split('.')
+            test_result['benchmark_name'] = benchmark[0]
+            test_result['benchmark_group'] = benchmark_group
             test_result['subscore'] = []
-            key_word = "/%s." % benchmark
-            tests = ((k, test_result_dict[k]) for k in test_result_dict.keys() if k.find(key_word) > 0)
-            for test in tests:
-                # subscore iteration
-                test_name = test[0].split('.')[-1]
-                for i in test[1]:
-                    test_case = { "name": test_name,
-                                  "measurement": i }
-                    test_result['subscore'].append(test_case)
+            test_name = benchmark[1]
+            for i in measurements:
+                test_case = { "name": test_name,
+                             "measurement": i }
+                test_result['subscore'].append(test_case)
 
             test_result_list.append(test_result)
         return test_result_list

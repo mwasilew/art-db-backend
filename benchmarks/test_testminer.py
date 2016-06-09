@@ -76,3 +76,23 @@ class ArtMicrobenchmarksTestResultsTest(TestCase):
             'compiler-mode': 'jit',
         }
         self.assertEqual(tester.get_environment_name(metadata), 'nexus9-64-a57-jit')
+
+    def test_parse_test_results(self):
+        input_json = '{"benchmarks" : { "benchmarks/algorithm/Foo.Bar": [5420897.5, 5434825.5, 5417673.0] } }'
+        tester = ArtMicrobenchmarksTestResults('https://example.com/')
+
+        test_result = tester.parse_test_results(input_json)[0]
+        self.assertEqual(test_result['benchmark_name'], 'Foo')
+        self.assertEqual(test_result['benchmark_group'], 'benchmarks/algorithm/')
+
+        subscore = test_result['subscore'][0]
+        self.assertEqual(subscore['name'], 'Bar')
+        self.assertEqual(subscore['measurement'], 5420897.5)
+
+    def test_parse_test_results_2(self):
+        input_json = '{"benchmarks" : { "benchmarks/group1/Foo.Bar": [5420897.5, 5434825.5, 5417673.0], "benchmarks/group2/Foo.Bar": [5420897.5, 5434825.5, 5417673.0] } }'
+        tester = ArtMicrobenchmarksTestResults('https://example.com/')
+        test_results = tester.parse_test_results(input_json)
+        self.assertEqual(len(test_results), 2)
+        self.assertEqual(len([t for t in test_results if t['benchmark_group'] == 'benchmarks/group1/']), 1)
+        self.assertEqual(len([t for t in test_results if t['benchmark_group'] == 'benchmarks/group2/']), 1)
