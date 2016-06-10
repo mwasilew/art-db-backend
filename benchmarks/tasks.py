@@ -37,7 +37,7 @@ def set_testjob_results(self, testjob_id):
         else:
             raise
 
-def store_testjob_data(testjob, test_results, ResultData=models.ResultData, Benchmark=models.Benchmark):
+def store_testjob_data(testjob, test_results):
     testjob.save()
 
     if testjob.results_loaded:
@@ -53,7 +53,7 @@ def store_testjob_data(testjob, test_results, ResultData=models.ResultData, Benc
             )
         else:
             benchmark_group = None
-        benchmark, _ = Benchmark.objects.get_or_create(
+        benchmark, _ = models.Benchmark.objects.get_or_create(
             name=result['benchmark_name'],
             group=benchmark_group,
         )
@@ -66,7 +66,7 @@ def store_testjob_data(testjob, test_results, ResultData=models.ResultData, Benc
                 subscore_results[item['name']] = [item['measurement']]
 
         for name, values in subscore_results.items():
-            ResultData.objects.create(
+            models.ResultData.objects.create(
                 name=name,
                 values=values,
                 result=testjob.result,
