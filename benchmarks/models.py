@@ -272,8 +272,14 @@ class TestJob(models.Model):
         return tester_class(baseurl, username, password)
 
 
+
+class BenchmarkGroup(models.Model):
+    name = models.CharField(max_length=128)
+
+
 class Benchmark(models.Model):
     name = models.CharField(max_length=64)
+    group = models.ForeignKey(BenchmarkGroup, related_name='benchmarks', null=True)
 
     def __unicode__(self):
         return self.name

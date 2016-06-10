@@ -44,7 +44,7 @@ def reverse(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('benchmarks', '0046_create_environments_retroactively'),
+        ('benchmarks', '0047_benchmark_groups'),
     ]
 
     operations = [
