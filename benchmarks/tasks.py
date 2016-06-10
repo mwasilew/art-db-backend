@@ -47,8 +47,15 @@ def store_testjob_data(testjob, test_results, ResultData=models.ResultData, Benc
         return
 
     for result in test_results:
+        if 'benchmark_group' in result:
+            benchmark_group, _ = models.BenchmarkGroup.objects.get_or_create(
+                name=result['benchmark_group']
+            )
+        else:
+            benchmark_group = None
         benchmark, _ = Benchmark.objects.get_or_create(
-            name=result['benchmark_name']
+            name=result['benchmark_name'],
+            group=benchmark_group,
         )
 
         subscore_results = {}
