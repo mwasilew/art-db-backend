@@ -125,7 +125,10 @@ class Environment(models.Model):
         return super(Environment, self).save(**kwargs)
 
     def __unicode__(self):
-        return self.name
+        if self.name:
+            return '%s (%s)' % (self.name, self.identifier)
+        else:
+            return self.identifier
 
 
 class Result(models.Model):
@@ -275,6 +278,9 @@ class TestJob(models.Model):
 
 class BenchmarkGroup(models.Model):
     name = models.CharField(max_length=128)
+
+    def __unicode__(self):
+        return self.name
 
 
 class Benchmark(models.Model):
