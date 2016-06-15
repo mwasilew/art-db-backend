@@ -47,8 +47,15 @@ def store_testjob_data(testjob, test_results):
         return
 
     for result in test_results:
+        if 'benchmark_group' in result:
+            benchmark_group, _ = models.BenchmarkGroup.objects.get_or_create(
+                name=result['benchmark_group']
+            )
+        else:
+            benchmark_group = None
         benchmark, _ = models.Benchmark.objects.get_or_create(
-            name=result['benchmark_name']
+            name=result['benchmark_name'],
+            group=benchmark_group,
         )
 
         subscore_results = {}
@@ -62,8 +69,8 @@ def store_testjob_data(testjob, test_results):
             models.ResultData.objects.create(
                 name=name,
                 values=values,
-                board=result['board'],
                 result=testjob.result,
+                test_job_id=testjob.id,
                 benchmark=benchmark
             )
 
@@ -99,6 +106,7 @@ def get_testjob_data(testjob):
     testjob.definition = details['definition']
     testjob.metadata = details['metadata']
     testjob.name = details['name']
+    testjob.environment = tester.get_environment(testjob.metadata, models.Environment)
     testjob.completed = True
     logger.debug("Test job({0}) completed: {1}".format(testjob.id, testjob.completed))
     if testjob.status in ["Incomplete", "Canceled"]:

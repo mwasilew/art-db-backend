@@ -8,7 +8,9 @@ from collections import OrderedDict
 
 from django.conf import settings
 
-compare_script = os.path.join(settings.EXTERNAL_DIR['BASE'], 'art-testing', 'compare.py')
+compare_script = os.getenv('COMPARE_SCRIPT', None)
+if not compare_script:
+    compare_script = os.path.join(settings.EXTERNAL_DIR['BASE'], 'art-testing', 'compare.py')
 
 def render_comparison(results_before, results_after):
     tmpdir = export_data(results_before, results_after)

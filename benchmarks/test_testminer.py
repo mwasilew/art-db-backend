@@ -6,6 +6,7 @@ import requests
 from benchmarks.testminer import GenericLavaTestSystem
 from benchmarks.testminer import LavaServerException
 from benchmarks.testminer import LavaResponseException
+from benchmarks.testminer import ArtMicrobenchmarksTestResults
 
 class MockResponse(object):
 
@@ -49,3 +50,49 @@ class LavaResponseExceptionTest(TestCase):
     def test_message(self):
         ex = LavaResponseException("foo is FUBAR")
         self.assertEqual("foo is FUBAR", ex.message)
+
+
+class ArtMicrobenchmarksTestResultsTest(TestCase):
+
+    def test_environment_name_no_metadata(self):
+        tester = ArtMicrobenchmarksTestResults('https://example.com/')
+        self.assertTrue(tester.get_environment_name({}) is None)
+
+    def test_environment_name_full(self):
+        tester = ArtMicrobenchmarksTestResults('https://example.com/')
+        metadata = {
+            'device': 'nexus9',
+            'mode': 64, # an int, on purpose
+            'core': 'a57'
+        }
+        self.assertEqual(tester.get_environment_name(metadata), 'nexus9-64-a57-aot')
+
+    def test_environment_name_with_explicit_compiler_mode(self):
+        tester = ArtMicrobenchmarksTestResults('https://example.com/')
+        metadata = {
+            'device': 'nexus9',
+            'mode': 64, # an int, on purpose
+            'core': 'a57',
+            'compiler-mode': 'jit',
+        }
+        self.assertEqual(tester.get_environment_name(metadata), 'nexus9-64-a57-jit')
+
+    def test_parse_test_results(self):
+        input_json = '{"benchmarks" : { "benchmarks/algorithm/Foo.Bar": [5420897.5, 5434825.5, 5417673.0] } }'
+        tester = ArtMicrobenchmarksTestResults('https://example.com/')
+
+        test_result = tester.parse_test_results(input_json)[0]
+        self.assertEqual(test_result['benchmark_name'], 'Foo')
+        self.assertEqual(test_result['benchmark_group'], 'benchmarks/algorithm/')
+
+        subscore = test_result['subscore'][0]
+        self.assertEqual(subscore['name'], 'Bar')
+        self.assertEqual(subscore['measurement'], 5420897.5)
+
+    def test_parse_test_results_2(self):
+        input_json = '{"benchmarks" : { "benchmarks/group1/Foo.Bar": [5420897.5, 5434825.5, 5417673.0], "benchmarks/group2/Foo.Bar": [5420897.5, 5434825.5, 5417673.0] } }'
+        tester = ArtMicrobenchmarksTestResults('https://example.com/')
+        test_results = tester.parse_test_results(input_json)
+        self.assertEqual(len(test_results), 2)
+        self.assertEqual(len([t for t in test_results if t['benchmark_group'] == 'benchmarks/group1/']), 1)
+        self.assertEqual(len([t for t in test_results if t['benchmark_group'] == 'benchmarks/group2/']), 1)

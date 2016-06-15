@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Manifest, Result, ResultData, TestJob
+from .models import Manifest, Result, ResultData, TestJob, Environment, Benchmark, BenchmarkGroup
 from .tasks import set_testjob_results
 
 @admin.register(Manifest)
@@ -37,3 +37,15 @@ class ResultDataAdmin(admin.ModelAdmin):
         result = obj.testjob.result
         return "%s#%s/%s" % (result.build_id, result.name, result.build_number)
 
+@admin.register(Environment)
+class EnvironmentAdmin(admin.ModelAdmin):
+    list_display = ('identifier', 'name')
+    readonly_fields = ('identifier',)
+
+@admin.register(BenchmarkGroup)
+class BenchmarkGroupAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+
+@admin.register(Benchmark)
+class BenchmarkAdmin(admin.ModelAdmin):
+    list_display = ('name', 'group')

@@ -6,13 +6,15 @@ import os
 import requests
 import shutil
 import subprocess
+import sys
 import xmlrpclib
 import yaml
+import tempfile
 from copy import deepcopy
 
 from subprocess import Popen, PIPE, STDOUT
 
-from benchmarks.metadata import extract_metadata, extract_name
+from benchmarks.metadata import extract_metadata, extract_name, extract_device
 
 from celery.utils.log import get_task_logger
 logger = get_task_logger("testminer")
@@ -35,6 +37,9 @@ class TestSystem(object):
         #return dict(boot=[], test=[])
         return []
 
+    def parse_test_results(self, data):
+        return []
+
     def get_test_job_details(self, job_id):
         """
         returns test job metadata, for example device type
@@ -51,8 +56,22 @@ class TestSystem(object):
     def get_result_class_name(self, job_id):
         return None
 
+    def get_result_class_name_from_definition(self, definition):
+        return None
+
     def get_result_data(self, job_id):
         return None, None
+
+    def get_environment_name(self, metadata):
+        return None
+
+    def get_environment(self, metadata, cls):
+        name = self.get_environment_name(metadata)
+        if name:
+            environment, _ = cls.objects.get_or_create(identifier=name)
+            return environment
+        else:
+            return None
 
     @staticmethod
     def reduce_test_results(test_result_list):
@@ -109,7 +128,9 @@ class GenericLavaTestSystem(TestSystem):
             definition = json.loads(content['multinode_definition'])
         details.update({"definition": str(json.dumps(definition))})
         details['metadata'] = extract_metadata(definition)
+        details['metadata']['device'] = extract_device(definition)
         details['name'] = extract_name(definition)
+
         for action in definition['actions']:
             if action['command'].startswith("submit_results"):
                 if 'stream' in action['parameters'].keys():
@@ -119,6 +140,9 @@ class GenericLavaTestSystem(TestSystem):
     def get_result_class_name(self, job_id):
         content = self.call_xmlrpc('scheduler.job_details', job_id)
         definition = json.loads(content['definition'])
+        return self.get_result_class_name_from_definition(definition)
+
+    def get_result_class_name_from_definition(self, definition):
         for action in definition['actions']:
             if action['command'] == "lava_test_shell":
                 if 'testdef_repos' in action['parameters'].keys():
@@ -508,99 +532,34 @@ class LavaTestSystem(GenericLavaTestSystem):
 
 class ArtMicrobenchmarksTestResults(LavaTestSystem):
     def get_test_job_results(self, test_job_id):
-
-        logger.info("Fetch microbenchmark results")
-        status = self.call_xmlrpc('scheduler.job_status', test_job_id)
-
-        if not ('bundle_sha1' in status and status['bundle_sha1']):
+        (json_filename, json_text) = self.get_result_data(test_job_id)
+        if json_text:
+            return self.parse_test_results(json_text)
+        else:
             return []
 
+    def parse_test_results(self, json_text):
         test_result_list = []
 
-        sha1 = status['bundle_sha1']
-        logger.debug("Bundle SHA1: {0}".format(sha1))
-        result_bundle = self.call_xmlrpc('dashboard.get', sha1)
-        bundle = json.loads(result_bundle['content'])
-
-        target = [t for t in bundle['test_runs'] if t['test_id'] == 'multinode-target']
-        if target:
-            target = target[0]
-        else:
-            return test_result_list
-        host = [t for t in bundle['test_runs'] if t['test_id'] == 'art-microbenchmarks']
-        if host:
-            host = host[0]
-        else:
-            return test_result_list
-        src = [s for s in host['software_context']['sources'] if 'test_params' in s]
-        if src:
-            src = src[0]
-        # This is an art-microbenchmarks test
-        # The test name and test results are in the attachmented pkl file
-        # get test results for the attachment
-        test_mode = "unknown"
-        if src:
-            test_mode = ast.literal_eval(src['test_params'])['MODE']
-        logger.debug("Test mode: {0}".format(test_mode))
-        json_attachments = [a['content'] for a in host['attachments'] if a['pathname'].endswith('json')]
-
-        if not json_attachments:
-            #fixme retrieve test results from LAVA results
-            #if 'test_results' not in host.keys():
-            #    return []
-            #test_result_dict = {}
-            #for test in host['test_results']:
-            #    if 'measurement' in test.keys():
-            #        benchmark, test_case_name = test['test_case_id'].split("-", 1)
-            #        if benchmark in test_result_dict.keys():
-            #            test_result = test_result_dict[benchmark]
-            #            test_result['subscore'].append(
-            #                    {"name": test_case_name,
-            #                     "measurement": test['measurement']
-            #                    })
-            #        else:
-            #            test_result = {}
-            #            test_result['board'] = target['attributes']['target']
-            #            test_result['board_config'] = target['attributes']['target']
-            #            # benchmark iteration
-            #            test_result['benchmark_name'] = benchmark
-            #            test_result['subscore'] = [
-            #                    {"name": test_case_name,
-            #                     "measurement": test['measurement']
-            #                    }]
-            #            test_result_dict[benchmark] = test_result
-            #return [value for key, value in test_result_dict.iteritems()]
-            logger.debug("JSON attachments missing")
-            return []
-
-
-        json_text = base64.b64decode(json_attachments[0])
-        # save json file locally
-        #with open(self.result_file_name + "_" + str(test_mode) + ".json", "w") as json_file:
-        #    json_file.write(json_text)
         test_result_dict = json.loads(json_text)
         if 'benchmarks' in test_result_dict.keys():
             test_result_dict = test_result_dict['benchmarks']
+
         # Key Format: benchmarks/micro/<BENCHMARK_NAME>.<SUBSCORE>
         # Extract and unique them to form a benchmark name list
-        test_result_keys = list(bn.split('/')[-1].split('.')[0] for bn in test_result_dict.keys())
-        benchmark_list   = list(set(test_result_keys))
-        for benchmark in benchmark_list:
+        for full_benchmark_name, measurements in test_result_dict.iteritems():
             test_result = {}
-            test_result['board'] = target['attributes']['target']
-            test_result['board_config'] = target['attributes']['target']
             # benchmark iteration
-            test_result['benchmark_name'] = benchmark
+            benchmark_group = '/'.join(full_benchmark_name.split('/')[0:-1]) + '/'
+            benchmark = full_benchmark_name.split('/')[-1].split('.')
+            test_result['benchmark_name'] = benchmark[0]
+            test_result['benchmark_group'] = benchmark_group
             test_result['subscore'] = []
-            key_word = "/%s." % benchmark
-            tests = ((k, test_result_dict[k]) for k in test_result_dict.keys() if k.find(key_word) > 0)
-            for test in tests:
-                # subscore iteration
-                subscore = "%s_%s" % (test[0].split('.')[-1], test_mode)
-                for i in test[1]:
-                    test_case = { "name": subscore,
-                                  "measurement": i }
-                    test_result['subscore'].append(test_case)
+            test_name = benchmark[1]
+            for i in measurements:
+                test_case = { "name": test_name,
+                             "measurement": i }
+                test_result['subscore'].append(test_case)
 
             test_result_list.append(test_result)
         return test_result_list
@@ -626,41 +585,35 @@ class ArtMicrobenchmarksTestResults(LavaTestSystem):
             return (None, None)
         return (json_attachments[0][0], base64.b64decode(json_attachments[0][1]))
 
+    def get_environment_name(self, metadata):
+        wanted = ('device', 'mode', 'core', 'compiler-mode')
+        data = { 'compiler-mode': 'aot' } # defaults
+        data.update(metadata)
+        environment = [ str(data[key]) for key in wanted if key in data ]
+        if len(environment) == len(wanted):
+            return '-'.join(environment)
+        else:
+            return None
+
 
 class ArtWATestResults(LavaTestSystem):
     def get_test_job_results(self, test_job_id):
-        # extract postprocessing results only
-        status = self.call_xmlrpc('scheduler.job_status', test_job_id)
-
-        if not ('bundle_sha1' in status and status['bundle_sha1']):
-            return []
-
-        sha1 = status['bundle_sha1']
-        result_bundle = self.call_xmlrpc('dashboard.get', sha1)
-        bundle = json.loads(result_bundle['content'])
-
-        target = [t for t in bundle['test_runs'] if t['test_id'] == 'wa2-target']
-        if target:
-            target = target[0]
+        (db_filename, db_content) = self.get_result_data(test_job_id)
+        if db_content:
+            return self.parse_test_results(db_content)
         else:
             return []
-        host = [t for t in bundle['test_runs'] if t['test_id'] == 'wa2-host-postprocessing']
-        if host:
-            host = host[0]
-        else:
-            return []
-        db_attachments = [a['content'] for a in host['attachments'] if a['pathname'].endswith('db')]
 
+    def parse_test_results(self, db_content):
         # select iteration, workload, metric, value from results;
         test_result_dict = {}
-        if db_attachments:
+        if db_content:
             import sqlite3
 
-            db_file_name = "/tmp/%s.db" % test_job_id
-            db_file = open(db_file_name, "w")
-            db_file.write(base64.b64decode(db_attachments[0]))
+            db_file = tempfile.NamedTemporaryFile(delete=False)
+            db_file.write(db_content)
             db_file.close()
-            conn = sqlite3.connect(db_file_name)
+            conn = sqlite3.connect(db_file.name)
             cursor = conn.cursor()
             for row in cursor.execute("select iteration, workload, metric, value from results"):
                 if row[1] in test_result_dict.keys():
@@ -671,8 +624,6 @@ class ArtWATestResults(LavaTestSystem):
                         })
                 else:
                     test_result = {}
-                    test_result['board'] = target['attributes']['target']
-                    test_result['board_config'] = target['attributes']['target']
                     # benchmark iteration
                     test_result['benchmark_name'] = row[1]
                     test_result['subscore'] = [{
@@ -680,7 +631,7 @@ class ArtWATestResults(LavaTestSystem):
                             'measurement': float(row[3])
                         }]
                     test_result_dict[row[1]] = test_result
-            os.unlink(db_file_name)
+            os.unlink(db_file.name)
         return [value for key, value in test_result_dict.iteritems()]
 
     def get_result_data(self, test_job_id):

@@ -1,5 +1,5 @@
 from django.test import TestCase as DjangoTestCase
-from django_dynamic_fixture import G
+from django_dynamic_fixture import G, N
 from unittest import TestCase
 from mock import patch
 from django.core import mail
@@ -8,6 +8,7 @@ from django.utils import timezone
 import re
 
 from benchmarks.models import Benchmark
+from benchmarks.models import BenchmarkGroup
 from benchmarks.models import Result
 from benchmarks.models import ResultData
 from benchmarks.models import TestJob
@@ -16,6 +17,7 @@ from benchmarks.testminer import LavaServerException
 from benchmarks.tasks import set_testjob_results
 from benchmarks.tasks import report_email
 from benchmarks.tasks import report_gerrit
+from benchmarks.tasks import store_testjob_data
 
 
 MINIMAL_XML = '<?xml version="1.0" encoding="UTF-8"?><body></body>'
@@ -164,3 +166,54 @@ class ReportsTest(TestCase):
     def test_report_gerrit(self):
         report_gerrit.apply(args=[self.current])
         self.assertTrue('branch:' in fake_gerrit.reports[0][1])
+
+class StoreTestJobData(TestCase):
+
+    def setUp(self):
+        self.testjob_count = TestJob.objects.count()
+        self.benchmark_count = Benchmark.objects.count()
+        self.benchmark_group_count = BenchmarkGroup.objects.count()
+        self.result_data_count = ResultData.objects.count()
+
+    def test_result_data(self):
+        result = G(Result, manifest__manifest=MINIMAL_XML)
+        testjob = N(TestJob, result=result, status='Complete')
+        test_results = [
+            {
+                'benchmark_name': 'bar',
+                'subscore': [
+                    { 'name': 'test1', 'measurement': 1 },
+                    { 'name': 'test1', 'measurement': 2 },
+                ]
+            },
+        ]
+        store_testjob_data(testjob, test_results)
+
+        self.assertEqual(TestJob.objects.count(), self.testjob_count + 1)
+        self.assertEqual(Benchmark.objects.count(), self.benchmark_count + 1)
+        self.assertEqual(ResultData.objects.count(), self.result_data_count + 1)
+
+        result_data = ResultData.objects.order_by('id').last()
+        self.assertEqual(result_data.values, [1,2])
+        self.assertEqual(result_data.benchmark.name, 'bar')
+
+    def test_result_data_with_benchmark_group(self):
+        result = G(Result, manifest__manifest=MINIMAL_XML)
+        testjob = N(TestJob, result=result, status='Complete')
+        test_results = [
+            {
+                'benchmark_group': 'foo',
+                'benchmark_name': 'bar',
+                'subscore': [
+                    { 'name': 'test1', 'measurement': 1 },
+                    { 'name': 'test1', 'measurement': 2 },
+                ]
+            },
+        ]
+        store_testjob_data(testjob, test_results)
+
+        self.assertEqual(BenchmarkGroup.objects.count(), self.benchmark_group_count + 1)
+
+        benchmark_group = BenchmarkGroup.objects.order_by('id').last()
+        benchmark = Benchmark.objects.order_by('id').last()
+        self.assertEqual(benchmark.group, benchmark_group)
