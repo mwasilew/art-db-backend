@@ -103,7 +103,7 @@ class BranchViewSet(viewsets.ModelViewSet):
 
 class StatsViewSet(viewsets.ModelViewSet):
     queryset = (benchmarks_models.ResultData.objects
-                .select_related("result", "benchmark")
+                .select_related("benchmark")
                 .order_by('created_at'))
 
     permission_classes = [DjangoModelPermissions]
@@ -113,20 +113,25 @@ class StatsViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         branch = self.request.query_params.get('branch')
         project = self.request.query_params.get('project')
+        environment = self.request.query_params.get('environment')
         benchmarks = self.request.query_params.getlist('benchmark')
 
-        if not (benchmarks and branch and project):
+        if not (benchmarks and branch and project and environment):
             return self.queryset.none()
-        if settings.IGNORE_GERRIT:
-            return self.queryset.filter(benchmark__name__in=benchmarks,
-                                        result__branch_name=branch,
-                                        result__name=project)
-        else:
-            return self.queryset.filter(benchmark__name__in=benchmarks,
-                                        result__gerrit_change_number=None,
-                                        result__branch_name=branch,
-                                        result__name=project)
 
+        testjobs = benchmarks_models.Environment.objects.get(identifier=environment).test_jobs
+        testjobs = testjobs.select_related('result')
+        testjobs = testjobs.filter(result__branch_name=branch)
+        testjobs = testjobs.filter(result__name=project)
+
+        if settings.IGNORE_GERRIT is False:
+            testjobs = testjobs.filter(result__gerrit_change_number=None)
+
+        testjob_ids = [ attrs['id'] for attrs in testjobs.values('id') ]
+
+        result = self.queryset.filter(test_job_id__in=testjob_ids,
+                                      benchmark__name__in=benchmarks)
+        return result
 
 # result
 class ResultViewSet(viewsets.ModelViewSet):
@@ -367,11 +372,22 @@ class SettingsViewSet(viewsets.ViewSet):
 class ProjectsView(views.APIView):
     # lists all project names in Result objects
     def get_queryset(self):
-        print "I'm here"
-        return benchmarks_models.Result.objects.all().order_by("name").distinct("name")
+        queryset = benchmarks_models.Result.objects.all()
+        if not settings.IGNORE_GERRIT:
+            # restrict to the baslines build projects
+            queryset = queryset.filter(gerrit_change_number=None)
+        return queryset.order_by("name").distinct("name")
 
     def get(self, request):
         return response.Response(self.get_queryset().values("name"))
+
+
+class EnvironmentsView(views.APIView):
+    def get_queryset(self):
+        return benchmarks_models.Environment.objects.all().order_by('identifier')
+
+    def get(self, request):
+        return response.Response(self.get_queryset().values("identifier", "name"))
 
 
 class CompareResults(viewsets.ViewSet):
