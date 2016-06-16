@@ -68,6 +68,7 @@ def store_testjob_data(testjob, test_results):
         for name, values in subscore_results.items():
             models.ResultData.objects.create(
                 name=name,
+                created_at=testjob.created_at,
                 values=values,
                 result=testjob.result,
                 test_job_id=testjob.id,
