@@ -81,7 +81,7 @@ class ManifestReducedViewSet(viewsets.ReadOnlyModelViewSet):
 # benchmark
 class BenchmarkViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
-    queryset = benchmarks_models.Benchmark.objects.all()
+    queryset = benchmarks_models.Benchmark.objects.all().order_by('name')
     serializer_class = serializers.BenchmarkSerializer
     filter_fields = ('id', 'name')
     pagination_class = None
@@ -103,14 +103,18 @@ class BranchViewSet(viewsets.ModelViewSet):
 
 class StatsViewSet(viewsets.ModelViewSet):
     queryset = (benchmarks_models.ResultData.objects
-                .select_related("benchmark")
+                .select_related("benchmark", "result")
                 .order_by('created_at'))
 
     permission_classes = [DjangoModelPermissions]
     serializer_class = serializers.ResultDataSerializer
     pagination_class = None
+    __queryset__ = None
 
     def get_queryset(self):
+        if self.__queryset__:
+            return self.__queryset__
+
         branch = self.request.query_params.get('branch')
         project = self.request.query_params.get('project')
         environment = self.request.query_params.get('environment')
@@ -119,7 +123,7 @@ class StatsViewSet(viewsets.ModelViewSet):
         if not (benchmarks and branch and project and environment):
             return self.queryset.none()
 
-        testjobs = benchmarks_models.Environment.objects.get(identifier=environment).test_jobs
+        testjobs = benchmarks_models.TestJob.objects.filter(environment__identifier=environment)
         testjobs = testjobs.select_related('result')
         testjobs = testjobs.filter(result__branch_name=branch)
         testjobs = testjobs.filter(result__name=project)
@@ -129,9 +133,9 @@ class StatsViewSet(viewsets.ModelViewSet):
 
         testjob_ids = [ attrs['id'] for attrs in testjobs.values('id') ]
 
-        result = self.queryset.filter(test_job_id__in=testjob_ids,
-                                      benchmark__name__in=benchmarks)
-        return result
+        self.__queryset__ = self.queryset.filter(test_job_id__in=testjob_ids,
+                                                 benchmark__name__in=benchmarks)
+        return self.__queryset__
 
 # result
 class ResultViewSet(viewsets.ModelViewSet):
