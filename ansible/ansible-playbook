@@ -10,5 +10,4 @@ exec ansible-playbook \
     --inventory-file=$basedir/hosts \
     --verbose \
     --extra-vars=latest_git_tag=${latest_git_tag} \
-    "$@" \
-    $basedir/site.yml
+    "$@"
