@@ -227,6 +227,7 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
         var params = {
             branch: $scope.branch.branch_name,
             benchmark: $scope.benchmark.name,
+            environment: $scope.environment.identifier,
             project: $scope.project.name
         };
 
@@ -339,22 +340,26 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
     $q.all([
         $http.get('/api/branch/'),
         $http.get('/api/benchmark/'),
-        $http.get('/api/projects/')
+        $http.get('/api/projects/'),
+        $http.get('/api/environments/')
     ]).then(function(response) {
 
         $scope.branchList = response[0].data;
         $scope.benchmarkList = response[1].data;
         $scope.projectList = response[2].data;
+        $scope.environmentList = response[3].data;
 
         var defaults = {
             branch: $routeParams.branch || $scope.branchList[0]['branch_name'],
             benchmark: $routeParams.benchmark || $scope.benchmarkList[0]['name'],
-            project: $routeParams.project || $scope.projectList[0]['name']
+            project: $routeParams.project || $scope.projectList[0]['name'],
+            environment: $routeParams.environment || $scope.environmentList[0]['identifier']
         };
 
         $scope.branch = _.find($scope.branchList, ['branch_name', defaults.branch]);
         $scope.benchmark = _.find($scope.benchmarkList, ['name', defaults.benchmark]);
         $scope.project = _.find($scope.projectList, ['name', defaults.project]);
+        $scope.environment = _.find($scope.environmentList, ['identifier', defaults.environment]);
 
     }).then($scope.change);
 

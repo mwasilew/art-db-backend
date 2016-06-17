@@ -24,5 +24,6 @@ urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'details/', views.ResultDataForManifest.as_view()),
     url(r'projects/', views.ProjectsView.as_view()),
+    url(r'environments/', views.EnvironmentsView.as_view()),
 ]
 

@@ -664,23 +664,29 @@ class StatsTest(APITestCase):
 	     gerrit_change_number=123)
 
 	benchmark = G(models.Benchmark, name="TheBenchmark")
+	environment = G(models.Environment, identifier='myenv')
+	testjob_baseline = G(models.TestJob, id=u'888888', environment=environment,result=baseline, completed=True)
+	testjob_patched = G(models.TestJob, id=u'999999', environment=environment, result=patched, completed=True)
 
         G(models.ResultData,
           result=baseline,
           benchmark=benchmark,
+          test_job_id=testjob_baseline.id,
           name="TheBenchmark",
           measurement=5)
 
         G(models.ResultData,
           result=patched,
           benchmark=benchmark,
+          test_job_id=testjob_patched.id,
           name="TheBenchmark",
           measurement=10)
 
         response = self.client.get('/api/stats/', {
             'branch': 'master',
             'benchmark': 'TheBenchmark',
-            'project': 'TheProject'
+            'project': 'TheProject',
+            'environment': 'myenv',
         })
 
         self.assertEqual(len(response.data), 1)
@@ -707,23 +713,29 @@ class StatsTest(APITestCase):
 	     gerrit_change_number=123)
 
 	benchmark = G(models.Benchmark, name="TheBenchmark")
+	environment = G(models.Environment, identifier='myenv')
+	testjob_baseline = G(models.TestJob, id=u'888888', environment=environment,result=baseline, completed=True)
+	testjob_patched = G(models.TestJob, id=u'999999', environment=environment, result=patched, completed=True)
 
         G(models.ResultData,
           result=baseline,
           benchmark=benchmark,
+          test_job_id=testjob_baseline.id,
           name="TheBenchmark",
           measurement=5)
 
         G(models.ResultData,
           result=patched,
           benchmark=benchmark,
+          test_job_id=testjob_patched.id,
           name="TheBenchmark",
           measurement=10)
 
         response = self.client.get('/api/stats/', {
             'branch': 'master',
             'benchmark': 'TheBenchmark',
-            'project': 'TheProject'
+            'project': 'TheProject',
+            'environment': 'myenv',
         })
 
         self.assertEqual(len(response.data), 2)
