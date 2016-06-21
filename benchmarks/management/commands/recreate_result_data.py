@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand
 
 
 from benchmarks.tasks import store_testjob_data
-from benchmarks.models import ResultData, TestJob
+from benchmarks.models import ResultData, Benchmark, TestJob
 
 
 def step(s):
@@ -21,6 +21,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         ResultData.objects.all().delete()
+        Benchmark.objects.all().delete()
 
         errors = []
 
