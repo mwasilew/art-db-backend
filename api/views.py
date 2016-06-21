@@ -81,7 +81,7 @@ class ManifestReducedViewSet(viewsets.ReadOnlyModelViewSet):
 # benchmark
 class BenchmarkViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
-    queryset = benchmarks_models.Benchmark.objects.all().order_by('name')
+    queryset = benchmarks_models.Benchmark.objects.all().order_by('name').select_related('group')
     serializer_class = serializers.BenchmarkSerializer
     filter_fields = ('id', 'name')
     pagination_class = None

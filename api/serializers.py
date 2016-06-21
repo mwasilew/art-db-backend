@@ -31,6 +31,7 @@ class DynamicFieldsMixin(object):
 class BenchmarkSerializer(serializers.ModelSerializer):
     class Meta:
         model = benchmarks_models.Benchmark
+        fields = ('id', 'name', 'group_name')
 
 
 class ReducedManifestSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
