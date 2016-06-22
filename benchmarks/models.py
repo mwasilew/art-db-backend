@@ -2,6 +2,8 @@ import hashlib
 import urlparse
 import xml.etree.ElementTree as ET
 
+from math  import log, exp
+
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
@@ -288,6 +290,40 @@ class BenchmarkGroup(models.Model):
 
     def __unicode__(self):
         return self.name
+
+
+class BenchmarkGroupSummary(models.Model):
+    group = models.ForeignKey(BenchmarkGroup, related_name='progress_data')
+    environment = models.ForeignKey(Environment, related_name='progress_data', null=True)
+    result = models.ForeignKey(Result, related_name='progress_data')
+    test_job_id = models.CharField(max_length=100, blank=False, null=True, db_index=True)
+    created_at = models.DateTimeField(default=timezone.now, null=False)
+    measurement = models.FloatField(null=False)
+    values = ArrayField(models.FloatField(), default=list)
+
+    def save(self, *args, **kwargs):
+        if self.values:
+            self.measurement = BenchmarkGroupSummary.__geomean__(self.values)
+        super(BenchmarkGroupSummary, self).save(*args, **kwargs)
+
+    @property
+    def name(self):
+        return "Geometric mean"
+
+    @staticmethod
+    def __geomean__(values):
+        # The intuitive/naive way of calculating a geometric mean (first
+        # multiply the n values, then take the nth-root of the result) does not
+        # work in practice. When you multiple an large enough amount of large
+        # enough numbers, their product will oferflow the float representation,
+        # and the result will be Infinity.
+        #
+        # Will use the alternative method described in
+        # https://en.wikipedia.org/wiki/Geometric_mean -- topic "Relationship
+        # with arithmetic mean of logarithms" -- which is exp(sum(log(x_i)/n))
+        n = len(values)
+        log_sum = reduce(lambda x,y: x + y, map(log, values))
+        return exp(log_sum/n)
 
 
 class Benchmark(models.Model):
