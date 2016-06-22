@@ -591,24 +591,24 @@ class StatsTest(APITestCase):
 
     @patch('django.conf.settings.IGNORE_GERRIT', False)
     def test_missing_parameters(self):
-	now = timezone.now()
-	yesterday = now - relativedelta(days=1)
+        now = timezone.now()
+        yesterday = now - relativedelta(days=1)
 
-	baseline = G(models.Result,
-	      manifest__manifest=MINIMAL_XML,
-	      branch_name='master',
+        baseline = G(models.Result,
+              manifest__manifest=MINIMAL_XML,
+              branch_name='master',
               name="TheProject",
-	      created_at=yesterday,
-	      gerrit_change_number=None)
+              created_at=yesterday,
+              gerrit_change_number=None)
 
-	patched = G(models.Result,
-	     manifest__manifest=MINIMAL_XML,
-	     branch_name='master',
+        patched = G(models.Result,
+             manifest__manifest=MINIMAL_XML,
+             branch_name='master',
              name="TheProject",
-	     created_at=now,
-	     gerrit_change_number=123)
+             created_at=now,
+             gerrit_change_number=123)
 
-	benchmark = G(models.Benchmark, name="TheBenchmark")
+        benchmark = G(models.Benchmark, name="TheBenchmark")
 
         G(models.ResultData,
           result=baseline,
@@ -646,27 +646,27 @@ class StatsTest(APITestCase):
     @patch('django.conf.settings.IGNORE_GERRIT', False)
     def test_only_baseline_changes(self):
 
-	now = timezone.now()
-	yesterday = now - relativedelta(days=1)
+        now = timezone.now()
+        yesterday = now - relativedelta(days=1)
 
-	baseline = G(models.Result,
-	      manifest__manifest=MINIMAL_XML,
-	      branch_name='master',
+        baseline = G(models.Result,
+              manifest__manifest=MINIMAL_XML,
+              branch_name='master',
               name="TheProject",
-	      created_at=yesterday,
-	      gerrit_change_number=None)
+              created_at=yesterday,
+              gerrit_change_number=None)
 
-	patched = G(models.Result,
-	     manifest__manifest=MINIMAL_XML,
-	     branch_name='master',
+        patched = G(models.Result,
+             manifest__manifest=MINIMAL_XML,
+             branch_name='master',
              name="TheProject",
-	     created_at=now,
-	     gerrit_change_number=123)
+             created_at=now,
+             gerrit_change_number=123)
 
-	benchmark = G(models.Benchmark, name="TheBenchmark")
-	environment = G(models.Environment, identifier='myenv')
-	testjob_baseline = G(models.TestJob, id=u'888888', environment=environment,result=baseline, completed=True)
-	testjob_patched = G(models.TestJob, id=u'999999', environment=environment, result=patched, completed=True)
+        benchmark = G(models.Benchmark, name="TheBenchmark")
+        environment = G(models.Environment, identifier='myenv')
+        testjob_baseline = G(models.TestJob, id=u'888888', environment=environment,result=baseline, completed=True)
+        testjob_patched = G(models.TestJob, id=u'999999', environment=environment, result=patched, completed=True)
 
         G(models.ResultData,
           result=baseline,
@@ -690,32 +690,32 @@ class StatsTest(APITestCase):
         })
 
         self.assertEqual(len(response.data), 1)
-	self.assertEqual(response.data[0]['measurement'], 5)
+        self.assertEqual(response.data[0]['measurement'], 5)
 
     @patch('django.conf.settings.IGNORE_GERRIT', True)
     def test_only_baseline_changes_ignore_gerrit(self):
 
-	now = timezone.now()
-	yesterday = now - relativedelta(days=1)
+        now = timezone.now()
+        yesterday = now - relativedelta(days=1)
 
-	baseline = G(models.Result,
-	      manifest__manifest=MINIMAL_XML,
-	      branch_name='master',
+        baseline = G(models.Result,
+              manifest__manifest=MINIMAL_XML,
+              branch_name='master',
               name="TheProject",
-	      created_at=yesterday,
-	      gerrit_change_number=None)
+              created_at=yesterday,
+              gerrit_change_number=None)
 
-	patched = G(models.Result,
-	     manifest__manifest=MINIMAL_XML,
-	     branch_name='master',
+        patched = G(models.Result,
+             manifest__manifest=MINIMAL_XML,
+             branch_name='master',
              name="TheProject",
-	     created_at=now,
-	     gerrit_change_number=123)
+             created_at=now,
+             gerrit_change_number=123)
 
-	benchmark = G(models.Benchmark, name="TheBenchmark")
-	environment = G(models.Environment, identifier='myenv')
-	testjob_baseline = G(models.TestJob, id=u'888888', environment=environment,result=baseline, completed=True)
-	testjob_patched = G(models.TestJob, id=u'999999', environment=environment, result=patched, completed=True)
+        benchmark = G(models.Benchmark, name="TheBenchmark")
+        environment = G(models.Environment, identifier='myenv')
+        testjob_baseline = G(models.TestJob, id=u'888888', environment=environment,result=baseline, completed=True)
+        testjob_patched = G(models.TestJob, id=u'999999', environment=environment, result=patched, completed=True)
 
         G(models.ResultData,
           result=baseline,
@@ -739,5 +739,5 @@ class StatsTest(APITestCase):
         })
 
         self.assertEqual(len(response.data), 2)
-	self.assertEqual(response.data[0]['measurement'], 5)
-	self.assertEqual(response.data[1]['measurement'], 10)
+        self.assertEqual(response.data[0]['measurement'], 5)
+        self.assertEqual(response.data[1]['measurement'], 10)
