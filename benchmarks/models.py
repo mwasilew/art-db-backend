@@ -6,6 +6,7 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.db.models import Count
+from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.fields import HStoreField
 
@@ -275,9 +276,15 @@ class TestJob(models.Model):
         return tester_class(baseurl, username, password)
 
 
-
 class BenchmarkGroup(models.Model):
-    name = models.CharField(max_length=128)
+
+    name = models.CharField(max_length=128, unique=True)
+
+    def save(self, *args, **kwargs):
+        # calling validation here since this object is usually created in the
+        # background, so there are no ModelForms involved.
+        self.full_clean()
+        super(BenchmarkGroup, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return self.name
