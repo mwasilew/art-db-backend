@@ -220,6 +220,11 @@ app.controller('BuildDetail', ['$scope', '$http', '$routeParams', '$q', '$routeP
 
 app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$routeParams', '$location', function($scope, $http, $routeParams, $timeout, $q, $routeParams, $location) {
 
+    $scope.get_environment_ids = function() {
+        var selected = _.filter($scope.environments, function(env) { return env.selected });
+        return _.map(selected, function(env) { return env.identifier} );
+    }
+
     $scope.change = function() {
 
         $scope.disabled = true;
@@ -227,62 +232,73 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
         var params = {
             branch: $scope.branch.branch_name,
             benchmark: $scope.benchmark.name,
-            environment: $scope.environment.identifier,
+            environment: $scope.get_environment_ids(),
             project: $scope.project.name
         };
 
         $location.search(params);
 
-        var options = {params: params};
-
-        $http.get('/api/stats/', options).then(function(response) {
-
+        $q.all(_.map($scope.get_environment_ids(), function(env) {
+            var env_params = {
+                branch: params.branch,
+                benchmark: params.benchmark,
+                project: params.project,
+                environment: env
+            };
+            return $http.get('/api/stats/', { params: env_params });
+        })).then(function(multiple_responses) {
             var series = [];
             var i = 0;
-            _.each(_.groupBy(response.data, "name"), function(data, name) {
+            _.each(multiple_responses, function(response) {
 
-                // data itself
-                series.push({
-                    name: name,
-                    color: Highcharts.getOptions().colors[i],
-                    zIndex: 1,
-                    data: _.map(data, function(data) {
-                        return {
-                            x: Date.parse(data.created_at),
-                            y: data.measurement,
-                            stdev: data.stdev,
-                            result_id: data.result,
-                            build_id: data.build_id
-                        };
-                    })
+                var env = response.config.params.environment;
+                _.each(_.groupBy(response.data, "name"), function(data, name) {
+
+                    // data itself
+                    series.push({
+                        name: name + ' (' + env + ')',
+                        color: Highcharts.getOptions().colors[i],
+                        zIndex: 1,
+                        data: _.map(data, function(data) {
+                            return {
+                                x: Date.parse(data.created_at),
+                                y: data.measurement,
+                                stdev: data.stdev,
+                                result_id: data.result,
+                                build_id: data.build_id
+                            };
+                        })
+                    });
+
+                    // range of values, based on the standard deviation
+                    series.push({
+                        name: name + ' stdev (' + env + ')',
+                        type: 'arearange',
+                        color: Highcharts.getOptions().colors[i],
+                        lineWidth: 0,
+                        linkedTo: ':previous',
+                        fillOpacity: 0.3,
+                        zIndex: 0,
+                        data: _.map(data, function(point) {
+                            return [
+                                Date.parse(point.created_at),
+                                // 99.73% of values are in the range (mean ± 3 * stdev)
+                                point.measurement - 3 * point.stdev,
+                                point.measurement + 3 * point.stdev
+                            ]
+                        })
+                    });
+
+                    i++;
                 });
-
-                // range of values, based on the standard deviation
-                series.push({
-                    name: name + ' stdev',
-                    type: 'arearange',
-                    color: Highcharts.getOptions().colors[i],
-                    lineWidth: 0,
-                    linkedTo: ':previous',
-                    fillOpacity: 0.3,
-                    zIndex: 0,
-                    data: _.map(data, function(point) {
-                        return [
-                            Date.parse(point.created_at),
-                            // 99.73% of values are in the range (mean ± 3 * stdev)
-                            point.measurement - 3 * point.stdev,
-                            point.measurement + 3 * point.stdev
-                        ]
-                    })
-                });
-
-                i++;
             });
+
+            var envs = _.join($scope.get_environment_ids(), ' x ');
 
             Highcharts.chart(
                 document.getElementById('charts'), {
                     title: {
-                        text: 'Benchmark results for branch: ' + $scope.branch.branch_name
+                        text: $scope.benchmark.name + ' on branch ' + $scope.branch.branch_name + '; ' + envs
                     },
                     xAxis: {
                         type: 'datetime',
@@ -337,6 +353,15 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
         });
     };
 
+    $scope.toggleEnvironment = function(env_id) {
+        for (var i = 0; i < $scope.environments.length; i++) {
+            if ($scope.environments.identifier == env_id) {
+                $scope.environments.selected = ! $scope.environments.selected;
+            }
+        }
+        $scope.change();
+    };
+
     $q.all([
         $http.get('/api/branch/'),
         $http.get('/api/benchmark/'),
@@ -353,13 +378,16 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
             branch: $routeParams.branch || $scope.branchList[0]['branch_name'],
             benchmark: $routeParams.benchmark || $scope.benchmarkList[0]['name'],
             project: $routeParams.project || $scope.projectList[0]['name'],
-            environment: $routeParams.environment || $scope.environmentList[0]['identifier']
+            environments: $routeParams.environment || [$scope.environmentList[0].identifier]
         };
 
         $scope.branch = _.find($scope.branchList, ['branch_name', defaults.branch]);
         $scope.benchmark = _.find($scope.benchmarkList, ['name', defaults.benchmark]);
         $scope.project = _.find($scope.projectList, ['name', defaults.project]);
-        $scope.environment = _.find($scope.environmentList, ['identifier', defaults.environment]);
+        $scope.environments = _.map($scope.environmentList, function(env) {
+            env.selected = defaults.environments.indexOf(env.identifier) > -1;
+            return env;
+        });
 
     }).then($scope.change);
 

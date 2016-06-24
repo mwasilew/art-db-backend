@@ -86,6 +86,13 @@ input, select, button, .btn {
 	color: #888;
 }
 
+.checkbox {
+	margin: 0px;
+}
+.checkbox label {
+	font-weight: normal;
+}
+
 #manifest-list .builds {
 	font-size: 13px;
 	border-bottom: 2px #aaa solid;

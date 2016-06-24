@@ -1,47 +1,68 @@
 <div class="row">
-  <div class="col-md-12">
-    <form>
-      <div class="row">
-        <div class="col-md-3">
-          <div class="form-group">
-            <label>Project</label>
+  <div class='col-md-3'>
+    <div id='sidebar'>
+
+      <form><!-- TODO -->
+
+        <div class='panel panel-default'>
+          <div class='panel-heading'>
+            Environment
+          </div>
+          <ul class='list-group'>
+            <li class='list-group-item' ng-repeat='environment in environments'>
+              <div class='checkbox'>
+                <input type='checkbox' name='environment[]'
+                       id='environment-{{environment.identifier}}'
+                       value='{{environment.identifier}}'
+                       ng-click='toggleEnvironment(environment.identifier)'
+                       ng-model='environment.selected'
+                />
+                <label for='environment-{{environment.identifier}}'>
+                  {{environment.identifier}}
+                </label>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class='panel panel-default'>
+          <div class='panel-heading'>
+            Benchmarks
+          </div>
+          <div class='panel-body'>
+            <select ng-disabled="disabled" ng-model="benchmark" class="form-control"
+                    ng-change="change()" ng-options="item.name for item in benchmarkList"></select>
+          </div>
+        </div>
+
+        <div class='panel panel-default'>
+          <div class='panel-heading'>
+            Project
+          </div>
+          <div class='panel-body'>
             <select ng-disabled="disabled" ng-model="project" class="form-control"
                     ng-change="change()"
                     ng-options="item.name for item in projectList"></select>
           </div>
         </div>
 
-        <div class="col-md-3">
-          <div class="form-group">
-            <label>Branch</label>
+        <div class='panel panel-default'>
+          <div class='panel-heading'>
+            Branch
+          </div>
+          <div class='panel-body'>
             <select ng-disabled="disabled" ng-model="branch" class="form-control"
                     ng-change="change()"
                     ng-options="item.branch_name for item in branchList"></select>
           </div>
         </div>
 
-        <div class="col-md-3">
-          <div class="form-group">
-            <label>Environment</label>
-            <select ng-disabled="disabled" ng-model="environment" class="form-control"
-                    ng-change="change()"
-                    ng-options="item.identifier for item in environmentList"></select>
-          </div>
-        </div>
+      </form>
 
-        <div class="col-md-3">
-          <div class="form-group">
-            <label>Benchmark</label>
-            <select ng-disabled="disabled" ng-model="benchmark" class="form-control"
-                    ng-change="change()" ng-options="item.name for item in benchmarkList"></select>
-          </div>
-        </div>
-      </div>
-    </form>
+    </div>
   </div>
-
-  <div class="col-md-12">
+  <div class="col-md-9">
+    <h1>{{chart_title}}</h1>
     <div id="charts"></div>
   </div>
-
 </div>
