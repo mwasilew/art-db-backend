@@ -267,13 +267,13 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                         name: name + ' (' + env + ')',
                         color: Highcharts.getOptions().colors[i],
                         zIndex: 1,
-                        data: _.map(data, function(data) {
+                        data: _.map(data, function(point) {
                             return {
-                                x: Date.parse(data.created_at),
-                                y: data.measurement,
-                                stdev: data.stdev,
-                                result_id: data.result,
-                                build_id: data.build_id
+                                x: Date.parse(point.created_at),
+                                y: point.measurement,
+                                stdev: point.stdev,
+                                result_id: point.result,
+                                build_id: point.build_id
                             };
                         })
                     });
