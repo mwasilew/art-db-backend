@@ -137,6 +137,22 @@ class StatsViewSet(viewsets.ModelViewSet):
                                                  benchmark__name__in=benchmarks)
         return self.__queryset__
 
+class BenchmarkGroupSummaryViewSet(viewsets.ModelViewSet):
+    queryset = benchmarks_models.BenchmarkGroupSummary.objects.filter(result__gerrit_change_number=None).order_by('created_at')
+    permission_classes = [DjangoModelPermissions]
+    serializer_class = serializers.BenchmarkGroupSummarySerializer
+    pagination_class = None
+
+    def get_queryset(self):
+        group = self.request.query_params.get('benchmark_group')
+        env = self.request.query_params.get('environment')
+        branch = self.request.query_params.get('branch')
+        return self.queryset.filter(
+            environment__identifier=env,
+            group__name=group,
+            result__branch_name=branch,
+        )
+
 # result
 class ResultViewSet(viewsets.ModelViewSet):
     permission_classes = [DjangoModelPermissions]

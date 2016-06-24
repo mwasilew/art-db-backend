@@ -330,10 +330,6 @@ class Benchmark(models.Model):
     name = models.CharField(max_length=64)
     group = models.ForeignKey(BenchmarkGroup, related_name='benchmarks', null=True)
 
-    @property
-    def group_name(self):
-        return self.group.name
-
     def __unicode__(self):
         return self.name
 

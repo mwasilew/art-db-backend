@@ -741,3 +741,36 @@ class StatsTest(APITestCase):
         self.assertEqual(len(response.data), 2)
         self.assertEqual(response.data[0]['measurement'], 5)
         self.assertEqual(response.data[1]['measurement'], 10)
+
+
+class BenchmarkGroupSummaryTest(APITestCase):
+
+    def setUp(self):
+        user = User.objects.create_superuser('test', 'email@test.com', 'test')
+        self.client.force_authenticate(user=user)
+
+    def test_basic(self):
+        result = G(models.Result, manifest__manifest=MINIMAL_XML, gerrit_change_number=None)
+        group = G(models.BenchmarkGroup)
+        env = G(models.Environment)
+        G(models.BenchmarkGroupSummary, group=group, environment=env, result=result)
+        response = self.client.get('/api/benchmark_group_summary/', {
+            'benchmark_group': group.name,
+            'environment': env.identifier,
+            'branch': result.branch_name,
+        })
+        self.assertEqual(1, len(response.data))
+
+    def test_returns_only_mainline_results(self):
+        mainline_result = G(models.Result, manifest__manifest=MINIMAL_XML, branch_name='master', gerrit_change_number=None)
+        patch_result = G(models.Result, manifest__manifest=MINIMAL_XML, branch_name='master', gerrit_change_number=999)
+        group = G(models.BenchmarkGroup)
+        env = G(models.Environment)
+        G(models.BenchmarkGroupSummary, group=group, environment=env, result=mainline_result)
+        G(models.BenchmarkGroupSummary, group=group, environment=env, result=patch_result)
+        response = self.client.get('/api/benchmark_group_summary/', {
+            'benchmark_group': group.name,
+            'environment': env.identifier,
+            'branch': 'master',
+        })
+        self.assertEqual(1, len(response.data))
