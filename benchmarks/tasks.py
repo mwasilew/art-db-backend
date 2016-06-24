@@ -49,6 +49,8 @@ def store_testjob_data(testjob, test_results):
 
     summary = defaultdict(lambda: [])
 
+    root_group, _ = models.BenchmarkGroup.objects.get_or_create(name='/')
+
     for result in test_results:
         if 'benchmark_group' in result:
             benchmark_group, _ = models.BenchmarkGroup.objects.get_or_create(
@@ -80,6 +82,7 @@ def store_testjob_data(testjob, test_results):
             if benchmark_group:
                 for v in values:
                     summary[benchmark_group.id].append(v)
+                    summary[root_group.id].append(v)
 
     for (gid, values) in summary.items():
         group = models.BenchmarkGroup.objects.get(pk=gid)
