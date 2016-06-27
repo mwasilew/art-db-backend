@@ -380,6 +380,17 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
         $scope.change();
     };
 
+    $scope.reset = function() {
+        $scope.branch = undefined;
+        _.each($scope.environments, function(env) {
+            env.selected = false;
+        });
+        $scope.benchmark = undefined;
+        $scope.project = undefined;
+        $location.search({});
+        document.getElementById('charts').innerHTML = '';
+    }
+
     $q.all([
         $http.get('/api/branch/'),
         $http.get('/api/benchmark/'),
