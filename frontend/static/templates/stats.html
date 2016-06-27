@@ -6,6 +6,17 @@
 
         <div class='panel panel-default'>
           <div class='panel-heading'>
+            Branch
+          </div>
+          <div class='panel-body'>
+            <select ng-disabled="disabled" ng-model="branch" class="form-control"
+                    ng-change="change()"
+                    ng-options="item.branch_name for item in branchList"></select>
+          </div>
+        </div>
+
+        <div class='panel panel-default' ng-show='branch'>
+          <div class='panel-heading'>
             Environment
           </div>
           <ul class='list-group'>
@@ -25,7 +36,7 @@
           </ul>
         </div>
 
-        <div class='panel panel-default'>
+        <div class='panel panel-default' ng-show='get_environment_ids().length > 0'>
           <div class='panel-heading'>
             Benchmarks
           </div>
@@ -35,7 +46,7 @@
           </div>
         </div>
 
-        <div class='panel panel-default'>
+        <div class='panel panel-default' ng-show='benchmark'>
           <div class='panel-heading'>
             Project
           </div>
@@ -43,17 +54,6 @@
             <select ng-disabled="disabled" ng-model="project" class="form-control"
                     ng-change="change()"
                     ng-options="item.name for item in projectList"></select>
-          </div>
-        </div>
-
-        <div class='panel panel-default'>
-          <div class='panel-heading'>
-            Branch
-          </div>
-          <div class='panel-body'>
-            <select ng-disabled="disabled" ng-model="branch" class="form-control"
-                    ng-change="change()"
-                    ng-options="item.branch_name for item in branchList"></select>
           </div>
         </div>
 
