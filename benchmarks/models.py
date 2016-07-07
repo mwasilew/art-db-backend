@@ -1,4 +1,5 @@
 import hashlib
+import re
 import urlparse
 import xml.etree.ElementTree as ET
 
@@ -242,7 +243,13 @@ class TestJob(models.Model):
     metadata = HStoreField(default=dict, blank=True)
 
     def save(self, *args, **kwargs):
+        jenkins_id_re = re.compile(r"J\d+_[\w\d\_\.]+")
+        if jenkins_id_re.match(self.id):
+            self.testrunnerclass = "ArtJenkinsTestResults"
+            self.testrunnerurl = self.result.build_url
+            self.url = self.result.build_url
         super(TestJob, self).save(*args, **kwargs)
+
         test_jobs = self.result.test_jobs
         self.result.completed = (test_jobs.count() == test_jobs.filter(completed=True).count())
         self.result.save()

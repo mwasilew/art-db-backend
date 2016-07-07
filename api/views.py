@@ -231,7 +231,7 @@ class ResultViewSet(viewsets.ModelViewSet):
                     id=testjob_id
                 )
                 if testjob_created:
-                    tasks.set_testjob_results.delay(testjob)
+                    tasks.set_testjob_results.delay(testjob_id)
 
         tasks.update_jenkins.delay(result)
         return response.Response(serializer.data, status=status.HTTP_201_CREATED)
