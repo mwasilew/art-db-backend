@@ -231,44 +231,57 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
 
         var params = {
             branch: $scope.branch.branch_name,
-            benchmark: $scope.benchmark.name,
             environment: $scope.get_environment_ids(),
             project: $scope.project.name
         };
+        var stats_endpoint;
+        if ($scope.benchmark.type == 'benchmark_group' || $scope.benchmark.type == 'root_benchmark_group') {
+            stats_endpoint = '/api/benchmark_group_summary/';
+            params.benchmark_group = $scope.benchmark.name;
+        } else {
+            stats_endpoint = '/api/stats/';
+            params.benchmark = $scope.benchmark.name;
+        }
 
         $location.search(params);
 
         $q.all(_.map($scope.get_environment_ids(), function(env) {
-            var env_params = {
-                branch: params.branch,
-                benchmark: params.benchmark,
-                project: params.project,
-                environment: env
-            };
-            return $http.get('/api/stats/', { params: env_params });
+            var env_params = {};
+            _.each(params, function(v, k) {
+                env_params[k] = v;
+            });
+            env_params.environment = env;
+            return $http.get(stats_endpoint, { params: env_params });
         })).then(function(multiple_responses) {
             var series = [];
-            var i = 0;
+            var i = -1;
             _.each(multiple_responses, function(response) {
 
                 var env = response.config.params.environment;
                 _.each(_.groupBy(response.data, "name"), function(data, name) {
+
+                    i++;
 
                     // data itself
                     series.push({
                         name: name + ' (' + env + ')',
                         color: Highcharts.getOptions().colors[i],
                         zIndex: 1,
-                        data: _.map(data, function(data) {
+                        data: _.map(data, function(point) {
                             return {
-                                x: Date.parse(data.created_at),
-                                y: data.measurement,
-                                stdev: data.stdev,
-                                result_id: data.result,
-                                build_id: data.build_id
+                                x: Date.parse(point.created_at),
+                                y: point.measurement,
+                                stdev: point.stdev,
+                                result_id: point.result,
+                                build_id: point.build_id
                             };
                         })
                     });
+
+                    if (! data[0].stdev) {
+                        // data has no stdev, skip the stdev data series
+                        return;
+                    }
 
                     // range of values, based on the standard deviation
                     series.push({
@@ -289,7 +302,6 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                         })
                     });
 
-                    i++;
                 });
             });
 
@@ -298,7 +310,7 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
             Highcharts.chart(
                 document.getElementById('charts'), {
                     title: {
-                        text: $scope.benchmark.name + ' on branch ' + $scope.branch.branch_name + '; ' + envs
+                        text: $scope.benchmark.label + ' on branch ' + $scope.branch.branch_name + '; ' + envs
                     },
                     xAxis: {
                         type: 'datetime',
@@ -317,12 +329,12 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                                 return '';
                             }
                             var y = this.y.toFixed(2);
-                            var range = (3 * this.stdev).toFixed(2);
-                            var stdev = this.stdev.toFixed(2);
+                            var range = this.stdev && (3 * this.stdev).toFixed(2);
+                            var stdev = this.stdev && this.stdev.toFixed(2);
                             var html = [
                                 '<br/><p><strong>',
                                 '<span style="color: ' + this.series.color + '">' + this.series.name + ':</span> ',
-                                y + ' ± ' + range + ' (st. dev.: ' + stdev + ')',
+                                y + (this.stdev && (' ± ' + range + ' (st. dev.: ' + stdev + ')') || ''),
                                 '</strong></p>',
                                 '<p>',
                                 '<a href="#/build/' + this.result_id + '">See details for build #' + this.build_id + '</a>',
@@ -370,13 +382,25 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
     ]).then(function(response) {
 
         $scope.branchList = response[0].data;
-        $scope.benchmarkList = response[1].data;
+
+        var benchmarkList = [];
+        benchmarkList.push({ name: "/", label: 'Overall summary', type: 'root_benchmark_group' });
+        _.each(_.groupBy(response[1].data, 'group'), function(benchmarks, group) {
+            benchmarkList.push({ name: group, label: '  ' + group + ' (summary)', type: 'benchmark_group' });
+            _.each(benchmarks, function(benchmark) {
+                benchmark.type = 'benchmark';
+                benchmark.label = '    ' + benchmark.name;
+                benchmarkList.push(benchmark);
+            });
+        });
+        $scope.benchmarkList = benchmarkList;
+
         $scope.projectList = response[2].data;
         $scope.environmentList = response[3].data;
 
         var defaults = {
             branch: $routeParams.branch || $scope.branchList[0]['branch_name'],
-            benchmark: $routeParams.benchmark || $scope.benchmarkList[0]['name'],
+            benchmark: $routeParams.benchmark || $routeParams.benchmark_group || $scope.benchmarkList[0]['name'],
             project: $routeParams.project || $scope.projectList[0]['name'],
             environments: $routeParams.environment || [$scope.environmentList[0].identifier]
         };

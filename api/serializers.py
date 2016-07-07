@@ -29,6 +29,7 @@ class DynamicFieldsMixin(object):
 
 
 class BenchmarkSerializer(serializers.ModelSerializer):
+    group = serializers.CharField(source='group.name', read_only=True)
     class Meta:
         model = benchmarks_models.Benchmark
 
@@ -147,3 +148,12 @@ class ResultDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = benchmarks_models.ResultData
 
+
+class BenchmarkGroupSummarySerializer(serializers.ModelSerializer):
+    result = serializers.CharField(source='result.id', read_only=True)
+    build_id = serializers.CharField(source='result.build_id', read_only=True)
+    name = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = benchmarks_models.BenchmarkGroupSummary
+        fields = ('id', 'name', 'result', 'build_id', 'measurement', 'created_at')

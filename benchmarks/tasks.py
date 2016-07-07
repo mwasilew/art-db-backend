@@ -5,6 +5,7 @@ import requests
 import subprocess
 import traceback
 
+from collections import defaultdict
 from dateutil.relativedelta import relativedelta
 from urllib import urlencode
 
@@ -46,6 +47,10 @@ def store_testjob_data(testjob, test_results):
     if not test_results:
         return
 
+    summary = defaultdict(lambda: [])
+
+    root_group, _ = models.BenchmarkGroup.objects.get_or_create(name='/')
+
     for result in test_results:
         if 'benchmark_group' in result:
             benchmark_group, _ = models.BenchmarkGroup.objects.get_or_create(
@@ -74,6 +79,22 @@ def store_testjob_data(testjob, test_results):
                 test_job_id=testjob.id,
                 benchmark=benchmark
             )
+            if benchmark_group:
+                for v in values:
+                    summary[benchmark_group.id].append(v)
+                    summary[root_group.id].append(v)
+
+    for (gid, values) in summary.items():
+        group = models.BenchmarkGroup.objects.get(pk=gid)
+        models.BenchmarkGroupSummary.objects.create(
+            group=group,
+            environment=testjob.environment,
+            created_at=testjob.created_at,
+            result=testjob.result,
+            test_job_id=testjob.id,
+            values=values,
+        )
+
 
     testjob.results_loaded = True
     testjob.save()
