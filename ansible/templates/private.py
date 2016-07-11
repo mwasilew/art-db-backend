@@ -36,6 +36,10 @@ CREDENTIALS = {
     "dev-private-review.linaro.org": (
         '{{ dev_private_review_linaro_org_user }}',
         '{{ dev_private_review_linaro_org_password }}'
+    ),
+    "ci.linaro.org": (
+        '{{ ci_linaro_org_user }}',
+        '{{ ci_linaro_org_password }}'
     )
 }
 
