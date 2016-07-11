@@ -11,7 +11,8 @@ import xmlrpclib
 import yaml
 import tempfile
 from copy import deepcopy
-
+from jenkinsapi import jenkins
+from urlparse import urlsplit
 from subprocess import Popen, PIPE, STDOUT
 
 from benchmarks.metadata import extract_metadata, extract_name, extract_device
@@ -24,6 +25,31 @@ try:
 except ImportError:
     import os
     DEVNULL = open(os.devnull, 'wb')
+
+
+def parse_microbenchmark_results(test_result_dict):
+    test_result_list = []
+    if 'benchmarks' in test_result_dict.keys():
+        test_result_dict = test_result_dict['benchmarks']
+
+    # Key Format: benchmarks/micro/<BENCHMARK_NAME>.<SUBSCORE>
+    # Extract and unique them to form a benchmark name list
+    for full_benchmark_name, measurements in test_result_dict.iteritems():
+        test_result = {}
+        # benchmark iteration
+        benchmark_group = '/'.join(full_benchmark_name.split('/')[0:-1]) + '/'
+        benchmark = full_benchmark_name.split('/')[-1].split('.')
+        test_result['benchmark_name'] = benchmark[0]
+        test_result['benchmark_group'] = benchmark_group
+        test_result['subscore'] = []
+        test_name = benchmark[1]
+        for i in measurements:
+            test_case = { "name": test_name,
+                         "measurement": i }
+            test_result['subscore'].append(test_case)
+
+        test_result_list.append(test_result)
+    return test_result_list
 
 
 class TestSystem(object):
@@ -76,6 +102,76 @@ class TestSystem(object):
     @staticmethod
     def reduce_test_results(test_result_list):
         return None
+
+
+class ArtJenkinsTestResults(TestSystem):
+    def __init__(self, base_url, username, password):
+        spl = urlsplit(base_url)
+        self.url = spl.scheme + "://" + spl.netloc
+        self.job_name = spl.path.split("/")[3]
+        self.build_number = int(spl.path.split("/")[4])
+        self.username = username # API username
+        self.password = password # API token
+        self.jenkins = jenkins.Jenkins(self.url, username=self.username, password=self.password)
+        self.jenkins_job = self.jenkins[self.job_name]
+        self.jenkins_build = self.jenkins_job.get_build(self.build_number)
+        self.jenkins_artifacts = self.jenkins_build.get_artifact_dict()
+
+    def test_results_available(self, job_id):
+        return True
+
+    def get_test_job_status(self, job_id):
+        if job_id.split("_", 1)[1] in self.jenkins_artifacts.keys():
+            return "Complete"
+        return "Results Mising"
+
+    def get_test_job_results(self, test_job_id):
+        (json_filename, json_text) = self.get_result_data(test_job_id)
+        if json_text:
+            return self.parse_test_results(json_text)
+        else:
+            return []
+
+    def parse_test_results(self, json_text):
+        test_result_dict = json.loads(json_text)
+        return parse_microbenchmark_results(test_result_dict)
+
+    def get_test_job_details(self, job_id):
+        """
+        returns test job metadata, for example device type
+        the tests were run on
+        """
+        details = dict(testertype="jenkins")
+        details.update(
+            {"metadata":
+                {"device": job_id.split("_", 2)[1],
+                 "environment": job_id.split("_", 1)[1].split(".")[0]},
+             "definition": {},
+             "name": job_id
+            }
+        )
+        return details
+
+    def get_job_url(self, job_id):
+        return self.jenkins_build.baseurl
+
+    def cleanup(self):
+        return None
+
+    def get_result_class_name(self, job_id):
+        return self.__class__.__name__
+
+    def get_result_class_name_from_definition(self, definition):
+        return self.__class__.__name__
+
+    def get_result_data(self, job_id):
+        data_file_name = job_id.split("_", 1)[1]
+        if data_file_name in self.jenkins_artifacts.keys():
+            return data_file_name, self.jenkins_artifacts[data_file_name].get_data()
+        return None, None
+
+    def get_environment_name(self, metadata):
+        return metadata['environment']
 
 
 class LavaServerException(Exception):
@@ -539,30 +635,8 @@ class ArtMicrobenchmarksTestResults(LavaTestSystem):
             return []
 
     def parse_test_results(self, json_text):
-        test_result_list = []
-
         test_result_dict = json.loads(json_text)
-        if 'benchmarks' in test_result_dict.keys():
-            test_result_dict = test_result_dict['benchmarks']
-
-        # Key Format: benchmarks/micro/<BENCHMARK_NAME>.<SUBSCORE>
-        # Extract and unique them to form a benchmark name list
-        for full_benchmark_name, measurements in test_result_dict.iteritems():
-            test_result = {}
-            # benchmark iteration
-            benchmark_group = '/'.join(full_benchmark_name.split('/')[0:-1]) + '/'
-            benchmark = full_benchmark_name.split('/')[-1].split('.')
-            test_result['benchmark_name'] = benchmark[0]
-            test_result['benchmark_group'] = benchmark_group
-            test_result['subscore'] = []
-            test_name = benchmark[1]
-            for i in measurements:
-                test_case = { "name": test_name,
-                             "measurement": i }
-                test_result['subscore'].append(test_case)
-
-            test_result_list.append(test_result)
-        return test_result_list
+        return parse_microbenchmark_results(test_result_dict)
 
     def get_result_data(self, test_job_id):
         status = self.call_xmlrpc('scheduler.job_status', test_job_id)
