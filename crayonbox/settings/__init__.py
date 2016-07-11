@@ -133,6 +133,8 @@ CREDENTIALS = {
     'host.url.netloc': ('username', 'password'),
 }
 
+UPDATE_JENKINS = False
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 LANGUAGE_CODE = 'en-us'

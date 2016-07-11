@@ -185,6 +185,9 @@ def check_testjob_completeness(self):
 
 @celery_app.task(bind=True)
 def update_jenkins(self, result):
+    if not settings.UPDATE_JENKINS:
+        return
+
     host = urlparse.urlsplit(result.build_url).netloc
 
     if host not in settings.CREDENTIALS.keys():
