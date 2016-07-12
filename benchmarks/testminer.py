@@ -121,9 +121,9 @@ class ArtJenkinsTestResults(TestSystem):
         return True
 
     def get_test_job_status(self, job_id):
-        if job_id.split("_", 1)[1] in self.jenkins_artifacts.keys():
+        if job_id.split("_", 2)[2] in self.jenkins_artifacts.keys():
             return "Complete"
-        return "Results Mising"
+        return "Results Missing"
 
     def get_test_job_results(self, test_job_id):
         (json_filename, json_text) = self.get_result_data(test_job_id)
@@ -144,8 +144,8 @@ class ArtJenkinsTestResults(TestSystem):
         details = dict(testertype="jenkins")
         details.update(
             {"metadata":
-                {"device": job_id.split("_", 2)[1],
-                 "environment": job_id.split("_", 1)[1].split(".")[0]},
+                {"device": job_id.split("_", 3)[2],
+                 "environment": job_id.split("_", 2)[2].split(".")[0]},
              "definition": {},
              "name": job_id
             }
@@ -165,7 +165,7 @@ class ArtJenkinsTestResults(TestSystem):
         return self.__class__.__name__
 
     def get_result_data(self, job_id):
-        data_file_name = job_id.split("_", 1)[1]
+        data_file_name = job_id.split("_", 2)[2]
         if data_file_name in self.jenkins_artifacts.keys():
             return data_file_name, self.jenkins_artifacts[data_file_name].get_data()
         return None, None
