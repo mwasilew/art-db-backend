@@ -1,4 +1,6 @@
 import hashlib
+import json
+from StringIO import StringIO
 from mock import patch
 
 from django_dynamic_fixture import G
@@ -365,6 +367,38 @@ class ResultTests(APITestCase):
         self.assertEqual(models.Result.objects.count(), 1)
         self.assertEqual(models.Manifest.objects.count(), 1)
         self.assertEqual(models.TestJob.objects.count(), 2)
+
+    @patch.dict('django.conf.settings.CREDENTIALS', {'jenkins.linaro.org': ("hej", "ho")})
+    def test_post_already_with_testjob_results(self):
+        data = {
+            'build_url': 'http://jenkins.linaro.org/foo/bar/baz/1',
+            'name': u'linaro-art-stable-m-build-juno',
+            'url': u'http://dynamicfixture1.com',
+            'build_number': 200,
+            'build_id': 200,
+            'manifest': MINIMAL_XML,
+            'created_at': '2016-01-06 09:00:01',
+            # NOTE NO 'test_jobs'
+            'environment1.json': StringIO(json.dumps({
+                "benchmarks/group1/foo.foo1": [1,2,2],
+                "benchmarks/group2/bar.bar1": [3,3,4],
+            })),
+
+            "environment2.json": StringIO(json.dumps({
+                    "benchmarks/group1/foo.foo1": [2,2,3],
+                    "benchmarks/group2/bar.bar1": [4,4,5],
+            })),
+        }
+        response = self.client.post('/api/result/', data=data)
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(models.Result.objects.count(), 1)
+        self.assertEqual(models.Manifest.objects.count(), 1)
+        self.assertEqual(models.TestJob.objects.count(), 2)
+
+        self.assertEqual(models.Environment.objects.count(), 2)
+        self.assertEqual(models.BenchmarkGroup.objects.count(), 3) # 2 + root
+
 
     def test_baseline_1(self):
 
