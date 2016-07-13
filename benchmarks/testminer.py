@@ -112,10 +112,39 @@ class ArtJenkinsTestResults(TestSystem):
         self.build_number = int(spl.path.split("/")[4])
         self.username = username # API username
         self.password = password # API token
-        self.jenkins = jenkins.Jenkins(self.url, username=self.username, password=self.password)
-        self.jenkins_job = self.jenkins[self.job_name]
-        self.jenkins_build = self.jenkins_job.get_build(self.build_number)
-        self.jenkins_artifacts = self.jenkins_build.get_artifact_dict()
+
+        self.__jenkins__ = None
+        self.__jenkins_job__ = None
+        self.__jenkins_build__ = None
+        self.__jenkins_artifacts__ = None
+
+    @property
+    def jenkins(self):
+        if self.__jenkins__ is None:
+            self.__jenkins__ = jenkins.Jenkins(
+                self.url,
+                username=self.username,
+                password=self.password
+            )
+        return self.__jenkins__
+
+    @property
+    def jenkins_job(self):
+        if self.__jenkins_job__ is None:
+            self.__jenkins_job__ = self.jenkins[self.job_name]
+        return self.__jenkins_job__
+
+    @property
+    def jenkins_build(self):
+        if self.__jenkins_build__ is None:
+            self.__jenkins_build__ = self.jenkins_job.get_build(self.build_number)
+        return self.__jenkins_build__
+
+    @property
+    def jenkins_artifacts(self):
+        if self.__jenkins_artifacts__ is None:
+            self.__jenkins_artifacts__ = self.jenkins_build.get_artifact_dict()
+        return self.__jenkins_artifacts__
 
     def test_results_available(self, job_id):
         return True
