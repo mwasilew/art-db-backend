@@ -1,0 +1,75 @@
+#!/bin/sh
+
+set -eu
+
+if [ $# -ne 1 ]; then
+  echo "usage: $0 TOKEN"
+  exit 1
+fi
+
+TOKEN="$1"
+
+checkdep() {
+  if ! which "$1" > /dev/null; then
+    echo "E: $1 not found; please install"
+    exit 1
+  fi
+}
+
+# dependencies
+checkdep curl
+checkdep jq
+checkdep openssl
+
+rand() {
+  local max="$1"
+  echo $((0x$(openssl rand -hex 1) % ${max} + 1))
+}
+
+hit_api() {
+  local endpoint="$1"
+  shift
+  curl --fail --header "Authorization: Token ${TOKEN}" \
+    "http://localhost:8000${endpoint}" "$@"
+}
+
+build_count() {
+  hit_api /api/result/ --silent | jq '.count'
+}
+
+XML=$(mktemp)
+environment1=$(mktemp)
+environment2=$(mktemp)
+trap 'rm -rf ${XML} ${environment1} ${environment2}' INT TERM EXIT
+echo '<?xml version="1.0" encoding="UTF-8"?><body></body>' > "${XML}"
+
+cat > "${environment1}" <<ENV1
+{
+  "benchmarks/group1/foo.foo1": [$(rand 2),$(rand 2),$(rand 2)],
+  "benchmarks/group2/bar.bar1": [$(rand 3),$(rand 3),$(rand 3)]
+}
+ENV1
+
+cat > "${environment2}" <<ENV2
+{
+  "benchmarks/group1/foo.foo1": [$(rand 3),$(rand 3),$(rand 3)],
+  "benchmarks/group2/bar.bar1": [$(rand 4),$(rand 4),$(rand 4)]
+}
+ENV2
+
+build_number=$(($(build_count) + 1))
+date=$(date '+%Y-%m-%d %H:%M:%S')
+
+hit_api /api/result/ \
+  --form 'build_url'='http://ci.linaro.org/foo/bar/baz/1' \
+  --form 'name'='linaro-art-stable-m-build-juno' \
+  --form 'url'='http://dynamicfixture1.com' \
+  --form 'build_number'="$build_number" \
+  --form 'build_id'="$build_number" \
+  --form 'branch_name'='master' \
+  --form 'manifest'="<$XML" \
+  --form 'created_at'="${date}" \
+  --form environment1.json=@${environment1} \
+  --form environment2.json=@${environment2}
+
+echo
