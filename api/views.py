@@ -7,6 +7,7 @@ from django.utils import timezone
 from itertools import groupby
 
 from django.conf import settings
+from django.db import transaction
 from django.db.models import Avg, StdDev, Count
 
 from rest_framework import views
@@ -206,6 +207,7 @@ class ResultViewSet(viewsets.ModelViewSet):
 
         return response.Response(data)
 
+    @transaction.atomic
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
 
