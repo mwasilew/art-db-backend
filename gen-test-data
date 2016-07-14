@@ -1,0 +1,17 @@
+#!/bin/sh
+
+set -eu
+
+if [ $# -ne 1 ]; then
+  echo "usage: $0 APITOKEN"
+  exit 1
+fi
+
+if ! which faketime >/dev/null; then
+  echo "E: please install faketime first"
+  exit 1
+fi
+
+for i in $(seq 10 -1 0); do
+  faketime "$i days ago" ./submit-test-data "$@"
+done
