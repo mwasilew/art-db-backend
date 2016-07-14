@@ -260,6 +260,7 @@ class ResultViewSet(viewsets.ModelViewSet):
             testrunnerclass='ArtJenkinsTestResults',
             testrunnerurl=result.build_url,
             environment=environment,
+            created_at=result.created_at,
         )
         testrunner = testjob.get_tester()
         json_data = testjob.data.read()
