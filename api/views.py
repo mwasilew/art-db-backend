@@ -235,6 +235,7 @@ class ResultViewSet(viewsets.ModelViewSet):
                 )
                 if testjob_created:
                     tasks.set_testjob_results.delay(testjob_id)
+            tasks.update_jenkins.delay(result)
         else:
             # no test_jobs, expect *.json to be passed in directly
             for filename in request.FILES:
@@ -245,7 +246,6 @@ class ResultViewSet(viewsets.ModelViewSet):
 
                 self.__create_test_job__(result, env, filedata)
 
-        tasks.update_jenkins.delay(result)
         return response.Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def __create_test_job__(self, result, env, data):
