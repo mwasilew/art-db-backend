@@ -1,4 +1,5 @@
 import json
+import re
 import urlparse
 
 from django.utils import timezone
@@ -6,6 +7,7 @@ from django.utils import timezone
 from itertools import groupby
 
 from django.conf import settings
+from django.db import transaction
 from django.db.models import Avg, StdDev, Count
 
 from rest_framework import views
@@ -205,6 +207,7 @@ class ResultViewSet(viewsets.ModelViewSet):
 
         return response.Response(data)
 
+    @transaction.atomic
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
 
@@ -232,9 +235,37 @@ class ResultViewSet(viewsets.ModelViewSet):
                 )
                 if testjob_created:
                     tasks.set_testjob_results.delay(testjob_id)
+            tasks.update_jenkins.delay(result)
+        else:
+            # no test_jobs, expect *.json to be passed in directly
+            for filename in request.FILES:
+                if not filename.endswith('.json'):
+                    next
+                env = re.sub('.json$', '', filename)
+                filedata = request.FILES[filename]
 
-        tasks.update_jenkins.delay(result)
+                self.__create_test_job__(result, env, filedata)
+
         return response.Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def __create_test_job__(self, result, env, data):
+        environment, _ = benchmarks_models.Environment.objects.get_or_create(identifier=env)
+        testjob = benchmarks_models.TestJob.objects.create(
+            id='J' + str(result.build_id) + '_' + result.name + '_' + env,
+            result=result,
+            status='Complete',
+            initialized=True,
+            completed=True,
+            data=data,
+            testrunnerclass='ArtJenkinsTestResults',
+            testrunnerurl=result.build_url,
+            environment=environment,
+            created_at=result.created_at,
+        )
+        testrunner = testjob.get_tester()
+        json_data = testjob.data.read()
+        test_results = testrunner.parse_test_results(json_data)
+        tasks.store_testjob_data(testjob, test_results)
 
 
 class TestJobViewSet(viewsets.ModelViewSet):

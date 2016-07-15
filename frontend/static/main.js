@@ -284,7 +284,7 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                         })
                     });
 
-                    if (! data[0].stdev) {
+                    if (data[0].stdev == undefined) {
                         // data has no stdev, skip the stdev data series
                         return;
                     }
