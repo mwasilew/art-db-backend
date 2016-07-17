@@ -228,13 +228,13 @@ class ResultViewSet(viewsets.ModelViewSet):
             test_jobs = {item.strip() for item in request.data.get('test_jobs').split(",")}
 
             for testjob_id in test_jobs:
-
-                testjob, testjob_created = benchmarks_models.TestJob.objects.get_or_create(
-                    result=result,
-                    id=testjob_id
-                )
-                if testjob_created:
-                    tasks.set_testjob_results.delay(testjob_id)
+                if len(testjob_id) > 0:
+                    testjob, testjob_created = benchmarks_models.TestJob.objects.get_or_create(
+                        result=result,
+                        id=testjob_id
+                    )
+                    if testjob_created:
+                        tasks.set_testjob_results.delay(testjob_id)
             tasks.update_jenkins.delay(result)
         else:
             # no test_jobs, expect *.json to be passed in directly
