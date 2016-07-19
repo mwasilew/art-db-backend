@@ -20,7 +20,7 @@ def http(result, message):
 
     data = {
         'message': message,
-        'labels': {'Code-Review': '+1'}
+        'labels': {'Code-Review': ' 0'}
     }
 
     username, password = settings.CREDENTIALS[host]
@@ -44,7 +44,7 @@ def ssh(result, message):
          '-o', 'StrictHostKeyChecking=no',
          '%s@%s' % (username, host),
          'gerrit', 'review', '-m', '"%s"' % message,
-         '--code-review', '+1', '%s,%s' % (change_number, patchset_number)],
+         '--code-review', ' 0', '%s,%s' % (change_number, patchset_number)],
         stderr=subprocess.STDOUT)
 
 methods = {
