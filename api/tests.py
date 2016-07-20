@@ -130,8 +130,8 @@ class ResultTests(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['id'], 123)
 
-    @patch('benchmarks.tasks.update_jenkins.delay', lambda x: None)
-    @patch('benchmarks.tasks.set_testjob_results.delay', lambda x: None)
+    @patch('benchmarks.tasks.update_jenkins.apply_async', lambda **kwargs: None)
+    @patch('benchmarks.tasks.set_testjob_results.apply_async', lambda **kwargs: None)
     def test_post_1(self):
 
         data = {
@@ -149,8 +149,8 @@ class ResultTests(APITestCase):
         self.assertEqual(models.Manifest.objects.count(), 1)
         self.assertEqual(response.status_code, 201)
 
-    @patch('benchmarks.tasks.update_jenkins.delay', lambda x: None)
-    @patch('benchmarks.tasks.set_testjob_results.delay', lambda x: None)
+    @patch('benchmarks.tasks.update_jenkins.apply_async', lambda **kwargs: None)
+    @patch('benchmarks.tasks.set_testjob_results.apply_async', lambda **kwargs: None)
     def test_post_2(self):
 
         data = {
@@ -174,8 +174,8 @@ class ResultTests(APITestCase):
         self.assertIn('655839.0', items)
         self.assertIn('655838.0', items)
 
-    @patch('benchmarks.tasks.update_jenkins.delay', lambda x: None)
-    @patch('benchmarks.tasks.set_testjob_results.delay', lambda x: None)
+    @patch('benchmarks.tasks.update_jenkins.apply_async', lambda **kwargs: None)
+    @patch('benchmarks.tasks.set_testjob_results.apply_async', lambda *kwargs: None)
     def test_post_3(self):
 
         data_1 = {
@@ -205,8 +205,8 @@ class ResultTests(APITestCase):
         self.assertEqual(models.Result.objects.count(), 2)
         self.assertEqual(models.Manifest.objects.count(), 1)
 
-    @patch('benchmarks.tasks.update_jenkins.delay', lambda x: None)
-    @patch('benchmarks.tasks.set_testjob_results.delay', lambda x: None)
+    @patch('benchmarks.tasks.update_jenkins.apply_async', lambda **kwargs: None)
+    @patch('benchmarks.tasks.set_testjob_results.apply_async', lambda **kwargs: None)
     def test_post_4(self):
         build_id = 200
         build_number = 20
@@ -238,8 +238,8 @@ class ResultTests(APITestCase):
         self.assertEqual(models.Result.objects.count(), 1)
         self.assertEqual(models.Manifest.objects.count(), 1)
 
-    @patch('benchmarks.tasks.update_jenkins.delay', lambda x: None)
-    @patch('benchmarks.tasks.set_testjob_results.delay', lambda x: None)
+    @patch('benchmarks.tasks.update_jenkins.apply_async', lambda **kwargs: None)
+    @patch('benchmarks.tasks.set_testjob_results.apply_async', lambda **kwargs: None)
     def test_post_5(self):
 
         data = {
@@ -260,8 +260,8 @@ class ResultTests(APITestCase):
         self.assertEqual(models.TestJob.objects.count(), 2)
         self.assertEqual(response.data['created_at'], '2016-01-06T09:00:01Z')
 
-    @patch('benchmarks.tasks.update_jenkins.delay', lambda x: None)
-    @patch('benchmarks.tasks.set_testjob_results.delay', lambda x: None)
+    @patch('benchmarks.tasks.update_jenkins.apply_async', lambda **kwargs: None)
+    @patch('benchmarks.tasks.set_testjob_results.apply_async', lambda **kwargs: None)
     def test_post_with_results(self):
 
         data = {
@@ -287,8 +287,8 @@ class ResultTests(APITestCase):
         self.assertEqual(models.ResultData.objects.get(name="load").measurement, 3)
         self.assertEqual(models.ResultData.objects.get(name="boot").measurement, 10)
 
-    @patch('benchmarks.tasks.update_jenkins.delay', lambda x: None)
-    @patch('benchmarks.tasks.set_testjob_results.delay', lambda x: None)
+    @patch('benchmarks.tasks.update_jenkins.apply_async', lambda **kwargs: None)
+    @patch('benchmarks.tasks.set_testjob_results.apply_async', lambda **kwargs: None)
     def test_post_with_results_empty(self):
 
         data = {
@@ -308,8 +308,8 @@ class ResultTests(APITestCase):
         self.assertEqual(models.Manifest.objects.count(), 1)
         self.assertEqual(models.ResultData.objects.count(), 0)
 
-    @patch('benchmarks.tasks.update_jenkins.delay', lambda x: None)
-    @patch('benchmarks.tasks.set_testjob_results.delay', lambda x: None)
+    @patch('benchmarks.tasks.update_jenkins.apply_async', lambda **kwargs: None)
+    @patch('benchmarks.tasks.set_testjob_results.apply_async', lambda **kwargs: None)
     def test_add_test_jobs_to_existing_result_object(self):
 
         initial_data = {
@@ -338,8 +338,8 @@ class ResultTests(APITestCase):
         self.assertEqual(models.Manifest.objects.count(), 1)
         self.assertEqual(models.TestJob.objects.count(), 3)
 
-    @patch('benchmarks.tasks.update_jenkins.delay', lambda x: None)
-    @patch('benchmarks.tasks.set_testjob_results.delay', lambda x: None)
+    @patch('benchmarks.tasks.update_jenkins.apply_async', lambda **kwargs: None)
+    @patch('benchmarks.tasks.set_testjob_results.apply_async', lambda **kwargs: None)
     def test_add_existing_test_jobs_to_existing_result_object(self):
 
         initial_data = {

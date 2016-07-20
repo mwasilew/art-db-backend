@@ -211,6 +211,8 @@ class ResultViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
 
+        delayed_tasks = []
+
         try:
             result = benchmarks_models.Result.objects.get(
                 build_id=serializer.initial_data['build_id'],
@@ -234,8 +236,8 @@ class ResultViewSet(viewsets.ModelViewSet):
                         id=testjob_id
                     )
                     if testjob_created:
-                        tasks.set_testjob_results.delay(testjob_id)
-            tasks.update_jenkins.delay(result)
+                        delayed_tasks.append((tasks.set_testjob_results, [testjob_id]))
+            delayed_tasks.append((tasks.update_jenkins, [result]))
         else:
             # no test_jobs, expect *.json to be passed in directly
             for filename in request.FILES:
@@ -245,6 +247,10 @@ class ResultViewSet(viewsets.ModelViewSet):
                 filedata = request.FILES[filename]
 
                 self.__create_test_job__(result, env, filedata)
+
+        # all done, schedule background tasks
+        for task, args in delayed_tasks:
+            task.apply_async(args=args, countdown=60) # 1 min from now
 
         return response.Response(serializer.data, status=status.HTTP_201_CREATED)
 
