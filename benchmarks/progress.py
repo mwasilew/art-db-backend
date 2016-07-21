@@ -67,3 +67,24 @@ def get_progress_since(date):
                 result.append(progress)
 
     return result
+
+
+def get_progress_betwewn_results(current, baseline):
+    result = []
+
+    for current_testjob in current.test_jobs.all():
+
+        environment = current_testjob.environment
+        baseline_testjob = baseline.testjobs.get(environment=environment)
+
+        if baseline_testjob:
+            progress = Progress(
+                project=current.name,
+                branch=current.branch_name,
+                environment=environment,
+                before=baseline_testjob,
+                after=current_testjob,
+            )
+            result.append(progress)
+
+    return result

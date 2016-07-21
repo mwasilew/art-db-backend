@@ -2,15 +2,16 @@ from django.conf import settings
 from django.core.mail import send_mail, EmailMessage
 from django.template.loader import render_to_string
 
-
+from benchmarks import progress
 from benchmarks.comparison import render_comparison
 
 
 def result_progress(current, baseline):
+    results = progress.get_progress_betwewn_results(current, baseline)
     _send_results(
         current=current,
         template='result_progress.html',
-        comparison=render_comparison(baseline.data.all(), current.data.all()),
+        comparison={p: render_comparison(p.before, p.after) for p in results},
         baseline=current.baseline,
         header="Art - Benchmark Progress for %s" % current.name,
         subject_template="%s [%s]",
@@ -82,23 +83,17 @@ def _benchmark_progress(context):
     send_mail(subject, None, from_email, to_email, html_message=message)
 
 
-def _render_comparisons(results):
-    comparisons = {}
-    if results:
-        for branch, result_pair in results.items():
-            comparisons[branch] = render_comparison(result_pair[0], result_pair[1])
-    return comparisons
-
-
 def daily_benchmark_progress(now, then, results):
     header = "Art - Daily Benchmark Progress"
     time = now.strftime('%d %m %Y')
+
+    comparisons = {p: render_comparison(p.before, p.after) for p in results}
 
     context = {
         "now": now,
         "header": header,
         "time": time,
-        "comparisons": _render_comparisons(results)
+        "comparisons": comparisons,
     }
 
     _benchmark_progress(context)
@@ -107,12 +102,13 @@ def daily_benchmark_progress(now, then, results):
 def monthly_benchmark_progress(now, then, results):
     header = "Art - Monthly Benchmark Progress"
     time = now.strftime('%B %Y')
+    comparisons = {p: render_comparison(p.before, p.after) for p in results}
 
     context = {
         "now": now,
         "header": header,
         "time": time,
-        "comparisons": _render_comparisons(results)
+        "comparisons": comparisons,
     }
 
     _benchmark_progress(context)
@@ -122,11 +118,13 @@ def weekly_benchmark_progress(now, then, results):
     header = "Art - Weekly Benchmark Progress"
     time = now.strftime('Week %W %Y')
 
+    comparisons = {p: render_comparison(p.before, p.after) for p in results}
+
     context = {
         "now": now,
         "header": header,
         "time": time,
-        "comparisons": _render_comparisons(results)
+        "comparisons": comparisons,
     }
 
     _benchmark_progress(context)

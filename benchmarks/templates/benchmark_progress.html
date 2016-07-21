@@ -9,12 +9,15 @@
 
     <hr>
 
-    {% for branch, comparison in comparisons.items %}
-        <h3>branch: {{ branch }}</h3>
-        <pre>
-        {{ comparison }}
-        </pre>
-
+    {% for comparison, rendered_comparison in comparisons.items %}
+    <h3>environment: {{ comparison.environment.name }}</h3>
+    <ul>
+      <li>branch: {{ comparison.branch }} </li>
+      <li>project: {{ comparison.project }} </li>
+    </ul>
+    <pre>
+      {{ rendered_comparison }}
+    </pre>
     {% endfor %}
 
 {% endblock %}
