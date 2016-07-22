@@ -6,9 +6,6 @@ ssl_ca: /etc/ssl/certs/gd_bundle-g2-g1.pem
 
 broker_url: "redis://localhost:6379/0"
 email_reports_to:
-  - "stuart.monteith@linaro.org"
-  - "serban.constantinescu@linaro.org"
+  - "linaro-art@linaro.org"
   - "milosz.wasilewski@linaro.org"
-  - "alexandre.rames@linaro.org"
-  - "scott.wakeling@linaro.org"
   - "antonio.terceiro@linaro.org"
