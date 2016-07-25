@@ -61,6 +61,7 @@ build_number=$(($(build_count) + 1))
 date=$(date '+%Y-%m-%d %H:%M:%S')
 
 hit_api /api/result/ \
+  --silent --output /dev/null \
   --form 'build_url'='http://ci.linaro.org/foo/bar/baz/1' \
   --form 'name'='linaro-art-stable-m-build-juno' \
   --form 'url'='http://dynamicfixture1.com' \

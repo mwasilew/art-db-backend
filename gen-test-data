@@ -2,16 +2,20 @@
 
 set -eu
 
-if [ $# -ne 1 ]; then
-  echo "usage: $0 APITOKEN"
+if [ $# -ne 1 -a $# -ne 2 ]; then
+  echo "usage: $0 APITOKEN [DAYS]"
   exit 1
 fi
+
+token="$1"
+days=${2:-10}
 
 if ! which faketime >/dev/null; then
   echo "E: please install faketime first"
   exit 1
 fi
 
-for i in $(seq 10 -1 0); do
-  faketime "$i days ago" ./submit-test-data "$@"
+for i in $(seq ${days} -1 0); do
+  faketime "$i days ago" ./submit-test-data "$token"
+  echo "submitted data for $i days ago"
 done
