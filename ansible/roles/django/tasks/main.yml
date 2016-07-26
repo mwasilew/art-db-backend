@@ -9,6 +9,8 @@
     - python-pip
     - python-virtualenv
     - openjdk-7-jre-headless
+    - python3-scipy
+    - python3-numpy
   tags:
     - install
     - update
