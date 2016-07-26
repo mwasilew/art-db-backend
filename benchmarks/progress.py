@@ -69,7 +69,7 @@ def get_progress_since(date):
     return result
 
 
-def get_progress_betwewn_results(current, baseline):
+def get_progress_between_results(current, baseline):
     result = []
 
     for current_testjob in current.test_jobs.all():

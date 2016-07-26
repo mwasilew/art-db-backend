@@ -7,7 +7,7 @@ from benchmarks.comparison import render_comparison
 
 
 def result_progress(current, baseline):
-    results = progress.get_progress_betwewn_results(current, baseline)
+    results = progress.get_progress_between_results(current, baseline)
     _send_results(
         current=current,
         template='result_progress.html',
