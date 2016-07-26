@@ -2,13 +2,14 @@ from django.test import TestCase
 from django_dynamic_fixture import G
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
-from django.conf import settings
 
 import django.core.mail
 
-from benchmarks.models import Result, ResultData, Benchmark
+from benchmarks.models import Result, TestJob, Environment, Benchmark, ResultData
 from benchmarks import mail
+from benchmarks.progress import Progress
 
+from benchmarks.tests import get_file
 
 MINIMAL_XML = '<?xml version="1.0" encoding="UTF-8"?><body></body>'
 
@@ -68,38 +69,57 @@ class SendEmailTestCase(TestCase):
         mail.result_progress_no_results(self.current)
         self.assertEqual(len(django.core.mail.outbox), 1)
 
-    def test_benchmark_progress_daily(self):
-        past = self.now - relativedelta(days=2)
-        past_build = G(
+class BenchmarkProgressTest(TestCase):
+
+    def setUp(self):
+        self.now = timezone.now()
+
+    def __progress__(self, past, **kwargs):
+        build1 = G(
             Result,
             manifest__manifest=MINIMAL_XML,
             branch_name='master',
+            name='myproject',
             gerrit_change_number=None,
             created_at=past,
         )
-        mail.daily_benchmark_progress(self.now, past, {"master": (past_build.data.all(), self.baseline.data.all())})
+        build2 = G(
+            Result,
+            manifest__manifest=MINIMAL_XML,
+            branch_name="master",
+            name='myproject',
+            gerrit_change_number=None,
+            created_at=timezone.now(),
+        )
+
+        env = G(Environment, identifier="myenv1")
+
+        job1 = G(TestJob, result=build1, environment=env, completed=True)
+        job1.data = get_file("then.json")
+        job1.save()
+
+
+        job2 = G(TestJob, result=build2, environment=env, completed=True)
+        job2.data = get_file("now.json")
+        job2.save()
+
+        progress = Progress("myproject", "master", "myenv1", job1, job2)
+        return [progress]
+
+    def test_benchmark_progress_daily(self):
+        past = self.now - relativedelta(days=2)
+        progress = self.__progress__(past)
+        mail.daily_benchmark_progress(self.now, past, progress)
         self.assertEqual(len(django.core.mail.outbox), 1)
 
     def test_benchmark_progress_weekly(self):
         past = self.now - relativedelta(days=8)
-        past_build = G(
-            Result,
-            manifest__manifest=MINIMAL_XML,
-            branch_name='master',
-            gerrit_change_number=None,
-            created_at=past,
-        )
-        mail.daily_benchmark_progress(self.now, past, {"master": (past_build.data.all(), self.baseline.data.all())})
+        progress = self.__progress__(past)
+        mail.weekly_benchmark_progress(self.now, past, progress)
         self.assertEqual(len(django.core.mail.outbox), 1)
 
     def test_benchmark_progress_monthly(self):
         past = self.now - relativedelta(days=32)
-        past_build = G(
-            Result,
-            manifest__manifest=MINIMAL_XML,
-            branch_name='master',
-            gerrit_change_number=None,
-            created_at=past,
-        )
-        mail.daily_benchmark_progress(self.now, past, {"master": (past_build.data.all(), self.baseline.data.all())})
+        progress = self.__progress__(past)
+        mail.monthly_benchmark_progress(self.now, past, progress)
         self.assertEqual(len(django.core.mail.outbox), 1)

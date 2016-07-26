@@ -18,7 +18,7 @@ from celery.utils.log import get_task_logger
 
 from crayonbox import celery_app
 
-from . import models, testminer, mail, gerrit
+from . import models, testminer, mail, gerrit, progress
 
 logger = get_task_logger("tasks")
 
@@ -325,28 +325,27 @@ def sync_external_repos(self):
 @celery_app.task(bind=True)
 def daily_benchmark_progress(self):
     now = timezone.now()
-    interval = relativedelta(days=1)
+    yesterday = now - relativedelta(days=1)
 
-    results = models.Result.objects.compare_progress(now, interval)
+    results = progress.get_progress_since(yesterday)
     if results:
-        mail.daily_benchmark_progress(now, interval, results)
+        mail.daily_benchmark_progress(now, yesterday, results)
 
 
 @celery_app.task(bind=True)
 def weekly_benchmark_progress(self):
     now = timezone.now()
-    interval = relativedelta(days=7)
-
-    results = models.Result.objects.compare_progress(now, interval)
+    last_week = now - relativedelta(days=7)
+    results = progress.get_progress_since(last_week)
     if results:
-        mail.weekly_benchmark_progress(now, interval, results)
+        mail.weekly_benchmark_progress(now, last_week, results)
 
 
 @celery_app.task(bind=True)
 def monthly_benchmark_progress(self):
     now = timezone.now()
-    interval = relativedelta(months=1)
+    last_month = now - relativedelta(months=1)
 
-    results = models.Result.objects.compare_progress(now, interval)
+    results = progress.get_progress_since(last_month)
     if results:
-        mail.monthly_benchmark_progress(now, interval, results)
+        mail.monthly_benchmark_progress(now, last_month, results)

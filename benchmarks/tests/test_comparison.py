@@ -1,12 +1,15 @@
+import os
 from dateutil.relativedelta import relativedelta
 from django_dynamic_fixture import G
 from django.test import TestCase
 from django.utils import timezone
 
-from benchmarks.models import Result, ResultData
+from benchmarks.tests import get_file
+from benchmarks.models import Result, ResultData, TestJob
 from benchmarks.comparison import render_comparison
 
 MINIMAL_XML = '<?xml version="1.0" encoding="UTF-8"?><body></body>'
+
 
 class ComparisonTest(TestCase):
 
@@ -29,17 +32,21 @@ class ComparisonTest(TestCase):
                       gerrit_change_number=None,
                       created_at=now)
 
-        G(ResultData,
-          result=result_now,
-          benchmark__name="benchmark1",
-          name="benchmark1",
-          values=[1.1,1.2,1.3,1.2,1.4])
+        testjob_now = G(
+            TestJob,
+            result=result_now,
+            completed=True,
+        )
+        testjob_now.data = get_file("now.json")
+        testjob_now.save()
 
-        G(ResultData,
-          result=result_then,
-          benchmark__name="benchmark1",
-          name="benchmark1",
-          values=[1,1.1,1.2,1.1,1.3])
+        testjob_then = G(
+            TestJob,
+            result=result_now,
+            completed=True,
+        )
+        testjob_then.data = get_file("then.json")
+        testjob_then.save()
 
-        output = render_comparison(result_then.data.all(), result_now.data.all())
+        output = render_comparison(testjob_then, testjob_now)
         self.assertTrue("benchmark1" in output)

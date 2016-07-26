@@ -1,14 +1,16 @@
-from django.test import TestCase as DjangoTestCase
+from django.test import TestCase
 from django_dynamic_fixture import G, N
-from unittest import TestCase
 from mock import patch
 from django.core import mail
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 import re
 
+import django.core.mail
+
 from benchmarks.models import Benchmark
 from benchmarks.models import BenchmarkGroup
+from benchmarks.models import Environment
 from benchmarks.models import Result
 from benchmarks.models import ResultData
 from benchmarks.models import TestJob
@@ -18,6 +20,13 @@ from benchmarks.tasks import set_testjob_results
 from benchmarks.tasks import report_email
 from benchmarks.tasks import report_gerrit
 from benchmarks.tasks import store_testjob_data
+
+from benchmarks.progress import Progress
+from benchmarks.tasks import daily_benchmark_progress
+from benchmarks.tasks import weekly_benchmark_progress
+from benchmarks.tasks import monthly_benchmark_progress
+
+from benchmarks.tests import get_file
 
 
 MINIMAL_XML = '<?xml version="1.0" encoding="UTF-8"?><body></body>'
@@ -169,12 +178,6 @@ class ReportsTest(TestCase):
 
 class StoreTestJobData(TestCase):
 
-    def setUp(self):
-        self.testjob_count = TestJob.objects.count()
-        self.benchmark_count = Benchmark.objects.count()
-        self.benchmark_group_count = BenchmarkGroup.objects.count()
-        self.result_data_count = ResultData.objects.count()
-
     def test_result_data(self):
         result = G(Result, manifest__manifest=MINIMAL_XML)
         testjob = N(TestJob, result=result, status='Complete')
@@ -189,9 +192,9 @@ class StoreTestJobData(TestCase):
         ]
         store_testjob_data(testjob, test_results)
 
-        self.assertEqual(TestJob.objects.count(), self.testjob_count + 1)
-        self.assertEqual(Benchmark.objects.count(), self.benchmark_count + 1)
-        self.assertEqual(ResultData.objects.count(), self.result_data_count + 1)
+        self.assertEqual(TestJob.objects.count(), 1)
+        self.assertEqual(Benchmark.objects.count(), 1)
+        self.assertEqual(ResultData.objects.count(), 1)
 
         result_data = ResultData.objects.order_by('id').last()
         self.assertEqual(result_data.values, [1,2])
@@ -210,10 +213,75 @@ class StoreTestJobData(TestCase):
                 ]
             },
         ]
-        store_testjob_data(testjob, test_results)
 
-        self.assertEqual(BenchmarkGroup.objects.count(), self.benchmark_group_count + 1)
+
+        store_testjob_data(testjob, test_results)
+        self.assertEqual(BenchmarkGroup.objects.count(), 2)  # foo + /
 
         benchmark_group = BenchmarkGroup.objects.order_by('id').last()
         benchmark = Benchmark.objects.order_by('id').last()
         self.assertEqual(benchmark.group, benchmark_group)
+
+class BenchmarkProgressTasksTest(TestCase):
+
+    def setUp(self):
+        self.now = timezone.now()
+
+    def __create_jobs__(self, past, **kwargs):
+        build1 = G(
+            Result,
+            manifest__manifest=MINIMAL_XML,
+            branch_name='master',
+            name='myproject',
+            gerrit_change_number=None,
+            created_at=past,
+        )
+        build2 = G(
+            Result,
+            manifest__manifest=MINIMAL_XML,
+            branch_name="master",
+            name='myproject',
+            gerrit_change_number=None,
+            created_at=timezone.now(),
+        )
+
+        env = G(Environment)
+
+        job1 = G(
+            TestJob,
+            result=build1,
+            environment=env,
+            completed=True,
+            created_at=build1.created_at
+        )
+        job1.data = get_file("then.json")
+        job1.save()
+
+
+        job2 = G(
+            TestJob,
+            result=build2,
+            environment=env,
+            completed=True,
+            created_at=build2.created_at
+        )
+        job2.data = get_file("now.json")
+        job2.save()
+
+        progress = Progress("myproject", "master", env, job1, job2)
+        return [progress]
+
+    def test_benchmark_progress_daily(self):
+        self.__create_jobs__(self.now - relativedelta(days=2))
+        daily_benchmark_progress.apply()
+        self.assertEqual(len(django.core.mail.outbox), 1)
+
+    def test_benchmark_progress_weekly(self):
+        self.__create_jobs__(self.now - relativedelta(days=8))
+        weekly_benchmark_progress.apply()
+        self.assertEqual(len(django.core.mail.outbox), 1)
+
+    def test_benchmark_progress_monthly(self):
+        self.__create_jobs__(self.now - relativedelta(days=32))
+        monthly_benchmark_progress.apply()
+        self.assertEqual(len(django.core.mail.outbox), 1)

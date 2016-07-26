@@ -26,9 +26,12 @@
     <hr/>
 
     <h3>Benchmarks</h3>
-
+    {% for comparison, rendered_comparison in comparisons.items %}
+    <h3>environment: {{ comparison.environment.name }}</h3>
     <pre>
-    {{ comparison }}
+      {{ rendered_comparison }}
     </pre>
+    {% endfor %}
+
 
 {% endblock %}
