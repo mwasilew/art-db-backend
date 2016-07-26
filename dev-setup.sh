@@ -135,7 +135,7 @@ DATABASES = {
 }
 
 LOGGING['loggers']['qinspect'] = { 'handlers': ['console'], 'level': 'DEBUG',
-				  'propagate': True, }
+                                   'propagate': True, }
 
 CELERY_ALWAYS_EAGER = True
 CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
