@@ -22,6 +22,8 @@ fi
 if [ ! -d ext/art-testing ]; then
   git clone "https://android-review.linaro.org/linaro/art-testing" ext/art-testing
 fi
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -qy \
+  python3-scipy python3-numpy
 
 if [ ! -f .virtualenv/bin/python ]; then
   virtualenv .virtualenv
@@ -135,7 +137,7 @@ DATABASES = {
 }
 
 LOGGING['loggers']['qinspect'] = { 'handlers': ['console'], 'level': 'DEBUG',
-				  'propagate': True, }
+                                   'propagate': True, }
 
 CELERY_ALWAYS_EAGER = True
 CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
