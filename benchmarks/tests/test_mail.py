@@ -34,24 +34,28 @@ class SendEmailTestCase(TestCase):
             gerrit_change_number=None,
             created_at=past,
         )
-        self.benchmark1 = G(Benchmark)
-        self.benchmark2 = G(Benchmark)
+        self.environment = G(Environment)
 
-    def fake_data(self, build, v1=5, v2=5):
-        G(ResultData,
-          result=build,
-          benchmark=self.benchmark1,
-          name="load-avg",
-          measurement=v1)
-        G(ResultData,
-          result=build,
-          benchmark=self.benchmark2,
-          name="cpu-usage",
-          measurement=v2)
+    def fake_data(self, build, filename="then.json"):
+
+        job = G(
+            TestJob,
+            result=build,
+            environment=self.environment,
+            completed=True,
+            created_at=build.created_at
+        )
+        job.data = get_file(filename)
+        job.save()
+
 
     def test_result_progress(self):
-        self.fake_data(self.baseline, 5, 5)
-        self.fake_data(self.current, 6, 6)
+        self.fake_data(self.baseline)
+        self.fake_data(self.current, filename="now.json")
+
+        self.assertTrue(self.current.test_jobs.count() > 0)
+        self.assertTrue(self.baseline.test_jobs.count() > 0)
+
         mail.result_progress(self.current, self.baseline)
         self.assertEqual(len(django.core.mail.outbox), 1)
 

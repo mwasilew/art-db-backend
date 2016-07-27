@@ -75,7 +75,7 @@ def get_progress_between_results(current, baseline):
     for current_testjob in current.test_jobs.all():
 
         environment = current_testjob.environment
-        baseline_testjob = baseline.testjobs.get(environment=environment)
+        baseline_testjob = baseline.test_jobs.get(environment=environment)
 
         if baseline_testjob:
             progress = Progress(
