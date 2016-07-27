@@ -40,6 +40,7 @@
           <th>job id</th>
           <th class="text-right">status</th>
           <th class="text-right">resubmit</th>
+          <th class="text-right">download</th>
         </tr>
       </thead>
       <tbody>
@@ -84,6 +85,15 @@
                </div>
             </span>
 
+          </td>
+          <td class='text-right'>
+            <a
+              ng-if='test.data'
+              href="/api/testjobdata/{{test.id}}"
+              class='label label-info'>
+              <i class='fa fa-download'></i>
+              test data
+            </a>
           </td>
         </tr>
       </tbody>
