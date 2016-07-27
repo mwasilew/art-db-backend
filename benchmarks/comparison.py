@@ -18,5 +18,5 @@ def render_comparison(testjob_before, testjob_after):
         compare_script,
         testjob_before.data.file.name,
         testjob_after.data.file.name,
-    ])
+    ], stderr=subprocess.STDOUT)
     return output
