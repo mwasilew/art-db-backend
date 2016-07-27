@@ -37,9 +37,9 @@ build_count() {
   hit_api /api/result/ --silent | jq '.count'
 }
 
-XML=$(mktemp)
-environment1=$(mktemp)
-environment2=$(mktemp)
+XML=$(mktemp --suffix=.xml)
+environment1=$(mktemp --suffix=.json)
+environment2=$(mktemp --suffix=.json)
 trap 'rm -rf ${XML} ${environment1} ${environment2}' INT TERM EXIT
 echo '<?xml version="1.0" encoding="UTF-8"?><body></body>' > "${XML}"
 
