@@ -8,6 +8,8 @@ from mock import patch
 
 from django_dynamic_fixture import G
 
+from benchmarks.tests import get_file
+
 from benchmarks.models import Result, ResultData, TestJob, Manifest, Benchmark
 
 
@@ -453,3 +455,13 @@ class TestJobTestCase(TestCase):
         job.status = "Results Missing"
         job.save()
         self.assertFalse(job.can_resubmit())
+
+    def test_data_filetype(self):
+        result = G(Result, manifest__manifest=MINIMAL_XML)
+        job = G(TestJob, result=result, id="12345.1")
+        job.data = get_file('now.json')
+
+        self.assertEqual('json', job.data_filetype)
+    def test_data_filetype_no_data(self):
+        job = TestJob()
+        self.assertEqual(None, job.data_filetype)
