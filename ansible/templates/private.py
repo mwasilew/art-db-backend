@@ -121,7 +121,6 @@ ALLOWED_HOSTS = ['{{ hostname }}', '52.90.187.47']
 
 ADMINS = [
     ("Milosz Wasilewski", 'milosz.wasilewski@linaro.org'),
-    ("Sebastian Pawlus", 'sebastian.pawlus@linaro.org'),
     ("Antonio Terceiro", 'antonio.terceiro@linaro.org')
 ]
 
