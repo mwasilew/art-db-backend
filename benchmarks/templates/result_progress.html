@@ -28,6 +28,18 @@
     <h3>Benchmarks</h3>
     {% for comparison, rendered_comparison in comparisons.items %}
     <h3>environment: {{ comparison.environment.name }}</h3>
+    <ul>
+      <li>
+          <a href="{{baseurl}}{% url 'testjobdata' comparison.before.id %}">
+              Download data file for baseline test job (#{{comparison.before.id}})
+          </a>
+      </li>
+      <li>
+          <a href="{{baseurl}}{% url 'testjobdata' comparison.after.id %}">
+              Download data file for patch test job (#{{comparison.after.id}})
+          </a>
+      </li>
+    </ul>
     <pre>
       {{ rendered_comparison }}
     </pre>

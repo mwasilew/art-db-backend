@@ -55,6 +55,7 @@ def _send_results(current, template, header, subject_template, comparison=None, 
         "comparison": comparison,
         "current": current,
         "baseline": baseline,
+        "baseurl": settings.URL,
     }
 
     message = render_to_string(template, context)
@@ -73,6 +74,7 @@ def _send_results(current, template, header, subject_template, comparison=None, 
     email.send()
 
 def _benchmark_progress(context):
+    context['baseurl'] = settings.URL
     message = render_to_string('benchmark_progress.html', context)
 
     subject = "%s [%s]" % (context['header'], context['time'])
