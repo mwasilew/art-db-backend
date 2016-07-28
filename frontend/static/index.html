@@ -41,7 +41,29 @@
 	  <li ng-class="{active: viewName == 'Stats'}"><a href="#/stats/">Stats</a></li>
 	</ul>
 
-	<p class="navbar-text pull-right">{{ auth.username }} <a href="/logout"><small>logout</small></a></p>
+	<div class="pull-right">
+	  <button
+              ng-click='toggle_user_dropdown()'
+              class="btn btn-default navbar-btn dropdown-toggle"
+	      type="button"
+	      id="dropdownMenu1"
+	      data-toggle="dropdown"
+	      aria-haspopup="true"
+	      aria-expanded="true">
+	    {{ auth.username }}
+	    <span class="caret"></span>
+	  </button>
+
+	  <ul id='user-dropdown-menu' class="dropdown-menu" aria-labelledby="dropdownMenu1">
+	    <li>
+	      <a><strong>API key:</strong> <br/>
+		{{auth.key}}</a>
+	    </li>
+	    <li role="separator" class="divider"></li>
+	    <li><a href="/logout"><strong>logout</strong></a></li>
+	  </ul>
+	</div>
+
       </div>
     </nav>
 

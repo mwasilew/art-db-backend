@@ -10,6 +10,18 @@ app.controller('Toolbar', ['$scope', '$http', '$rootScope', function($scope, $ht
         $scope.auth = response.data;
     });
 
+    $scope.show_user_dropdown = false;
+
+    $scope.toggle_user_dropdown = function() {
+        $scope.show_user_dropdown = !$scope.show_user_dropdown;
+        var dropdown = document.getElementById('user-dropdown-menu');
+        if ($scope.show_user_dropdown) {
+            dropdown.style.display = 'block';
+        } else {
+            dropdown.style.display = '';
+        }
+    }
+
 }]);
 
 app.config(['$routeProvider', function($routeProvider) {
