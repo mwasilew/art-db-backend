@@ -284,6 +284,12 @@ class TestJob(models.Model):
         tester_class = getattr(testminer, self.testrunnerclass)
         return tester_class(baseurl, username, password)
 
+    @property
+    def data_filetype(self):
+        if self.data.name is None:
+            return None
+        return self.data.name.split('.')[-1]
+
 
 class BenchmarkGroup(models.Model):
 

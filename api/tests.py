@@ -10,6 +10,7 @@ from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 
 from benchmarks import models
+from benchmarks.tests import get_file
 
 
 MINIMAL_XML = '<?xml version="1.0" encoding="UTF-8"?><body></body>'
@@ -808,3 +809,60 @@ class BenchmarkGroupSummaryTest(APITestCase):
             'branch': 'master',
         })
         self.assertEqual(1, len(response.data))
+
+class TestJobData(APITestCase):
+
+    def setUp(self):
+        self.testjob = G(
+            models.TestJob,
+            id="0001",
+            status="Complete",
+            completed=True,
+            result__manifest__manifest=MINIMAL_XML
+        )
+        user = User.objects.create_superuser('test', 'email@test.com', 'test')
+        self.client.force_authenticate(user=user)
+
+    def test_download_json(self):
+        self.testjob.data = get_file('now.json')
+        self.testjob.save()
+
+        response = self.client.get('/api/testjobdata/0001')
+        self.assertEqual(200, response.status_code)
+        self.assertEqual('application/json', response['Content-Type'])
+        self.assertEqual('attachment; filename="0001.json"', response['Content-Disposition'])
+
+    def test_data_filename_as_testjob_id(self):
+        self.testjob.id = '0001.json'
+        self.testjob.data = get_file('now.json')
+        self.testjob.save()
+
+        response = self.client.get('/api/testjobdata/0001.json')
+        self.assertEqual(200, response.status_code)
+        self.assertEqual('attachment; filename="0001.json"', response['Content-Disposition'])
+
+    def test_download_xml(self):
+        self.testjob.data = get_file('manifest.xml')
+        self.testjob.save()
+
+        response = self.client.get('/api/testjobdata/0001')
+        self.assertEqual(200, response.status_code)
+        self.assertEqual('application/xml', response['Content-Type'])
+
+    @patch('mimetypes.guess_type', lambda filename: (None, None))
+    def test_download_unknown_file_type(self):
+        self.testjob.data = get_file('manifest.xml')
+        self.testjob.save()
+
+        response = self.client.get('/api/testjobdata/0001')
+        self.assertEqual(200, response.status_code)
+        self.assertEqual('application/octet-stream', response['Content-Type'])
+
+    def test_requires_authentication(self):
+        self.testjob.data = get_file('now.json')
+        self.testjob.save()
+
+        self.client.force_authenticate(user=None)
+
+        response = self.client.get('/api/testjobdata/0001')
+        self.assertEqual(401, response.status_code)

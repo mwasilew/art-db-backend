@@ -1,6 +1,9 @@
 import json
 import re
 import urlparse
+import mimetypes
+
+mimetypes.init()
 
 from django.utils import timezone
 
@@ -9,6 +12,7 @@ from itertools import groupby
 from django.conf import settings
 from django.db import transaction
 from django.db.models import Avg, StdDev, Count
+from django.http import HttpResponse
 
 from rest_framework import views
 from rest_framework import viewsets
@@ -16,7 +20,7 @@ from rest_framework import response
 from rest_framework import mixins
 from rest_framework import status
 from rest_framework import filters
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import detail_route, api_view
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from rest_framework.decorators import list_route
@@ -319,6 +323,26 @@ class TestJobViewSet(viewsets.ModelViewSet):
         serializer = serializers.TestJobSerializer(result.test_jobs.all(), many=True)
 
         return response.Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET"])
+def download_testjob_data(request, testjob_id):
+    testjob = benchmarks_models.TestJob.objects.get(pk=testjob_id)
+
+    content_type, _ = mimetypes.guess_type(testjob.data.path)
+    data = testjob.data.read()
+
+    if testjob.id.endswith('.' + testjob.data_filetype):
+        filename = testjob.id
+    else:
+        filename = testjob.id + '.' + testjob.data_filetype
+
+    if content_type is None:
+        content_type = 'application/octet-stream'
+
+    response = HttpResponse(data, content_type=content_type)
+    response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+    return response
 
 
 class ResultDataViewSet(viewsets.ModelViewSet):

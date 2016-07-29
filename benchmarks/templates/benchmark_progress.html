@@ -14,6 +14,16 @@
     <ul>
       <li>branch: {{ comparison.branch }} </li>
       <li>project: {{ comparison.project }} </li>
+      <li>
+          <a href="{{baseurl}}{% url 'testjobdata' comparison.before.id %}">
+              Download data file for older test job (#{{comparison.before.id}})
+          </a>
+      </li>
+      <li>
+          <a href="{{baseurl}}{% url 'testjobdata' comparison.after.id %}">
+              Download data file for newer test job (#{{comparison.after.id}})
+          </a>
+      </li>
     </ul>
     <pre>
       {{ rendered_comparison }}

@@ -26,5 +26,11 @@ urlpatterns = [
     url(r'details/', views.ResultDataForManifest.as_view()),
     url(r'projects/', views.ProjectsView.as_view()),
     url(r'environments/', views.EnvironmentsView.as_view()),
+    url(
+        r'testjobdata/([a-zA-Z0-9_.-]+)',
+        views.download_testjob_data,
+        name='testjobdata'
+    ),
+
 ]
 
