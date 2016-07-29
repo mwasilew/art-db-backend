@@ -11,7 +11,7 @@ def result_progress(current, baseline):
     _send_results(
         current=current,
         template='result_progress.html',
-        comparison={p: render_comparison(p.before, p.after) for p in results},
+        comparisons={p: render_comparison(p.before, p.after) for p in results},
         baseline=current.baseline,
         header="Art - Benchmark Progress for %s" % current.name,
         subject_template="%s [%s]",
@@ -46,13 +46,13 @@ def result_progress_no_results(current):
     )
 
 
-def _send_results(current, template, header, subject_template, comparison=None, baseline=None):
+def _send_results(current, template, header, subject_template, comparisons=None, baseline=None):
     time = current.created_at.strftime("%d-%m-%Y %H:%M:%S")
 
     context = {
         "header": header,
         "time": time,
-        "comparison": comparison,
+        "comparisons": comparisons,
         "current": current,
         "baseline": baseline,
         "baseurl": settings.URL,

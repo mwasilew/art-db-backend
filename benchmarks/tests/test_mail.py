@@ -59,6 +59,9 @@ class SendEmailTestCase(TestCase):
         mail.result_progress(self.current, self.baseline)
         self.assertEqual(len(django.core.mail.outbox), 1)
 
+        message = django.core.mail.outbox[0]
+        self.assertTrue(message.body.find('benchmark1') > -1)
+
     def test_result_progress_baseline_missing(self):
         self.fake_data(self.current)
         mail.result_progress_baseline_missing(self.current)
