@@ -52,7 +52,7 @@ app.config(['$routeProvider', function($routeProvider) {
             reloadOnSearch: false
         })
         .otherwise({
-            redirectTo: '/manifests/'
+            redirectTo: '/stats/'
         });
 }]);
 
