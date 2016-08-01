@@ -241,8 +241,7 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
 
         var params = {
             branch: $scope.branch && $scope.branch.branch_name,
-            environment: $scope.get_environment_ids(),
-            project: $scope.project && $scope.project.name
+            environment: $scope.get_environment_ids()
         };
         var stats_endpoint;
         if ($scope.benchmark) {
@@ -255,7 +254,7 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
             }
         }
 
-        if (!(params.branch && params.environment.length > 0 && (params.benchmark || params.benchmark_group) && params.project)) {
+        if (!(params.branch && params.environment.length > 0 && (params.benchmark || params.benchmark_group))) {
             return;
         }
 
@@ -398,7 +397,6 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
             env.selected = false;
         });
         $scope.benchmark = undefined;
-        $scope.project = undefined;
         $location.search({});
         document.getElementById('charts').innerHTML = '';
     }
@@ -406,7 +404,6 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
     $q.all([
         $http.get('/api/branch/'),
         $http.get('/api/benchmark/'),
-        $http.get('/api/projects/'),
         $http.get('/api/environments/')
     ]).then(function(response) {
 
@@ -424,13 +421,11 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
         });
         $scope.benchmarkList = benchmarkList;
 
-        $scope.projectList = response[2].data;
-        $scope.environmentList = response[3].data;
+        $scope.environmentList = response[2].data;
 
         var defaults = {
             branch: $routeParams.branch,
             benchmark: $routeParams.benchmark || $routeParams.benchmark_group,
-            project: $routeParams.project,
             environments: $routeParams.environment || []
         };
 
@@ -443,9 +438,6 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
         });
         if (defaults.benchmark) {
             $scope.benchmark = _.find($scope.benchmarkList, ['name', defaults.benchmark]);
-        }
-        if (defaults.project) {
-            $scope.project = _.find($scope.projectList, ['name', defaults.project]);
         }
 
     }).then($scope.change);

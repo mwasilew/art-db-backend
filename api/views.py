@@ -122,17 +122,15 @@ class StatsViewSet(viewsets.ModelViewSet):
             return self.__queryset__
 
         branch = self.request.query_params.get('branch')
-        project = self.request.query_params.get('project')
         environment = self.request.query_params.get('environment')
         benchmarks = self.request.query_params.getlist('benchmark')
 
-        if not (benchmarks and branch and project and environment):
+        if not (benchmarks and branch and environment):
             return self.queryset.none()
 
         testjobs = benchmarks_models.TestJob.objects.filter(environment__identifier=environment)
         testjobs = testjobs.select_related('result')
         testjobs = testjobs.filter(result__branch_name=branch)
-        testjobs = testjobs.filter(result__name=project)
 
         if settings.IGNORE_GERRIT is False:
             testjobs = testjobs.filter(result__gerrit_change_number=None)
