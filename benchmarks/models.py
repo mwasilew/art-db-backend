@@ -89,36 +89,6 @@ class ResultManager(models.Manager):
         return results
 
 
-    def compare_progress(self, now, interval):
-        then = now - interval
-
-        branches = (Result.objects.order_by('branch_name')
-                    .distinct("branch_name")
-                    .values_list("branch_name", flat=True))
-
-        results_by_branch = {}
-
-        for branch_name in branches:
-            query = (ResultData.objects
-                     .filter(result__branch_name=branch_name)
-                     .filter(result__gerrit_change_number__isnull=True))
-            current = (query
-                       .filter(result__created_at__gt=then,
-                               result__created_at__lte=now)
-                       .order_by("benchmark", "name")
-                       .distinct("benchmark", "name"))
-
-            previous = (query
-                        .filter(result__created_at__gt=then - interval,
-                                result__created_at__lte=then)
-                        .order_by("benchmark", "name")
-                        .distinct("benchmark", "name"))
-
-            if current and previous:
-                results_by_branch[branch_name] = (previous, current)
-        return results_by_branch
-
-
 class Environment(models.Model):
     identifier = models.CharField(max_length=128, unique=True)
     name = models.CharField(max_length=128)
