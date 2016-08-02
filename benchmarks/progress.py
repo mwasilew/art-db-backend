@@ -44,6 +44,7 @@ def get_progress_since(date):
                     environment=environment,
                     result__branch_name=branch,
                     result__name=project,
+                    result__gerrit_change_number=None, # only baseline builds
                 ).order_by('created_at')
 
                 after = testjobs.filter(created_at__gt=date).last()
