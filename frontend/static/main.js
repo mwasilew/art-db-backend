@@ -52,7 +52,7 @@ app.config(['$routeProvider', function($routeProvider) {
             reloadOnSearch: false
         })
         .otherwise({
-            redirectTo: '/manifests/'
+            redirectTo: '/stats/'
         });
 }]);
 
@@ -423,11 +423,22 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
 
         $scope.environmentList = response[2].data;
 
-        var defaults = {
-            branch: $routeParams.branch,
-            benchmark: $routeParams.benchmark || $routeParams.benchmark_group,
-            environments: $routeParams.environment || []
-        };
+        var defaults;
+        if ($routeParams.branch || $routeParams.benchmark || $routeParams.environment) {
+            defaults = {
+                branch: $routeParams.branch,
+                benchmark: $routeParams.benchmark || $routeParams.benchmark_group,
+                environments: $routeParams.environment || []
+            };
+        } else {
+            defaults = {
+                branch: 'master',
+                benchmark: '/',
+                environments: _.map($scope.environmentList, function(env) {
+                    return env.identifier;
+                })
+            };
+        }
 
         if (defaults.branch) {
             $scope.branch = _.find($scope.branchList, ['branch_name', defaults.branch]);
