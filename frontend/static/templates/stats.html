@@ -61,22 +61,6 @@
           </div>
         </div>
 
-        <div class='panel panel-default' ng-show='benchmark'>
-          <div class='panel-heading'>
-            <span ng-show='project'>
-              Project
-            </span>
-            <span ng-hide='project'>
-              <strong>Select project</strong>
-            </span>
-          </div>
-          <div class='panel-body'>
-            <select ng-disabled="disabled" ng-model="project" class="form-control"
-                    ng-change="change()"
-                    ng-options="item.name for item in projectList"></select>
-          </div>
-        </div>
-
         <a class='btn btn-default' ng-show='project' ng-click='reset()'>Reset filter</a>
 
       </form>
