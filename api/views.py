@@ -1,11 +1,8 @@
-import json
 import re
 import urlparse
 import mimetypes
 
 mimetypes.init()
-
-from django.utils import timezone
 
 from itertools import groupby
 
