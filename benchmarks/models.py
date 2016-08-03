@@ -260,6 +260,10 @@ class TestJob(models.Model):
             return None
         return self.data.name.split('.')[-1]
 
+    @property
+    def result_data(self):
+        return self.result.data.filter(test_job_id=self.id).prefetch_related('benchmark').order_by('benchmark__name', "name")
+
 
 class BenchmarkGroup(models.Model):
 
