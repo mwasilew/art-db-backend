@@ -24,6 +24,8 @@ from rest_framework.decorators import list_route
 
 from benchmarks import models as benchmarks_models
 from benchmarks import tasks, testminer
+from benchmarks import progress
+from benchmarks import comparison
 
 from . import serializers
 
@@ -185,24 +187,34 @@ class ResultViewSet(viewsets.ModelViewSet):
     @detail_route()
     def benchmarks(self, request, pk=None):
         result = self.get_object()
-        benchmarks = result.data.select_related("benchmark").all()
+        test_jobs = result.test_jobs.prefetch_related('environment').all()
+        result_data = result.data.prefetch_related('benchmark').all()
 
-        serializer = serializers.ResultDataSerializer(benchmarks, many=True)
-        return response.Response(serializer.data)
+        data = []
+        for test_job in test_jobs:
+            rdata = [ r for r in result_data if r.test_job_id == test_job.id ]
+            data.append({
+                "environment": test_job.environment.identifier,
+                "data": serializers.ResultDataSerializer(rdata, many=True).data
+            })
+
+        return response.Response(data)
 
     @detail_route()
     def benchmarks_compare(self, request, pk=None):
         result = self.get_object()
         previous = result.to_compare()
-
         if not previous:
             return response.Response([])
 
         data = [{
-            'change': item['change'],
-            'current': serializers.ResultDataSerializer(item['current']).data,
-            'previous': serializers.ResultDataSerializer(item['previous']).data,
-        } for item in benchmarks_models.Result.objects.compare(result, previous)]
+            "environment": item.environment.identifier,
+            "data": [{
+                'change': item['change'],
+                'current': serializers.ResultDataSerializer(item['current']).data,
+                'previous': serializers.ResultDataSerializer(item['previous']).data,
+            } for item in comparison.compare(item.before, item.after)]
+        } for item in progress.get_progress_between_results(result, previous) ]
 
         return response.Response(data)
 
