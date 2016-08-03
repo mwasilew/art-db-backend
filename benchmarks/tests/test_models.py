@@ -68,47 +68,6 @@ class ResultTestCase(TestCase):
         result.testjobs_updated # we are happy it this just doesn't crash
 
 
-class ResultManagerTestCase(TestCase):
-
-    def test_compare_against_baseline_with_some_missing_benchmarks(self):
-        new_build = G(
-            Result,
-            manifest__manifest=MINIMAL_XML,
-            branch_name='master',
-            gerrit_change_number=123,
-        )
-
-        baseline = G(
-            Result,
-            manifest__manifest=MINIMAL_XML,
-            branch_name='master',
-            gerrit_change_number=None,
-        )
-
-        benchmark1 = G(Benchmark)
-        benchmark2 = G(Benchmark)
-
-        G(ResultData,
-          result=new_build,
-          benchmark=benchmark1,
-          name="load-avg",
-          measurement=5)
-        G(ResultData,
-          result=new_build,
-          benchmark=benchmark2,
-          name="cpu-usage",
-          measurement=5)
-
-        # baseline missing result for benchmark2
-        G(ResultData,
-          result=baseline,
-          benchmark=benchmark1,
-          name="load-avg",
-          measurement=5)
-
-        # should just not crash
-        Result.objects.compare(new_build, baseline)
-
     def test_to_compare_missing_results_current(self):
 
         now = timezone.now()

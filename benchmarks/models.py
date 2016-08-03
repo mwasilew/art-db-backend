@@ -55,40 +55,6 @@ class Manifest(models.Model):
         return super(Manifest, self).save(*args, **kwargs)
 
 
-class ResultManager(models.Manager):
-
-    def _get_first(self, query):
-        for item in query:
-            if item.data.count():
-                return item
-        return None
-
-    def compare(self, first, second):
-        if not (first.data.count() and second.data.count()):
-            return []
-
-        measurement_previous = {d.name: d for d in second.data.select_related("benchmark")}
-        results = []
-
-        for resultdata in first.data.order_by("name").select_related("benchmark"):
-            current = resultdata
-            previous = measurement_previous.get(resultdata.name)
-
-            if previous and previous.measurement:
-                change = current.measurement / previous.measurement * 100
-                change = (change - 100) * -1
-            else:
-                change = None
-
-            results.append({
-                "current": current,
-                "previous": previous,
-                "change": change
-            })
-
-        return results
-
-
 class Environment(models.Model):
     identifier = models.CharField(max_length=128, unique=True)
     name = models.CharField(max_length=128)
@@ -106,8 +72,6 @@ class Environment(models.Model):
 
 
 class Result(models.Model):
-
-    objects = ResultManager()
 
     manifest = models.ForeignKey(Manifest, related_name="results", null=True)
 
