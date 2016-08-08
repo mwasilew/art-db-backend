@@ -338,6 +338,9 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
 
             Highcharts.chart(
                 document.getElementById('charts'), {
+                    chart: {
+                        zoomType: "xy"
+                    },
                     title: {
                         text: $scope.benchmark.label + ' on branch ' + $scope.branch.branch_name + '; ' + envs
                     },
@@ -386,6 +389,9 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                                 lineWidth: 1
                             }
                         }
+                    },
+                    legend: {
+                        maxHeight: 100
                     },
                     series: series
                 });
