@@ -223,7 +223,7 @@ class ResultViewSet(viewsets.ModelViewSet):
                 })
             res = {
                 "environment": item.environment.identifier,
-                "data": sorted(data_list, key=__get_key)
+                "data": sorted(data_list, reverse=True, key=__get_key)
             }
             data.append(res)
 
