@@ -147,10 +147,10 @@
           </td>
           <td class="text-right">
             <b>
-            <span ng-if="item.change > 0" style="color:#77DD77">
+            <span ng-if="item.change < 0" class="label label-danger">
               {{ item.change.toFixed(2) }} %
             </span>
-            <span ng-if="item.change < 0" style="color:#FF6961">
+            <span ng-if="item.change >= 0" class="label label-success">
               {{ item.change.toFixed(2) }} %
             </span>
             </b>
