@@ -132,7 +132,8 @@
       </thead>
       <tbody ng-hide='hide'>
 
-        <tr ng-repeat='item in comparison.data | filter:filterBenchmarksCompared(queryBenchmarks) '>
+        <tr ng-repeat='item in comparison.data | filter:filterBenchmarksCompared(queryBenchmarks) '
+            ng-class="getChangeClass(item.change)">
           <td>
             {{ item.current.benchmark }} / <b>{{ item.current.name }}</b>
             ({{ item.current.values.length }})
@@ -147,10 +148,7 @@
           </td>
           <td class="text-right">
             <b>
-            <span ng-if="item.change > 0" style="color:#77DD77">
-              {{ item.change.toFixed(2) }} %
-            </span>
-            <span ng-if="item.change < 0" style="color:#FF6961">
+            <span ng-if="item.change != null">
               {{ item.change.toFixed(2) }} %
             </span>
             </b>

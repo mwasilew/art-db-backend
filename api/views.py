@@ -207,14 +207,25 @@ class ResultViewSet(viewsets.ModelViewSet):
         if not previous:
             return response.Response([])
 
-        data = [{
-            "environment": item.environment.identifier,
-            "data": [{
-                'change': item['change'],
-                'current': serializers.ResultDataSerializer(item['current']).data,
-                'previous': serializers.ResultDataSerializer(item['previous']).data,
-            } for item in comparison.compare(item.before, item.after)]
-        } for item in progress.get_progress_between_results(result, previous) ]
+        def __get_key(item):
+            return item['change']
+
+        data = []
+        for item in progress.get_progress_between_results(result, previous):
+            data_list = []
+            for data_item in comparison.compare(item.before, item.after):
+                data_list.append({
+                    'change': data_item['change'],
+                    'current': serializers.ResultDataSerializer(
+                        data_item['current']).data,
+                    'previous': serializers.ResultDataSerializer(
+                        data_item['previous']).data,
+                })
+            res = {
+                "environment": item.environment.identifier,
+                "data": sorted(data_list, reverse=True, key=__get_key)
+            }
+            data.append(res)
 
         return response.Response(data)
 

@@ -228,6 +228,18 @@ app.controller('BuildDetail', ['$scope', '$http', '$routeParams', '$q', '$routeP
         };
     };
 
+    $scope.getChangeClass = function(criteria) {
+        if (criteria < -3) {
+            return "success";
+        }
+        if (criteria >= -3 && criteria <= 3) {
+            return "";
+        }
+        if (criteria > 3) {
+            return "danger";
+        }
+    }
+
 }]);
 
 app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$routeParams', '$location', function($scope, $http, $routeParams, $timeout, $q, $routeParams, $location) {

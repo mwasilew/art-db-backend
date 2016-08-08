@@ -35,7 +35,7 @@ def compare(testjob_before, testjob_after):
         ]
         if len(__previous__) == 1:
             previous = __previous__[0]
-            change = ((current.measurement / previous.measurement * 100) - 100) * -1
+            change = (current.measurement / previous.measurement * 100) - 100
             result.append({
                 "current": current,
                 "previous": previous,
