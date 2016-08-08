@@ -110,6 +110,11 @@
       <div class="form-group">
         <input type="text" ng-model="queryBenchmarks" class="form-control input-sm" placeholder="filter">
       </div>
+      <div class='checkbox'>
+        <input id='show-boring' type='checkbox' ng-model='showBoring'/>
+        <label for='show-boring'>Show non-significant results</label>
+      </div>
+
     </form>
 
     <table ng-repeat='comparison in benchmarksCompare' class="table table-bordered benchmarks">
@@ -133,7 +138,7 @@
       <tbody ng-hide='hide'>
 
         <tr ng-repeat='item in comparison.data | filter:filterBenchmarksCompared(queryBenchmarks) '
-            ng-class="getChangeClass(item.change)">
+            ng-class="getChangeClass(item.change)" ng-show='showBoring || getChangeClass(item.change) != ""'>
           <td>
             {{ item.current.benchmark }} / <b>{{ item.current.name }}</b>
             ({{ item.current.values.length }})
