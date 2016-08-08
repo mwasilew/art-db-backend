@@ -23,3 +23,23 @@ def render_comparison(testjob_before, testjob_after):
     output = subprocess.check_output(compare_command + compare_files,
                                      stderr=subprocess.STDOUT)
     return output
+
+def compare(testjob_before, testjob_after):
+    result = []
+    current_results = testjob_after.result_data.all()
+    previous_results = testjob_before.result_data.all()
+    for current in current_results:
+        __previous__ = [
+            r for r in previous_results
+            if r.benchmark_id == current.benchmark_id and r.name ==current.name
+        ]
+        if len(__previous__) == 1:
+            previous = __previous__[0]
+            change = ((current.measurement / previous.measurement * 100) - 100) * -1
+            result.append({
+                "current": current,
+                "previous": previous,
+                "change": change,
+            })
+
+    return result

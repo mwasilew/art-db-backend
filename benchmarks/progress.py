@@ -24,6 +24,7 @@ class Progress(object):
     def __repr__(self):
         return self.__str__()
 
+
 def get_values(queryset, field):
     data = queryset.distinct(field).order_by(field).values(field)
     return [item[field] for item in data]
@@ -73,12 +74,19 @@ def get_progress_since(date):
 def get_progress_between_results(current, baseline):
     result = []
 
-    for current_testjob in current.test_jobs.all():
+    test_jobs = current.test_jobs.prefetch_related('environment').all()
+    baseline_test_jobs = baseline.test_jobs.prefetch_related('environment').all()
+
+    for current_testjob in test_jobs.all():
 
         environment = current_testjob.environment
-        baseline_testjob = baseline.test_jobs.get(environment=environment)
+        corresponding_job_in_baseline = [
+            j for j in baseline_test_jobs
+            if j.environment_id == current_testjob.environment_id
+        ]
 
-        if baseline_testjob:
+        if len(corresponding_job_in_baseline) == 1:
+            baseline_testjob = corresponding_job_in_baseline[0]
             progress = Progress(
                 project=current.name,
                 branch=current.branch_name,

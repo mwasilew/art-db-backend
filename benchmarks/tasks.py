@@ -276,12 +276,9 @@ def report_gerrit(self, current):
             "baseline": current.baseline
         })
     else:
-        results = models.Result.objects.compare(current, current.baseline)
-
         message = render_to_string("gerrit_update.html", {
             "current": current,
             "baseline": current.baseline,
-            "results": results
         })
 
     gerrit.update(current, message)

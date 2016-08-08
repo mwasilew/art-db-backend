@@ -55,70 +55,6 @@ class Manifest(models.Model):
         return super(Manifest, self).save(*args, **kwargs)
 
 
-class ResultManager(models.Manager):
-
-    def _get_first(self, query):
-        for item in query:
-            if item.data.count():
-                return item
-        return None
-
-    def compare(self, first, second):
-        if not (first.data.count() and second.data.count()):
-            return []
-
-        measurement_previous = {d.name: d for d in second.data.select_related("benchmark")}
-        results = []
-
-        for resultdata in first.data.order_by("name").select_related("benchmark"):
-            current = resultdata
-            previous = measurement_previous.get(resultdata.name)
-
-            if previous and previous.measurement:
-                change = current.measurement / previous.measurement * 100
-                change = (change - 100) * -1
-            else:
-                change = None
-
-            results.append({
-                "current": current,
-                "previous": previous,
-                "change": change
-            })
-
-        return results
-
-
-    def compare_progress(self, now, interval):
-        then = now - interval
-
-        branches = (Result.objects.order_by('branch_name')
-                    .distinct("branch_name")
-                    .values_list("branch_name", flat=True))
-
-        results_by_branch = {}
-
-        for branch_name in branches:
-            query = (ResultData.objects
-                     .filter(result__branch_name=branch_name)
-                     .filter(result__gerrit_change_number__isnull=True))
-            current = (query
-                       .filter(result__created_at__gt=then,
-                               result__created_at__lte=now)
-                       .order_by("benchmark", "name")
-                       .distinct("benchmark", "name"))
-
-            previous = (query
-                        .filter(result__created_at__gt=then - interval,
-                                result__created_at__lte=then)
-                        .order_by("benchmark", "name")
-                        .distinct("benchmark", "name"))
-
-            if current and previous:
-                results_by_branch[branch_name] = (previous, current)
-        return results_by_branch
-
-
 class Environment(models.Model):
     identifier = models.CharField(max_length=128, unique=True)
     name = models.CharField(max_length=128)
@@ -136,8 +72,6 @@ class Environment(models.Model):
 
 
 class Result(models.Model):
-
-    objects = ResultManager()
 
     manifest = models.ForeignKey(Manifest, related_name="results", null=True)
 
@@ -289,6 +223,10 @@ class TestJob(models.Model):
         if self.data.name is None:
             return None
         return self.data.name.split('.')[-1]
+
+    @property
+    def result_data(self):
+        return self.result.data.filter(test_job_id=self.id).prefetch_related('benchmark').order_by('benchmark__name', "name")
 
 
 class BenchmarkGroup(models.Model):
