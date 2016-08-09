@@ -294,6 +294,7 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                     // data itself
                     series.push({
                         name: name + ' (' + env + ')',
+                        type: 'spline',
                         color: Highcharts.getOptions().colors[i],
                         zIndex: 1,
                         data: _.map(data, function(point) {
@@ -315,7 +316,7 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                     // range of values, based on the standard deviation
                     series.push({
                         name: name + ' stdev (' + env + ')',
-                        type: 'arearange',
+                        type: 'areasplinerange',
                         color: Highcharts.getOptions().colors[i],
                         lineWidth: 0,
                         linkedTo: ':previous',
@@ -338,6 +339,9 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
 
             Highcharts.chart(
                 document.getElementById('charts'), {
+                    chart: {
+                        zoomType: "xy"
+                    },
                     title: {
                         text: $scope.benchmark.label + ' on branch ' + $scope.branch.branch_name + '; ' + envs
                     },
@@ -386,6 +390,9 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                                 lineWidth: 1
                             }
                         }
+                    },
+                    legend: {
+                        maxHeight: 100
                     },
                     series: series
                 });
