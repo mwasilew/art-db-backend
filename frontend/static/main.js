@@ -301,21 +301,23 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                             return {
                                 x: Date.parse(point.created_at),
                                 y: point.measurement,
-                                stdev: point.stdev,
+                                min: _.min(point.values),
+                                max: _.max(point.values),
                                 result_id: point.result,
                                 build_id: point.build_id
                             };
                         })
                     });
 
-                    if (data[0].stdev == undefined) {
-                        // data has no stdev, skip the stdev data series
+                    if (data[0].values == undefined) {
+                        // data does not have multiple values, skip the range
+                        // data series
                         return;
                     }
 
                     // range of values, based on the standard deviation
                     series.push({
-                        name: name + ' stdev (' + env + ')',
+                        name: name + ' range (' + env + ')',
                         type: 'areasplinerange',
                         color: Highcharts.getOptions().colors[i],
                         lineWidth: 0,
@@ -325,9 +327,8 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                         data: _.map(data, function(point) {
                             return [
                                 Date.parse(point.created_at),
-                                // 99.73% of values are in the range (mean ± 3 * stdev)
-                                point.measurement - 3 * point.stdev,
-                                point.measurement + 3 * point.stdev
+                                _.min(point.values),
+                                _.max(point.values)
                             ]
                         })
                     });
@@ -362,13 +363,26 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                                 return '';
                             }
                             var y = this.y.toFixed(2);
-                            var range = this.stdev && (3 * this.stdev).toFixed(2);
-                            var stdev = this.stdev && this.stdev.toFixed(2);
+                            var min = this.min && this.min.toFixed(2);
+                            var max = this.max && this.max.toFixed(2);
+                            var range = '';
+                            if (this.min && this.max) {
+                                range = _.join([
+                                    '<br/>',
+                                    'Range: ',
+                                    this.min.toFixed(2),
+                                    ' — ',
+                                    this.max.toFixed(2)
+                                ], '');
+                            }
                             var html = [
-                                '<br/><p><strong>',
-                                '<span style="color: ' + this.series.color + '">' + this.series.name + ':</span> ',
-                                y + (this.stdev && (' ± ' + range + ' (st. dev.: ' + stdev + ')') || ''),
-                                '</strong></p>',
+                                '<br/><p><em>',
+                                '<span style="color: ' + this.series.color + '">' + this.series.name + '</span></em><br/> ',
+                                '<strong>',
+                                'Mean: ' + y,
+                                '</strong>',
+                                range,
+                                '</p>',
                                 '<p>',
                                 '<a href="#/build/' + this.result_id + '">See details for build #' + this.build_id + '</a>',
                                 '</p>'
