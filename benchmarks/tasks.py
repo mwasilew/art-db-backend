@@ -245,7 +245,6 @@ def check_result_completeness(self):
         save = False
 
         if result.completed:
-            report_email.apply_async(args=[result])
             report_gerrit.apply_async(args=[result])
             result.reported = True
             save = True
