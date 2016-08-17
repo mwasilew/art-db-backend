@@ -127,15 +127,21 @@ class Result(models.Model):
             self.__to_compare__ = None
             return self.__to_compare__
 
-        self.__to_compare__ = self._default_manager.annotate(
+        __to_compare__ = self._default_manager.annotate(
             data_count=Count('data')
         ).filter(
             data_count__gt=0,
             branch_name=self.branch_name,
             gerrit_change_number=None,
             manifest__reduced__hash=self.manifest.reduced.hash
-        ).order_by('-created_at').first()
+        ).order_by('-created_at')
 
+        if self.gerrit_change_number is None:  # baseline build
+            __to_compare__ = __to_compare__.filter(
+                created_at__lt=self.created_at
+            )
+
+        self.__to_compare__ = __to_compare__.first()
         return self.__to_compare__
 
 
