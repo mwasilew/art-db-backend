@@ -132,12 +132,16 @@
           <th style="width: 60%">name (sample size)</th>
           <th class="text-right">current (stdev)</th>
           <th class="text-right">previous (stdev)</th>
-          <th class="text-right">change</th>
+          <th class="text-right">
+            change
+            <a class='label label-default' ng-click='reverse = false' ng-show='reverse'  ><i class='fa fa-sort-asc'></i></a>
+            <a class='label label-default' ng-click='reverse = true'  ng-show='!reverse' ><i class='fa fa-sort-desc'></i></a>
+          </th>
         </tr>
       </thead>
       <tbody ng-hide='hide'>
 
-        <tr ng-repeat='item in comparison.data | filter:filterBenchmarksCompared(queryBenchmarks) '
+        <tr ng-repeat='item in comparison.data | filter:filterBenchmarksCompared(queryBenchmarks) | orderBy:"change":reverse '
             ng-class="getChangeClass(item.change)" ng-show='showBoring || getChangeClass(item.change) != ""'>
           <td>
             {{ item.current.benchmark }} / <b>{{ item.current.name }}</b>
