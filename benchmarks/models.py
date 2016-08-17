@@ -111,7 +111,6 @@ class Result(models.Model):
             return self.__baseline__
 
         self.__baseline__ = self._default_manager.filter(
-            created_at__lt=self.created_at,
             branch_name=self.branch_name,
             gerrit_change_number=None,
             manifest__reduced__hash=self.manifest.reduced.hash
@@ -132,7 +131,6 @@ class Result(models.Model):
             data_count=Count('data')
         ).filter(
             data_count__gt=0,
-            created_at__lt=self.created_at,
             branch_name=self.branch_name,
             gerrit_change_number=None,
             manifest__reduced__hash=self.manifest.reduced.hash
