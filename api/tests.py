@@ -866,3 +866,20 @@ class TestJobData(APITestCase):
 
         response = self.client.get('/api/testjobdata/0001')
         self.assertEqual(401, response.status_code)
+
+
+class ManifestDataTest(APITestCase):
+
+    def setUp(self):
+        user = User.objects.create_superuser('test', 'email@test.com', 'test')
+        self.client.force_authenticate(user=user)
+
+    def test_download_xml(self):
+        m = G(models.Manifest, manifest=MINIMAL_XML)
+        response = self.client.get('/api/manifest_data/%s/download/' % m.id)
+
+        self.assertEqual(MINIMAL_XML, response.content)
+        self.assertEqual('text/xml', response['Content-Type'])
+
+        disposition = 'attachment; filename="%s.xml"' % m.manifest_hash
+        self.assertEqual(disposition, response['Content-Disposition'])

@@ -48,7 +48,16 @@
                   <td>
                     <a ng-href="#/build/{{ result.id }}">#{{ result.build_id }} / {{ result.name }}</a>
                   </td>
-                  <td class="text-right">{{ manifest.manifest_hash }}</td>
+                  <td class="text-right">
+                    <small>
+                      <a class='label label-info' href='/api/manifest_data/{{manifest.id}}/download/'>
+                        <i class='fa fa-download'></i>
+                        XML
+                      </a>
+                    </small>
+                    &nbsp;
+                    {{ manifest.manifest_hash }}
+                  </td>
                   <td class="text-right">{{ result.gerrit_change_number }}</td>
                   <td class="text-right">{{ result.gerrit_patchset_number }}</td>
                   <td class="text-right">{{ result.created_at }}</td>

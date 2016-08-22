@@ -110,6 +110,12 @@ class ManifestSerializer(serializers.ModelSerializer):
         model = benchmarks_models.Manifest
 
 
+class ManifestDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ("id", "manifest_hash", "manifest")
+        model = benchmarks_models.Manifest
+
+
 class ManifestReducedSerializer(serializers.ModelSerializer):
     manifests = ManifestSerializer(many=True, read_only=True)
 

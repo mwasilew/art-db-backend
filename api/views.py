@@ -75,6 +75,16 @@ class ManifestViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ('manifest_hash', 'reduced__hash')
     filter_fields = ('manifest_hash', 'reduced__hash')
 
+class ManifestDataViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = benchmarks_models.Manifest.objects
+    serializer_class = serializers.ManifestDataSerializer
+
+    @detail_route()
+    def download(self, request, pk=None):
+        manifest = self.get_object()
+        response = HttpResponse(manifest.manifest, content_type='text/xml')
+        response['Content-Disposition'] = 'attachment; filename="%s.xml"' % manifest.manifest_hash
+        return response
 
 class ManifestReducedViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [DjangoModelPermissions]
