@@ -7,6 +7,7 @@ from . import views
 router = routers.DefaultRouter()
 router.register(r'token', views.TokenViewSet)
 router.register(r'manifest', views.ManifestViewSet)
+router.register(r'manifest_data', views.ManifestDataViewSet)
 router.register(r'manifest_reduced', views.ManifestReducedViewSet)
 router.register(r'result', views.ResultViewSet)
 router.register(r'resultdata', views.ResultDataViewSet)

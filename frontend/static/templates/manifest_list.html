@@ -20,6 +20,12 @@
       <tr ng-repeat-start="item in page.results">
         <td>
           <h4>
+            <small class='pull-right'>
+              <a class='label label-info' href='/api/manifest_data/{{item.id}}/download/'>
+                <i class='fa fa-download'></i>
+                XML
+              </a>
+            </small>
             <span title="manifest hash">{{ item.manifest_hash }}</span>
             <small title="reduced hash">{{ item.reduced_hash }}</small>
           </h4>
@@ -48,6 +54,8 @@
               </tr>
             </tbody>
           </table>
+          <br/>
+          <br/>
         </td>
       </tr>
     </tbody>
