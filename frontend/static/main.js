@@ -284,6 +284,8 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
         })).then(function(data_by_env) {
             $scope.drawChart($scope.benchmark, $scope.branch, data_by_env);
         });
+
+        $scope.disabled = false;
     };
 
     $scope.drawChart = function(benchmark, branch, data_by_environment) {
@@ -415,8 +417,6 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                     },
                     series: series
                 });
-
-        $scope.disabled = false;
     }
 
     $scope.toggleEnvironment = function(env_id) {
