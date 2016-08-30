@@ -345,8 +345,14 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                         });
         });
 
+        var charts = document.getElementById('charts');
+
+        var this_chart = document.createElement('div');
+        this_chart.innerHTML = '<i class="fa fa-cog fa-spin"></i>';
+        charts.appendChild(this_chart);
+
         Highcharts.chart(
-                document.getElementById('charts'), {
+                this_chart, {
                     chart: {
                         zoomType: "xy"
                     },
