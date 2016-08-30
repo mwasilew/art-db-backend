@@ -453,12 +453,13 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
         $scope.branchList = response[0].data;
 
         var benchmarkList = [];
-        benchmarkList.push({ name: "/", label: 'Overall summary', type: 'root_benchmark_group' });
+        benchmarkList.push({ name: "/", label: 'Overall summary', padding: '', type: 'root_benchmark_group' });
         _.each(_.groupBy(response[1].data, 'group'), function(benchmarks, group) {
-            benchmarkList.push({ name: group, label: '  ' + group + ' (summary)', type: 'benchmark_group' });
+            benchmarkList.push({ name: group, label: group + ' (summary)', padding: '  ', type: 'benchmark_group' });
             _.each(benchmarks, function(benchmark) {
                 benchmark.type = 'benchmark';
-                benchmark.label = '    ' + benchmark.name;
+                benchmark.label = benchmark.name;
+                benchmark.padding = '    ';
                 benchmarkList.push(benchmark);
             });
         });
