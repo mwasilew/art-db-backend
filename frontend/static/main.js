@@ -281,10 +281,12 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
             });
             env_params.environment = env;
             return $http.get(stats_endpoint, { params: env_params });
-        })).then($scope.drawChart);
+        })).then(function(data_by_env) {
+            $scope.drawChart($scope.benchmark, $scope.branch, data_by_env);
+        });
     };
 
-    $scope.drawChart = function(data_by_environment) {
+    $scope.drawChart = function(benchmark, branch, data_by_environment) {
         var series = [];
         var i = -1;
 
@@ -347,7 +349,7 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                         zoomType: "xy"
                     },
                     title: {
-                        text: $scope.benchmark.label + ' on branch ' + $scope.branch.branch_name
+                        text: benchmark.label + ' on branch ' + branch.branch_name
                     },
                     xAxis: {
                         type: 'datetime',
