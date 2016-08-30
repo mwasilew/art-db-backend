@@ -288,6 +288,16 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
         $scope.disabled = false;
     };
 
+    $scope.charts = [];
+
+    $scope.deleteChart = function(chart_id) {
+        console.log($scope.charts);
+        _.remove($scope.charts, function(item) { return item.id == chart_id; });
+        console.log($scope.charts);
+        var el = document.getElementById(chart_id);
+        el.remove();
+    }
+
     $scope.drawChart = function(benchmark, branch, data_by_environment) {
         var series = [];
         var i = -1;
@@ -348,8 +358,11 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
         var charts = document.getElementById('charts');
 
         var this_chart = document.createElement('div');
+        this_chart.className = 'panel panel-default';
+        this_chart.id = 'chart-' + ($scope.charts.length + 1);
         this_chart.innerHTML = '<i class="fa fa-cog fa-spin"></i>';
         charts.appendChild(this_chart);
+        $scope.charts.push({"id": this_chart.id, "name": benchmark.label + '/' + branch.branch_name});
 
         Highcharts.chart(
                 this_chart, {

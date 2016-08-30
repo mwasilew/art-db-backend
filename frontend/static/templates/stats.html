@@ -58,6 +58,16 @@
           <div class='panel-body'>
             <select ng-disabled="disabled" ng-model="benchmark" class="form-control"
                     ng-change="change()" ng-options="item.padding + item.label for item in benchmarkList"></select>
+
+            <hr/>
+
+            <ul class='list-group'>
+              <li class='list-group-item' ng-repeat='chart in charts'>
+                {{chart.name}}
+                <a class='pull-right label label-default' ng-click='deleteChart(chart.id)'><strong>×</strong></a>
+              </li>
+            </ul>
+
           </div>
         </div>
 
@@ -68,7 +78,6 @@
     </div>
   </div>
   <div class="col-md-9">
-    <h1>{{chart_title}}</h1>
     <div id='charts'>
     </div>
   </div>
