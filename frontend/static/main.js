@@ -281,33 +281,38 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
             });
             env_params.environment = env;
             return $http.get(stats_endpoint, { params: env_params });
-        })).then(function(multiple_responses) {
-            var series = [];
-            var i = -1;
-            _.each(multiple_responses, function(response) {
+        })).then($scope.drawChart);
+    };
 
-                var env = response.config.params.environment;
-                _.each(_.groupBy(response.data, "name"), function(data, name) {
+    $scope.drawChart = function(data_by_environment) {
+        var series = [];
+        var i = -1;
 
-                    i++;
+        _.each(data_by_environment, function(response) {
 
-                    // data itself
-                    series.push({
-                        name: name + ' (' + env + ')',
-                        type: 'spline',
-                        color: Highcharts.getOptions().colors[i],
-                        zIndex: 1,
-                        data: _.map(data, function(point) {
-                            return {
-                                x: Date.parse(point.created_at),
-                                y: point.measurement,
-                                min: _.min(point.values),
-                                max: _.max(point.values),
-                                result_id: point.result,
-                                build_id: point.build_id
-                            };
-                        })
-                    });
+            var env = response.config.params.environment;
+
+            _.each(_.groupBy(response.data, "name"), function(data, name) {
+
+                i++;
+
+                // data itself
+                series.push({
+                    name: name + ' (' + env + ')',
+                                  type: 'spline',
+                                  color: Highcharts.getOptions().colors[i],
+                                  zIndex: 1,
+                                  data: _.map(data, function(point) {
+                                      return {
+                                          x: Date.parse(point.created_at),
+                                          y: point.measurement,
+                                          min: _.min(point.values),
+                                          max: _.max(point.values),
+                                          result_id: point.result,
+                                          build_id: point.build_id
+                                      };
+                                  })
+                                  });
 
                     if (data[0].values == undefined) {
                         // data does not have multiple values, skip the range
@@ -318,25 +323,25 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                     // range of values, based on the standard deviation
                     series.push({
                         name: name + ' range (' + env + ')',
-                        type: 'areasplinerange',
-                        color: Highcharts.getOptions().colors[i],
-                        lineWidth: 0,
-                        linkedTo: ':previous',
-                        fillOpacity: 0.3,
-                        zIndex: 0,
-                        data: _.map(data, function(point) {
-                            return [
-                                Date.parse(point.created_at),
-                                _.min(point.values),
-                                _.max(point.values)
-                            ]
-                        })
-                    });
+                                      type: 'areasplinerange',
+                                      color: Highcharts.getOptions().colors[i],
+                                      lineWidth: 0,
+                                      linkedTo: ':previous',
+                                      fillOpacity: 0.3,
+                                      zIndex: 0,
+                                      data: _.map(data, function(point) {
+                                          return [
+                                              Date.parse(point.created_at),
+                                              _.min(point.values),
+                                              _.max(point.values)
+                                          ]
+                                      })
+                                      });
 
-                });
-            });
+                        });
+        });
 
-            Highcharts.chart(
+        Highcharts.chart(
                 document.getElementById('charts'), {
                     chart: {
                         zoomType: "xy"
@@ -366,24 +371,24 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                             var range = '';
                             if (this.min && this.max) {
                                 range = _.join([
-                                    '<br/>',
-                                    'Range: ',
-                                    this.min.toFixed(2),
-                                    ' — ',
-                                    this.max.toFixed(2)
+                                        '<br/>',
+                                        'Range: ',
+                                        this.min.toFixed(2),
+                                        ' — ',
+                                        this.max.toFixed(2)
                                 ], '');
                             }
                             var html = [
                                 '<br/><p><em>',
                                 '<span style="color: ' + this.series.color + '">' + this.series.name + '</span></em><br/> ',
                                 '<strong>',
-                                'Mean: ' + y,
-                                '</strong>',
-                                range,
-                                '</p>',
-                                '<p>',
-                                '<a href="#/build/' + this.result_id + '">See details for build #' + this.build_id + '</a>',
-                                '</p>'
+                            'Mean: ' + y,
+                            '</strong>',
+                            range,
+                            '</p>',
+                            '<p>',
+                            '<a href="#/build/' + this.result_id + '">See details for build #' + this.build_id + '</a>',
+                            '</p>'
                             ]
                             return _.join(html, '');
                         }
@@ -409,9 +414,8 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                     series: series
                 });
 
-            $scope.disabled = false;
-        });
-    };
+        $scope.disabled = false;
+    }
 
     $scope.toggleEnvironment = function(env_id) {
         for (var i = 0; i < $scope.environments.length; i++) {
