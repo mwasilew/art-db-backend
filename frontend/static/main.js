@@ -336,15 +336,13 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                 });
             });
 
-            var envs = _.join($scope.get_environment_ids(), ' x ');
-
             Highcharts.chart(
                 document.getElementById('charts'), {
                     chart: {
                         zoomType: "xy"
                     },
                     title: {
-                        text: $scope.benchmark.label + ' on branch ' + $scope.branch.branch_name + '; ' + envs
+                        text: $scope.benchmark.label + ' on branch ' + $scope.branch.branch_name
                     },
                     xAxis: {
                         type: 'datetime',
