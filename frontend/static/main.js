@@ -242,6 +242,23 @@ app.controller('BuildDetail', ['$scope', '$http', '$routeParams', '$q', '$routeP
 
 }]);
 
+
+function forceArray(obj) {
+    if (obj) {
+      if (Array.isArray(obj)) {
+          return obj;
+      } else {
+          return [obj];
+      }
+    } else {
+        return [];
+    }
+}
+
+function slug(s) {
+    return s.toLowerCase().replace(/\W+/g, '-').replace(/-$/, '');
+}
+
 app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$routeParams', '$location', function($scope, $http, $routeParams, $timeout, $q, $routeParams, $location) {
 
     $scope.get_environment_ids = function() {
@@ -251,51 +268,67 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
 
     $scope.change = function() {
 
-        var params = {
-            branch: $scope.branch && $scope.branch.branch_name,
-            environment: $scope.get_environment_ids()
-        };
-        var stats_endpoint;
-        if ($scope.benchmark) {
-            if ($scope.benchmark.type == 'benchmark_group' || $scope.benchmark.type == 'root_benchmark_group') {
-                stats_endpoint = '/api/benchmark_group_summary/';
-                params.benchmark_group = $scope.benchmark.name;
-            } else {
-                stats_endpoint = '/api/stats/';
-                params.benchmark = $scope.benchmark.name;
-            }
-        }
-
-        if (!(params.branch && params.environment.length > 0 && (params.benchmark || params.benchmark_group))) {
-            return;
-        }
-
         $scope.disabled = true;
 
-        $location.search(params);
+        for (var i = 0; i < $scope.benchmarks.length; i++) {
+            var benchmark = $scope.benchmarks[i];
 
-        $q.all(_.map($scope.get_environment_ids(), function(env) {
-            var env_params = {};
-            _.each(params, function(v, k) {
-                env_params[k] = v;
+            // skip benchmarks that were already graphed
+            if (benchmark.graphed) {
+                continue;
+            }
+
+            var params = {
+                branch: $scope.branch.branch_name,
+                environment: $scope.get_environment_ids()
+            };
+
+            var stats_endpoint;
+            if (benchmark.type == 'benchmark_group' || benchmark.type == 'root_benchmark_group') {
+                stats_endpoint = '/api/benchmark_group_summary/';
+                params.benchmark_group = benchmark.name;
+            } else {
+                stats_endpoint = '/api/stats/';
+                params.benchmark = benchmark.name;
+            }
+
+            $q.all(_.map($scope.get_environment_ids(), function(env) {
+                var env_params = {};
+                _.each(params, function(v, k) {
+                    env_params[k] = v;
+                });
+                env_params.environment = env;
+                return $http.get(stats_endpoint, { params: env_params });
+            })).then(function(data_by_env) {
+                var bname = data_by_env[0].config.params.benchmark ||
+                    data_by_env[0].config.params.benchmark_group;
+
+                var benchmark = _.find($scope.benchmarks, ['name', bname]);
+                $scope.drawChart(benchmark, $scope.branch, data_by_env);
+                benchmark.graphed = true;
             });
-            env_params.environment = env;
-            return $http.get(stats_endpoint, { params: env_params });
-        })).then(function(data_by_env) {
-            $scope.drawChart($scope.benchmark, $scope.branch, data_by_env);
+        }
+
+        $location.search({
+            branch: $scope.branch.branch_name,
+            environment: $scope.get_environment_ids(),
+            benchmark: _.map($scope.benchmarks, 'name')
         });
 
         $scope.disabled = false;
     };
 
-    $scope.charts = [];
+    $scope.addBenchmark = function() {
+        var benchmark = $scope.benchmark;
+        $scope.benchmarks.push(benchmark);
+        $scope.change();
+        $scope.benchmark = undefined;
+    }
 
-    $scope.deleteChart = function(chart_id) {
-        console.log($scope.charts);
-        _.remove($scope.charts, function(item) { return item.id == chart_id; });
-        console.log($scope.charts);
-        var el = document.getElementById(chart_id);
-        el.remove();
+    $scope.removeBenchmark = function(benchmark) {
+        document.getElementById('chart-' + slug(benchmark.label)).remove();
+        _.remove($scope.benchmarks, benchmark);
+        $scope.change();
     }
 
     $scope.drawChart = function(benchmark, branch, data_by_environment) {
@@ -359,10 +392,9 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
 
         var this_chart = document.createElement('div');
         this_chart.className = 'panel panel-default';
-        this_chart.id = 'chart-' + ($scope.charts.length + 1);
+        this_chart.id = 'chart-' + slug(benchmark.label);
         this_chart.innerHTML = '<i class="fa fa-cog fa-spin"></i>';
         charts.appendChild(this_chart);
-        $scope.charts.push({"id": this_chart.id, "name": benchmark.label + '/' + branch.branch_name});
 
         Highcharts.chart(
                 this_chart, {
@@ -484,13 +516,13 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
         if ($routeParams.branch || $routeParams.benchmark || $routeParams.environment) {
             defaults = {
                 branch: $routeParams.branch,
-                benchmark: $routeParams.benchmark || $routeParams.benchmark_group,
-                environments: $routeParams.environment || []
+                benchmarks: forceArray($routeParams.benchmark),
+                environments: forceArray($routeParams.environment)
             };
         } else {
             defaults = {
                 branch: 'master',
-                benchmark: '/',
+                benchmarks: ['/'],
                 environments: _.map($scope.environmentList, function(env) {
                     return env.identifier;
                 })
@@ -504,9 +536,9 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
             env.selected = defaults.environments.indexOf(env.identifier) > -1;
             return env;
         });
-        if (defaults.benchmark) {
-            $scope.benchmark = _.find($scope.benchmarkList, ['name', defaults.benchmark]);
-        }
+        $scope.benchmarks = _.map(defaults.benchmarks, function(b) {
+            return _.find($scope.benchmarkList, ['name', b])
+        });
 
     }).then($scope.change);
 
