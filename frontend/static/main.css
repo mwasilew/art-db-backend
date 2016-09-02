@@ -106,3 +106,9 @@ input, select, button, .btn {
 .chart {
     min-height: 500px;
 }
+
+.benchmark-selected {
+    border-bottom: 1px solid #eeeeec;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+}

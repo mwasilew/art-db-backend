@@ -48,26 +48,17 @@
 
         <div class='panel panel-default' ng-show='get_environment_ids().length > 0'>
           <div class='panel-heading'>
-            <span ng-show='benchmark'>
-              Benchmarks
-            </span>
-            <span ng-hide='benchmark'>
-              <strong>Add benchmark</strong>
-            </span>
+            Benchmarks
           </div>
           <div class='panel-body'>
+            <div class='benchmark-selected' ng-repeat='benchmark in benchmarks'>
+              <small>{{benchmark.label}}</small>
+              <a class='pull-right label label-default' ng-click='removeBenchmark(benchmark)'><strong>×</strong></a>
+            </div>
+
+            Add benchmark:
             <select ng-disabled="disabled" ng-model="benchmark" class="form-control"
                     ng-change="addBenchmark()" ng-options="item.padding + item.label for item in benchmarkList"></select>
-
-            <hr/>
-
-            <ul class='list-group'>
-              <li class='list-group-item' ng-repeat='benchmark in benchmarks'>
-                {{benchmark.label}}
-                <a class='pull-right label label-default' ng-click='removeBenchmark(benchmark)'><strong>×</strong></a>
-              </li>
-            </ul>
-
           </div>
         </div>
 
