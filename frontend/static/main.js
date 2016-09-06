@@ -331,11 +331,11 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
         $scope.change();
     }
 
-    $scope.drawChart = function(benchmark, branch, data_by_environment) {
+    $scope.drawChart = function(benchmark, branch, env_data) {
         var series = [];
         var i = -1;
 
-        _.each(data_by_environment, function(response) {
+        _.each(env_data, function(response) {
 
             var env = response.config.params.environment;
 
