@@ -1,4 +1,8 @@
-<i ng-show="!build" class="fa fa-cog fa-spin"></i>
+<i ng-show="!build && !error" class="fa fa-cog fa-spin"></i>
+
+<div id='error' ng-show='error'>
+  <h1>{{error.status}} {{error.statusText}}</h1>
+</div>
 
 <div id="build-detail" ng-show="build">
 
