@@ -278,6 +278,13 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                 continue;
             }
 
+            var charts = document.getElementById('charts');
+            var this_chart = document.createElement('div');
+            this_chart.className = 'chart panel panel-default';
+            this_chart.id = 'chart-' + slug(benchmark.label);
+            this_chart.innerHTML = '<i class="fa fa-cog fa-spin"></i>';
+            charts.appendChild(this_chart);
+
             var params = {
                 branch: $scope.branch.branch_name,
                 environment: $scope.get_environment_ids()
@@ -304,7 +311,12 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                     data_by_env[0].config.params.benchmark_group;
 
                 var benchmark = _.find($scope.benchmarks, ['name', bname]);
-                $scope.drawChart(benchmark, $scope.branch, data_by_env);
+                var target_id = 'chart-' + slug(benchmark.label);
+                var target = document.getElementById(target_id);
+
+                $scope.drawChart(benchmark, $scope.branch, data_by_env, target);
+
+
                 benchmark.graphed = true;
             });
         }
@@ -331,7 +343,7 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
         $scope.change();
     }
 
-    $scope.drawChart = function(benchmark, branch, env_data) {
+    $scope.drawChart = function(benchmark, branch, env_data, element) {
         var series = [];
         var i = -1;
 
@@ -388,16 +400,8 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                         });
         });
 
-        var charts = document.getElementById('charts');
-
-        var this_chart = document.createElement('div');
-        this_chart.className = 'panel panel-default';
-        this_chart.id = 'chart-' + slug(benchmark.label);
-        this_chart.innerHTML = '<i class="fa fa-cog fa-spin"></i>';
-        charts.appendChild(this_chart);
-
         Highcharts.chart(
-                this_chart, {
+                element, {
                     chart: {
                         zoomType: "xy"
                     },
