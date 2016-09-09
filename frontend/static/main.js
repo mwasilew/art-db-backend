@@ -183,10 +183,13 @@ app.controller('BuildDetail', ['$scope', '$http', '$routeParams', '$q', '$routeP
         $http.get('/api/result/' + $routeParams.buildId + '/benchmarks_compare/'),
         $http.get('/api/result/' + $routeParams.buildId + '/baseline/')
     ]).then(function(response) {
+        $scope.error = null;
         $scope.build = response[0].data;
         $scope.benchmarks = response[1].data;
         $scope.benchmarksCompare = response[2].data;
         $scope.baseline = response[3].data;
+    }).catch(function(error) {
+        $scope.error = error;
     });
 
     $scope.resubmit = function(testJob) {
