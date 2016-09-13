@@ -174,8 +174,17 @@ class ResultViewSet(viewsets.ModelViewSet):
                 .prefetch_related('test_jobs'))
     serializer_class = serializers.ResultSerializer
 
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = (filters.SearchFilter, filters.DjangoFilterBackend)
     search_fields = ('branch_name',
+                     'name',
+                     'build_id',
+                     'gerrit_change_number',
+                     'gerrit_patchset_number',
+                     'gerrit_change_url',
+                     'gerrit_change_id',
+                     'manifest__manifest_hash',
+                     'manifest__reduced__hash')
+    filter_fields = ('branch_name',
                      'name',
                      'build_id',
                      'gerrit_change_number',
@@ -312,6 +321,15 @@ class TestJobViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.TestJobSerializer
 
     lookup_value_regex = "[^/]+"  # LAVA ids are 000.0
+
+    filter_backends = (filters.SearchFilter, filters.DjangoFilterBackend)
+    filter_fields = ('result',
+                     'initialized',
+                     'completed',
+                     'testrunnerclass',
+                     'status')
+    search_fields = ('id',
+                     'name')
 
     @detail_route()
     def resubmit(self, request, pk=None):
