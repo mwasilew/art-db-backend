@@ -213,7 +213,7 @@ class ResultViewSet(viewsets.ModelViewSet):
         for test_job in test_jobs:
             rdata = [ r for r in result_data if r.test_job_id == test_job.id ]
             data.append({
-                "environment": test_job.environment.identifier,
+                "environment": test_job.environment and test_job.environment.identifier,
                 "data": serializers.ResultDataSerializer(rdata, many=True).data
             })
 
