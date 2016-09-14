@@ -36,6 +36,8 @@ class MetadataParser(object):
                     self.device = data[key]
                 elif 'role' in data and 'device_type' in data and data['role'] == 'target':
                     self.device = data['device_type']
+                elif not 'role' in data and 'device_type' in data:
+                    self.device = data['device_type']
                 else:
                     self.__extract_metadata_recursively__(data[key])
         elif isinstance(data, list):
