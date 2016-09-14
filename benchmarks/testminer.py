@@ -306,6 +306,9 @@ class GenericLavaTestSystem(TestSystem):
         else:
             raise LavaServerException(self.xmlrpc_url, response.status_code)
 
+    def get_environment_name(self, metadata):
+        return metadata.get('device')
+
 
 class LavaTestSystem(GenericLavaTestSystem):
     REPO_HOME = "/tmp/repos" # change it to cofigurable parameter
