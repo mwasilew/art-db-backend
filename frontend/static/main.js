@@ -549,6 +549,9 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
 
         if (defaults.branch) {
             $scope.branch = _.find($scope.branchList, ['branch_name', defaults.branch]);
+            if (! $scope.branch) {
+                $scope.branch = $scope.branchList[0];
+            }
         }
         $scope.environments = _.map($scope.environmentList, function(env) {
             env.selected = defaults.environments.indexOf(env.identifier) > -1;
