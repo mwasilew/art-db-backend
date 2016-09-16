@@ -346,8 +346,10 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
 
     $scope.addBenchmark = function() {
         var benchmark = $scope.benchmark;
-        $scope.benchmarks.push(benchmark);
-        $scope.updateCharts();
+        if (! _.find($scope.benchmarks, benchmark)) {
+            $scope.benchmarks.push(benchmark);
+            $scope.updateCharts();
+        }
         $scope.benchmark = undefined;
     }
 
