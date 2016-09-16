@@ -110,7 +110,7 @@ class BenchmarkProgressTest(TestCase):
         job2.data = get_file("now.json")
         job2.save()
 
-        progress = Progress("myproject", "master", "myenv1", job1, job2)
+        progress = Progress("myproject", "master", env, job1, job2)
         return [progress]
 
     def test_benchmark_progress_daily(self):

@@ -1,3 +1,6 @@
+from collections import OrderedDict
+
+
 from django.conf import settings
 from django.core.mail import send_mail, EmailMessage
 from django.template.loader import render_to_string
@@ -6,12 +9,18 @@ from benchmarks import progress
 from benchmarks.comparison import render_comparison
 
 
+def render_results(results):
+    comparisons = {p: render_comparison(p.before, p.after) for p in results}
+    key = lambda t: t[0].environment.identifier
+    return OrderedDict(sorted(comparisons.items(), key=key))
+
+
 def result_progress(current, baseline):
     results = progress.get_progress_between_results(current, baseline)
     _send_results(
         current=current,
         template='result_progress.html',
-        comparisons={p: render_comparison(p.before, p.after) for p in results},
+        comparisons=render_results(results),
         baseline=current.baseline,
         header="Art - Benchmark Progress for %s" % current.name,
         subject_template="%s [%s]",
@@ -89,13 +98,11 @@ def daily_benchmark_progress(now, then, results):
     header = "Art - Daily Benchmark Progress"
     time = now.strftime('%d %m %Y')
 
-    comparisons = {p: render_comparison(p.before, p.after) for p in results}
-
     context = {
         "now": now,
         "header": header,
         "time": time,
-        "comparisons": comparisons,
+        "comparisons": render_results(results),
     }
 
     _benchmark_progress(context)
@@ -104,13 +111,12 @@ def daily_benchmark_progress(now, then, results):
 def monthly_benchmark_progress(now, then, results):
     header = "Art - Monthly Benchmark Progress"
     time = now.strftime('%B %Y')
-    comparisons = {p: render_comparison(p.before, p.after) for p in results}
 
     context = {
         "now": now,
         "header": header,
         "time": time,
-        "comparisons": comparisons,
+        "comparisons": render_results(results),
     }
 
     _benchmark_progress(context)
@@ -120,13 +126,11 @@ def weekly_benchmark_progress(now, then, results):
     header = "Art - Weekly Benchmark Progress"
     time = now.strftime('Week %W %Y')
 
-    comparisons = {p: render_comparison(p.before, p.after) for p in results}
-
     context = {
         "now": now,
         "header": header,
         "time": time,
-        "comparisons": comparisons,
+        "comparisons": render_results(results),
     }
 
     _benchmark_progress(context)
