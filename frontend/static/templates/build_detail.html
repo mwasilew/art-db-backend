@@ -41,6 +41,9 @@
       <a ng-show="baseline" ng-href="{{ baseline.permalink }}" target="_blank">
         #{{ baseline.id }}
       </a>
+      <a ng-show="baseline" ng-href="#/builds/compare/?from={{baseline.id}}&to={{build.id}}" target="_blank">
+        (compare)
+      </a>
       <em ng-hide="baseline">No baseline build</em>
     </dd>
   </dl>

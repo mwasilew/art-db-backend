@@ -57,11 +57,11 @@ nav .navbar-brand {
     border-bottom: 1px solid #eee;
 }
 
-#build-detail table.benchmarks {
+table.benchmarks {
     font-size: 13px;
 }
 
-#build-detail table tbody>tr>td {
+table tbody>tr>td {
     vertical-align: middle;
 }
 

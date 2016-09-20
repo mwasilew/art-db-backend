@@ -1,0 +1,117 @@
+<h1>
+  Compare builds
+  <span ng-show='buildFrom && buildTo'>
+    <a href='#/build/{{buildFrom.id}}'>#{{buildFrom.id}}</a>
+    and
+    <a href='#/build/{{buildTo.id}}'>#{{buildTo.id}}</a>
+  </span>
+</h1>
+
+<form class='form-inline'>
+
+  <div class="form-group">
+    <label for="compareFrom">Compare:</label>
+    <input
+      type='text'
+      name='from'
+      class="form-control"
+      id="compareFrom"
+      ng-model='compareFrom'
+      placeholder='build number'
+    />
+  </div>
+
+  <div class="form-group">
+    <label for="compareTo">to:</label>
+    <input
+      type='text'
+      name='from'
+      class="form-control"
+      id="compareTo"
+      ng-model='compareTo'
+      placeholder='build number'
+    />
+  </div>
+
+  <input
+    type='button'
+    class='btn btn-primary'
+    value='Compare'
+    ng-click='compare()'
+  />
+
+</form>
+
+<i ng-show='loading && !ready' class='fa fa-cog fa-spin'></i>
+
+<div ng-show="ready">
+
+  <h2>Benchmarks</h2>
+
+  <form>
+    <div class="form-group">
+      <input type="text" ng-model="queryBenchmarks" class="form-control input-sm" placeholder="filter">
+    </div>
+    <div class='checkbox'>
+      <input id='show-boring' type='checkbox' ng-model='showBoring'/>
+      <label for='show-boring'>Show non-significant results</label>
+    </div>
+
+  </form>
+
+  <table ng-repeat='comparison in comparisons' class="table table-bordered benchmarks">
+    <thead>
+      <tr class='active'>
+        <th colspan='4'>
+          {{comparison.environment}}
+          <a ng-click='hide = !hide' class='label label-default'>
+            <i ng-hide='hide' class='fa fa-minus'></i>
+            <i ng-hide='!hide' class='fa fa-plus'></i>
+          </a>
+        </th>
+      </tr>
+      <tr ng-hide='hide'>
+        <th style="width: 60%">name (sample size)</th>
+        <th class="text-right">current (stdev)</th>
+        <th class="text-right">previous (stdev)</th>
+        <th class="text-right">
+          change
+          <a class='label label-default' ng-click='reverse = false' ng-show='reverse'  ><i class='fa fa-sort-asc'></i></a>
+          <a class='label label-default' ng-click='reverse = true'  ng-show='!reverse' ><i class='fa fa-sort-desc'></i></a>
+        </th>
+      </tr>
+    </thead>
+    <tbody ng-hide='hide'>
+
+      <tr ng-repeat='item in comparison.data | filter:filterBenchmarksCompared(queryBenchmarks) | orderBy:"change":reverse '
+            ng-class="getChangeClass(item.change)" ng-show='showBoring || getChangeClass(item.change) != ""'>
+        <td>
+          {{ item.current.benchmark }} / <b>{{ item.current.name }}</b>
+          ({{ item.current.values.length }})
+        </td>
+        <td class="text-right">
+          {{ item.current.measurement.toFixed(2) }}<br/>
+          ({{ item.current.stdev.toFixed(2) }})
+        </td>
+        <td class="text-right">
+          {{ item.previous.measurement ? item.previous.measurement.toFixed(2) : "N/A" }}<br/>
+          {{ item.previous.stdev ? "(" + item.previous.stdev.toFixed(2) + ")": "" }}
+        </td>
+        <td class="text-right">
+          <b>
+            <span ng-if="item.change != null">
+              {{ item.change.toFixed(2) }} %
+            </span>
+          </b>
+          <span ng-if="item.change === null">
+            N/A
+          </span>
+        </td>
+      </tr>
+
+    </tbody>
+  </table>
+</div>
+
+
+</div>

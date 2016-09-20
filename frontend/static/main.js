@@ -31,6 +31,11 @@ app.config(['$routeProvider', function($routeProvider) {
             controller: 'BuildList',
             reloadOnSearch: false
         })
+        .when('/builds/compare/', {
+            templateUrl: '/static/templates/compare.html',
+            controller: 'CompareBuilds',
+            reloadOnSearch: false
+        })
         .when('/build/:buildId', {
             templateUrl: '/static/templates/build_detail.html',
             controller: 'BuildDetail',
@@ -261,6 +266,60 @@ app.controller('BuildDetail', ['$scope', '$http', '$routeParams', '$q', '$routeP
         if (criteria > 3) {
             return "danger";
         }
+    }
+
+}]);
+
+app.controller('CompareBuilds', ['$scope', '$http', '$routeParams', '$q', '$routeParams', '$location', function($scope, $http, $routeParams, $q, $routeParams, $location) {
+
+    $scope.filterBenchmarksCompared = function(criteria) {
+        $location.search('benchmarks', criteria || null);
+
+        return function( item ) {
+            if (!criteria) {
+                return true;
+            }
+            if (item.current.benchmark.toLowerCase().indexOf(criteria.toLowerCase()) != -1 ||
+                item.current.name.toLowerCase().indexOf(criteria.toLowerCase()) != -1) {
+                return true;
+            }
+            return false;
+        };
+    };
+
+    $scope.getChangeClass = function(criteria) {
+        if (criteria < -3) {
+            return "success";
+        }
+        if (criteria >= -3 && criteria <= 3) {
+            return "";
+        }
+        if (criteria > 3) {
+            return "danger";
+        }
+    }
+
+    $scope.compare = function() {
+        $location.search({'from': $scope.compareFrom, 'to': $scope.compareTo});
+        $scope.loading = true;
+        $scope.ready = false;
+        $q.all([
+            $http.get('/api/result/' + $scope.compareFrom + '/'),
+            $http.get('/api/result/' + $scope.compareTo + '/'),
+            $http.get('/api/result/' + $scope.compareTo + '/benchmarks_compare/?comparison_base=' + $scope.compareFrom),
+        ]).then(function (response) {
+            $scope.ready = true;
+            $scope.buildFrom = response[0].data;
+            $scope.buildTo = response[1].data;
+            $scope.comparisons = response[2].data;
+        });
+    }
+    if ($routeParams.from && $routeParams.to) {
+        $scope.compareFrom = $routeParams.from;
+        $scope.compareTo = $routeParams.to;
+        $scope.compare();
+    } else {
+        $location.search({});
     }
 
 }]);
