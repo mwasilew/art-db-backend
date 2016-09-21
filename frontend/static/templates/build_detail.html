@@ -6,13 +6,15 @@
 
 <div id="build-detail" ng-show="build">
 
-  <h1 class="md-display-1"> <small>{{ build.created_at }}</small><br/>#{{ build.build_id }} {{ build.name }}</h1>
+  <h1 class="md-display-1">
+    Build #{{ build.id }}
+    <small>{{ build.created_at}}</small>
+  </h1>
 
-  <hr/>
-  <a ng-href="{{ build.build_url }}" target="_blank">{{ build.build_url }}</a>
   <hr/>
 
   <dl class="dl-horizontal">
+
     <dt>Branch</dt>
     <dd>{{ build.branch_name || "not set"}}</dd>
 
@@ -25,10 +27,19 @@
     <dt>Gerrit Patchset Number</dt>
     <dd>{{ build.gerrit_patchset_number || "not set" }}</dd>
 
+
+    <dt>Original build</dt>
+    <dd>
+    <a ng-href="{{ build.build_url }}" target="_blank">
+      {{build.name}} #{{ build.build_id }}
+      <i class='fa fa-external-link'></i>
+    </a>
+    </dd>
+
     <dt>Baseline</dt>
     <dd>
       <a ng-show="baseline" ng-href="{{ baseline.permalink }}" target="_blank">
-        #{{ baseline.build_id }} {{ baseline.name }}
+        #{{ baseline.id }}
       </a>
       <em ng-hide="baseline">No baseline build</em>
     </dd>

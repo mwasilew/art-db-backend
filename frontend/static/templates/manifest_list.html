@@ -46,7 +46,11 @@
             <tbody>
               <tr ng-repeat="result in item.results">
                 <td>
-                  <a ng-href="#/build/{{ result.id }}">#{{ result.build_id }} / {{ result.name }}</a>
+                  <a ng-href="#/build/{{ result.id }}">
+                    #{{ result.id }}
+                   —
+                   {{ result.name }} #{{ result.build_id }}
+                  </a>
                 </td>
                 <td class="text-right">{{ result.gerrit_change_number }}</td>
                 <td class="text-right">{{ result.gerrit_patchset_number }}</td>

@@ -9,21 +9,23 @@
     </div>
   </form>
 
-  <pagination page="page"></pagination>
-
   <table class="table table-striped">
     <thead>
       <tr>
-        <th style="width: 10%;">#</th>
-        <th style="width: 40%;">build name</th>
-        <th style="width: 35%;">LAVA jobs</th>
-        <th style="width: 15%;">created at</th>
+        <th>#</th>
+        <th>branch</th>
+        <th>build name</th>
+        <th>Test jobs</th>
+        <th>created at</th>
+        <th>Original #</th>
       </tr>
     </thead>
     <tbody>
       <tr ng-repeat="build in page.results">
 
-        <td><a ng-href="#/build/{{ build.id }}">#{{ build.build_id }}</a></td>
+        <td><a ng-href="#/build/{{ build.id }}">#{{ build.id }}</a></td>
+
+        <td><a ng-href="#/build/{{ build.id }}">{{ build.branch_name }}</a></td>
 
         <td>
           <a ng-href="#/build/{{ build.id }}">{{ build.name }}</a> <br/>
@@ -31,13 +33,18 @@
         </td>
 
         <td>
-          <div ng-repeat="test in build.test_jobs">
-            (<a href="{{ test.url }}" target="_blank">#{{ test.id }}</a>
-            <ng-include src="'/static/templates/_test_job_status.html'"></ng-include>)
-      </div>
+          {{build.test_jobs|count_by_status}}
         </td>
 
         <td>{{ build.created_at }}</td>
+
+        <td>
+          <a href="{{build.build_url}}">
+            #{{build.build_id}}
+            <i class='fa fa-external-link'></i>
+          </a>
+        </td>
+
       </tr>
     </tbody>
   </table>

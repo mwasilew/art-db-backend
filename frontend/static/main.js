@@ -141,13 +141,33 @@ app.controller(
      }]
 );
 
+app.filter('count_by_status', function() {
+    return function(test_jobs) {
+        var data = {};
+        _.each(test_jobs, function(t) {
+            var st = t.status;
+            if (data[st]) {
+                data[st] += 1;
+            } else {
+                data[st] = 1
+            }
+        });
+
+        var text = _.map(data, function(count, st) {
+            return st + ': ' + count;
+        })
+
+        return _.join(text, ', ');
+    }
+});
+
 
 app.controller(
     'BuildList',
 
-    ['$scope', '$http', '$routeParams', '$location',
+    ['$scope', '$http', '$routeParams', '$location', 'count_by_statusFilter',
 
-     function($scope, $http, $routeParams, $location) {
+     function($scope, $http, $routeParams, $location, count_by_statusFilter) {
 
          var params = {
              'search': $routeParams.search,
@@ -384,7 +404,6 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                                           min: _.min(point.values),
                                           max: _.max(point.values),
                                           result_id: point.result,
-                                          build_id: point.build_id
                                       };
                                   })
                                   });
@@ -462,7 +481,7 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                             range,
                             '</p>',
                             '<p>',
-                            '<a href="#/build/' + this.result_id + '">See details for build #' + this.build_id + '</a>',
+                            '<a href="#/build/' + this.result_id + '">See details for build #' + this.result_id + '</a>',
                             '</p>'
                             ]
                             return _.join(html, '');
