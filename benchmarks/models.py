@@ -114,7 +114,7 @@ class Result(models.Model):
         if self.__baseline__ != False:
             return self.__baseline__
 
-        self.__baseline__ = self._default_manager.filter(
+        self.__baseline__ = self._default_manager.exclude(id=self.id).filter(
             branch_name=self.branch_name,
             gerrit_change_number=None,
             manifest__reduced__hash=self.manifest.reduced.hash
