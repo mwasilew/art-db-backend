@@ -193,6 +193,21 @@ app.controller(
                      $scope.page = response.data;
                  });
          };
+
+
+         $scope.setCompareFrom = function(id) {
+             $scope.compareFrom = id;
+             return true;
+         }
+
+         $scope.setCompareTo = function(id) {
+             if (id == $scope.compareFrom) {
+                 return false;
+             } else {
+                 $scope.compareTo = id;
+                 return true;
+             }
+         }
      }]
 );
 
