@@ -69,10 +69,6 @@ input, select, button, .btn {
     border-radius: 0 !important;
 }
 
-#build-list form {
-    margin: 30px 0 40px 0;
-}
-
 .checkbox input[type="checkbox"] {
     margin-left: 0px !important;
 }
