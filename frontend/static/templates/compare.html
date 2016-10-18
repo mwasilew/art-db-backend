@@ -42,7 +42,8 @@
 
 </form>
 
-<i ng-show='loading && !ready' class='fa fa-cog fa-spin'></i>
+<i ng-show='loading && !ready && !error' class='fa fa-cog fa-spin'></i>
+<div ng-show='error' class='alert alert-warning'>{{error.statusText}}</div>
 
 <div ng-show="ready">
 

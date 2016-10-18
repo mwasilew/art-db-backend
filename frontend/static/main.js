@@ -315,9 +315,14 @@ app.controller('CompareBuilds', ['$scope', '$http', '$routeParams', '$q', '$rout
     }
 
     $scope.compare = function() {
+        if (!($scope.compareFrom && $scope.compareTo)) {
+            alert('Please inform the build numbers to compare');
+            return;
+        }
         $location.search({'from': $scope.compareFrom, 'to': $scope.compareTo});
         $scope.loading = true;
         $scope.ready = false;
+        $scope.error = null;
         $q.all([
             $http.get('/api/result/' + $scope.compareFrom + '/'),
             $http.get('/api/result/' + $scope.compareTo + '/'),
@@ -327,6 +332,8 @@ app.controller('CompareBuilds', ['$scope', '$http', '$routeParams', '$q', '$rout
             $scope.buildFrom = response[0].data;
             $scope.buildTo = response[1].data;
             $scope.comparisons = response[2].data;
+        }).catch(function(error) {
+            $scope.error = error;
         });
     }
     if ($routeParams.from && $routeParams.to) {
