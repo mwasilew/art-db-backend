@@ -1,6 +1,14 @@
+<div id='build-nav'>
+  <ul class="nav nav-pills nav-pills-sm">
+    <li role="presentation" class="active"><a href="#/builds/">build list</a></li>
+    <li role="presentation"><a href="#/builds/compare/">compare builds</a></li>
+  </ul>
+</div>
+
 <i ng-show="!page" class="fa fa-cog fa-spin"></i>
 
 <div ng-show="page" id="build-list">
+
   <form>
     <div class="form-group">
       <input type="text" ng-change="makeSearch()"

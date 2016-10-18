@@ -98,7 +98,7 @@ input, select, button, .btn {
     border-bottom: 2px #aaa solid;
 }
 
-#manifest-list .nav {
+#manifest-list .nav, #build-nav .nav {
     margin: 10px 0 15px 0;
     background-color: #eee;
 }
