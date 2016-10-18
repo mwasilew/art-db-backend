@@ -208,6 +208,14 @@ app.controller(
                  return true;
              }
          }
+
+         $scope.compare = function() {
+             if (!($scope.compareFrom && $scope.compareTo)) {
+                 alert('Please select builds to compare first');
+                 return;
+             }
+             location.href = '#/builds/compare/?from=' + $scope.compareFrom + '&to=' + $scope.compareTo;
+         }
      }]
 );
 

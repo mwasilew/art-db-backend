@@ -17,6 +17,8 @@
     </div>
   </form>
 
+  <a class='btn btn-primary' ng-click='compare()' title='compare selected builds'>Compare selected builds</a>
+
   <form>
   <table class="table table-striped">
     <thead>
@@ -37,7 +39,6 @@
         <td><input type='radio' name='compareFrom' value='{{build.id}}' ng-click='setCompareFrom(build.id)'/></td>
         <td ng-show='compareFrom'>
           <input ng-show='compareFrom != build.id' type='radio' name='compareTo' value='{{build.id}}' ng-click='setCompareTo(build.id)'/>
-          <a ng-show='compareFrom != build.id && compareTo == build.id' href='#/builds/compare/?from={{compareFrom}}&to={{build.id}}' title='compare selected builds'>compare</a>
         </td>
 
         <td><a ng-href="#/build/{{ build.id }}">#{{ build.id }}</a></td>
@@ -66,6 +67,8 @@
     </tbody>
   </table>
   </form>
+
+  <a class='btn btn-primary' ng-click='compare()' title='compare selected builds'>Compare selected builds</a>
 
   <pagination page="page"></pagination>
 
