@@ -67,6 +67,10 @@
 
   </form>
 
+  <div ng-show='comparisons.length == 0' class='alert alert-warning'>
+    No results to display
+  </div>
+
   <table ng-repeat='comparison in comparisons' class="table table-bordered benchmarks">
     <thead>
       <tr class='active'>
