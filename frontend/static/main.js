@@ -146,33 +146,31 @@ app.controller(
      }]
 );
 
-app.filter('count_by_status', function() {
-    return function(test_jobs) {
-        var data = {};
-        _.each(test_jobs, function(t) {
-            var st = t.status;
-            if (data[st]) {
-                data[st] += 1;
-            } else {
-                data[st] = 1
-            }
-        });
+function count_by_status(test_jobs) {
+    var data = {};
+    _.each(test_jobs, function(t) {
+        var st = t.status;
+        if (data[st]) {
+            data[st] += 1;
+        } else {
+            data[st] = 1
+        }
+    });
 
-        var text = _.map(data, function(count, st) {
-            return st + ': ' + count;
-        })
+    var text = _.map(data, function(count, st) {
+        return st + ': ' + count;
+    })
 
-        return _.join(text, ', ');
-    }
-});
+    return _.join(text, '<br/>');
+}
 
 
 app.controller(
     'BuildList',
 
-    ['$scope', '$http', '$routeParams', '$location', 'count_by_statusFilter',
+    ['$scope', '$http', '$routeParams', '$location', '$sce',
 
-     function($scope, $http, $routeParams, $location, count_by_statusFilter) {
+     function($scope, $http, $routeParams, $location, $sce) {
 
          var params = {
              'search': $routeParams.search,
@@ -181,6 +179,9 @@ app.controller(
 
          $http.get('/api/result/', {params: params}).then(function(response) {
              $scope.page = response.data;
+             _.each($scope.page.results, function(build) {
+                 build.test_jobs_count_by_status = $sce.trustAsHtml(count_by_status(build.test_jobs));
+             })
          });
 
          $scope.search = $routeParams.search;

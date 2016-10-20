@@ -50,8 +50,7 @@
           <a style="color:#999" href="{{ build.url }}">{{ build.url }}</a>
         </td>
 
-        <td>
-          {{build.test_jobs|count_by_status}}
+        <td ng-bind-html='build.test_jobs_count_by_status'>
         </td>
 
         <td>{{ build.created_at }}</td>
