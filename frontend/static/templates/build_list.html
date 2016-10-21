@@ -1,6 +1,14 @@
+<div id='build-nav'>
+  <ul class="nav nav-pills nav-pills-sm">
+    <li role="presentation" class="active"><a href="#/builds/">build list</a></li>
+    <li role="presentation"><a href="#/builds/compare/">compare builds</a></li>
+  </ul>
+</div>
+
 <i ng-show="!page" class="fa fa-cog fa-spin"></i>
 
 <div ng-show="page" id="build-list">
+
   <form>
     <div class="form-group">
       <input type="text" ng-change="makeSearch()"
@@ -9,38 +17,57 @@
     </div>
   </form>
 
-  <pagination page="page"></pagination>
+  <a class='btn btn-primary' ng-click='compare()' title='compare selected builds'>Compare selected builds</a>
 
+  <form>
   <table class="table table-striped">
     <thead>
       <tr>
-        <th style="width: 10%;">#</th>
-        <th style="width: 40%;">build name</th>
-        <th style="width: 35%;">LAVA jobs</th>
-        <th style="width: 15%;">created at</th>
+        <th></th>
+        <th ng-show='compareFrom'></th>
+        <th>#</th>
+        <th>branch</th>
+        <th>build name</th>
+        <th>Test jobs</th>
+        <th>created at</th>
+        <th>Original #</th>
       </tr>
     </thead>
     <tbody>
       <tr ng-repeat="build in page.results">
 
-        <td><a ng-href="#/build/{{ build.id }}">#{{ build.build_id }}</a></td>
+        <td><input type='radio' name='compareFrom' value='{{build.id}}' ng-click='setCompareFrom(build.id)'/></td>
+        <td ng-show='compareFrom'>
+          <input ng-show='compareFrom != build.id' type='radio' name='compareTo' value='{{build.id}}' ng-click='setCompareTo(build.id)'/>
+        </td>
+
+        <td><a ng-href="#/build/{{ build.id }}">#{{ build.id }}</a></td>
+
+        <td><a ng-href="#/build/{{ build.id }}">{{ build.branch_name }}</a></td>
 
         <td>
           <a ng-href="#/build/{{ build.id }}">{{ build.name }}</a> <br/>
           <a style="color:#999" href="{{ build.url }}">{{ build.url }}</a>
         </td>
 
-        <td>
-          <div ng-repeat="test in build.test_jobs">
-            (<a href="{{ test.url }}" target="_blank">#{{ test.id }}</a>
-            <ng-include src="'/static/templates/_test_job_status.html'"></ng-include>)
-      </div>
+        <td ng-bind-html='build.test_jobs_count_by_status'>
         </td>
 
         <td>{{ build.created_at }}</td>
+
+        <td>
+          <a href="{{build.build_url}}">
+            #{{build.build_id}}
+            <i class='fa fa-external-link'></i>
+          </a>
+        </td>
+
       </tr>
     </tbody>
   </table>
+  </form>
+
+  <a class='btn btn-primary' ng-click='compare()' title='compare selected builds'>Compare selected builds</a>
 
   <pagination page="page"></pagination>
 

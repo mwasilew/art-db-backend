@@ -31,6 +31,11 @@ app.config(['$routeProvider', function($routeProvider) {
             controller: 'BuildList',
             reloadOnSearch: false
         })
+        .when('/builds/compare/', {
+            templateUrl: '/static/templates/compare.html',
+            controller: 'CompareBuilds',
+            reloadOnSearch: false
+        })
         .when('/build/:buildId', {
             templateUrl: '/static/templates/build_detail.html',
             controller: 'BuildDetail',
@@ -141,13 +146,31 @@ app.controller(
      }]
 );
 
+function count_by_status(test_jobs) {
+    var data = {};
+    _.each(test_jobs, function(t) {
+        var st = t.status;
+        if (data[st]) {
+            data[st] += 1;
+        } else {
+            data[st] = 1
+        }
+    });
+
+    var text = _.map(data, function(count, st) {
+        return st + ': ' + count;
+    })
+
+    return _.join(text, '<br/>');
+}
+
 
 app.controller(
     'BuildList',
 
-    ['$scope', '$http', '$routeParams', '$location',
+    ['$scope', '$http', '$routeParams', '$location', '$sce',
 
-     function($scope, $http, $routeParams, $location) {
+     function($scope, $http, $routeParams, $location, $sce) {
 
          var params = {
              'search': $routeParams.search,
@@ -156,6 +179,9 @@ app.controller(
 
          $http.get('/api/result/', {params: params}).then(function(response) {
              $scope.page = response.data;
+             _.each($scope.page.results, function(build) {
+                 build.test_jobs_count_by_status = $sce.trustAsHtml(count_by_status(build.test_jobs));
+             })
          });
 
          $scope.search = $routeParams.search;
@@ -168,6 +194,29 @@ app.controller(
                      $scope.page = response.data;
                  });
          };
+
+
+         $scope.setCompareFrom = function(id) {
+             $scope.compareFrom = id;
+             return true;
+         }
+
+         $scope.setCompareTo = function(id) {
+             if (id == $scope.compareFrom) {
+                 return false;
+             } else {
+                 $scope.compareTo = id;
+                 return true;
+             }
+         }
+
+         $scope.compare = function() {
+             if (!($scope.compareFrom && $scope.compareTo)) {
+                 alert('Please select builds to compare first');
+                 return;
+             }
+             location.href = '#/builds/compare/?from=' + $scope.compareFrom + '&to=' + $scope.compareTo;
+         }
      }]
 );
 
@@ -241,6 +290,67 @@ app.controller('BuildDetail', ['$scope', '$http', '$routeParams', '$q', '$routeP
         if (criteria > 3) {
             return "danger";
         }
+    }
+
+}]);
+
+app.controller('CompareBuilds', ['$scope', '$http', '$routeParams', '$q', '$routeParams', '$location', function($scope, $http, $routeParams, $q, $routeParams, $location) {
+
+    $scope.filterBenchmarksCompared = function(criteria) {
+        $location.search('benchmarks', criteria || null);
+
+        return function( item ) {
+            if (!criteria) {
+                return true;
+            }
+            if (item.current.benchmark.toLowerCase().indexOf(criteria.toLowerCase()) != -1 ||
+                item.current.name.toLowerCase().indexOf(criteria.toLowerCase()) != -1) {
+                return true;
+            }
+            return false;
+        };
+    };
+
+    $scope.getChangeClass = function(criteria) {
+        if (criteria < -3) {
+            return "success";
+        }
+        if (criteria >= -3 && criteria <= 3) {
+            return "";
+        }
+        if (criteria > 3) {
+            return "danger";
+        }
+    }
+
+    $scope.compare = function() {
+        if (!($scope.compareFrom && $scope.compareTo)) {
+            alert('Please inform the build numbers to compare');
+            return;
+        }
+        $location.search({'from': $scope.compareFrom, 'to': $scope.compareTo});
+        $scope.loading = true;
+        $scope.ready = false;
+        $scope.error = null;
+        $q.all([
+            $http.get('/api/result/' + $scope.compareFrom + '/'),
+            $http.get('/api/result/' + $scope.compareTo + '/'),
+            $http.get('/api/result/' + $scope.compareTo + '/benchmarks_compare/?comparison_base=' + $scope.compareFrom),
+        ]).then(function (response) {
+            $scope.ready = true;
+            $scope.buildFrom = response[0].data;
+            $scope.buildTo = response[1].data;
+            $scope.comparisons = response[2].data;
+        }).catch(function(error) {
+            $scope.error = error;
+        });
+    }
+    if ($routeParams.from && $routeParams.to) {
+        $scope.compareFrom = $routeParams.from;
+        $scope.compareTo = $routeParams.to;
+        $scope.compare();
+    } else {
+        $location.search({});
     }
 
 }]);
@@ -384,7 +494,6 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                                           min: _.min(point.values),
                                           max: _.max(point.values),
                                           result_id: point.result,
-                                          build_id: point.build_id
                                       };
                                   })
                                   });
@@ -462,7 +571,7 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                             range,
                             '</p>',
                             '<p>',
-                            '<a href="#/build/' + this.result_id + '">See details for build #' + this.build_id + '</a>',
+                            '<a href="#/build/' + this.result_id + '">See details for build #' + this.result_id + '</a>',
                             '</p>'
                             ]
                             return _.join(html, '');

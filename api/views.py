@@ -222,7 +222,11 @@ class ResultViewSet(viewsets.ModelViewSet):
     @detail_route()
     def benchmarks_compare(self, request, pk=None):
         result = self.get_object()
-        previous = result.to_compare()
+        comparison_base = request.query_params.get('comparison_base')
+        if comparison_base:
+            previous = benchmarks_models.Result.objects.get(pk=comparison_base)
+        else:
+            previous = result.to_compare()
         if not previous:
             return response.Response([])
 

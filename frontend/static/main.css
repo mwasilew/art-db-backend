@@ -57,20 +57,16 @@ nav .navbar-brand {
     border-bottom: 1px solid #eee;
 }
 
-#build-detail table.benchmarks {
+table.benchmarks {
     font-size: 13px;
 }
 
-#build-detail table tbody>tr>td {
+table tbody>tr>td {
     vertical-align: middle;
 }
 
 input, select, button, .btn {
     border-radius: 0 !important;
-}
-
-#build-list form {
-    margin: 30px 0 40px 0;
 }
 
 .checkbox input[type="checkbox"] {
@@ -98,7 +94,7 @@ input, select, button, .btn {
     border-bottom: 2px #aaa solid;
 }
 
-#manifest-list .nav {
+#manifest-list .nav, #build-nav .nav {
     margin: 10px 0 15px 0;
     background-color: #eee;
 }

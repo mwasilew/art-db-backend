@@ -46,7 +46,11 @@
 
                 <tr ng-repeat="result in manifest.results">
                   <td>
-                    <a ng-href="#/build/{{ result.id }}">#{{ result.build_id }} / {{ result.name }}</a>
+                    <a ng-href="#/build/{{ result.id }}">
+                      #{{ result.id }}
+                      —
+                      #{{ result.build_id }} {{ result.name }}
+                    </a>
                   </td>
                   <td class="text-right">
                     <small>
