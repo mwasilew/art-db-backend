@@ -467,6 +467,7 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
         document.getElementById('chart-' + slug(benchmark.label)).remove();
         _.remove($scope.benchmarks, benchmark);
         benchmark.graphed = false;
+        $scope.updateCharts();
     }
 
     $scope.drawChart = function(benchmark, branch, env_data, element) {
