@@ -50,7 +50,6 @@
     - update
 
 - name: Copy index.wsgi
-  sudo_user: "{{apache_user}}"
   when: django_local_wsgi is defined
   template: src={{django_local_wsgi}}
             dest={{install_base}}/index.wsgi
@@ -62,7 +61,6 @@
     - django
 
 - name: Copy local settings
-  sudo_user: "{{apache_user}}"
   when: django_local_settings is defined
   template: src={{django_local_settings}}
             dest={{django_app_root}}/crayonbox/settings/private.py
@@ -114,7 +112,6 @@
       - install
 
 - name: Copy ext keys
-  sudo_user: "{{apache_user}}"
   template: src=secrets/art-reports-bot.key
             dest={{ dev_private_review_linaro_org_password }}
             owner={{apache_user}} group={{apache_user}} mode=0600

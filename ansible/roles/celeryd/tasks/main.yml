@@ -16,7 +16,6 @@
     - '{{supervisor_log_dir}}'
 
 - name: Copy supervisord.conf
-  sudo_user: "{{apache_user}}"
   when: supervisord_conf is defined
   template: src=templates/supervisord.conf
             dest={{supervisord_conf}}
@@ -27,7 +26,6 @@
     - celery
 
 - name: Copy supervisor service files
-  sudo_user: "{{apache_user}}"
   template: src={{item.src}}
             dest={{item.dest}}
             owner={{apache_user}} group={{apache_user}} mode=0755
