@@ -56,6 +56,35 @@
 
 <div ng-show="ready">
 
+  <h2>Build info</h2>
+
+  <table class="table table-bordered">
+    <tr>
+      <td></td>
+      <th>#{{buildFrom.id}}</th>
+      <th>#{{buildTo.id}}</th>
+    </tr>
+    <tr>
+      <th>Branch</th>
+      <td>{{buildFrom.branch_name}}</td>
+      <td>{{buildTo.branch_name}}</td>
+    </tr>
+    <tr>
+      <th>Original build</th>
+      <td>
+        <a href="{{buildFrom.build_url}}">{{buildFrom.name}} {{buildFrom.build_id}}
+          <i class='fa fa-external-link'></i>
+        </a>
+      </td>
+      <td>
+        <a href="{{buildTo.build_url}}">{{buildTo.name}} {{buildTo.build_id}}
+          <i class='fa fa-external-link'></i>
+        </a>
+      </td>
+    </tr>
+  </table>
+
+
   <h2>Benchmarks</h2>
 
   <form>
