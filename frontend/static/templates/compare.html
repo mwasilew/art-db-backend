@@ -86,8 +86,8 @@
       </tr>
       <tr ng-hide='hide'>
         <th style="width: 60%">name (sample size)</th>
-        <th class="text-right">current (stdev)</th>
-        <th class="text-right">previous (stdev)</th>
+        <th class="text-right">#{{buildFrom.id}} (stdev)</th>
+        <th class="text-right">#{{buildTo.id}} (stdev)</th>
         <th class="text-right">
           change
           <a class='label label-default' ng-click='reverse = false' ng-show='reverse'  ><i class='fa fa-sort-asc'></i></a>
@@ -104,12 +104,12 @@
           ({{ item.current.values.length }})
         </td>
         <td class="text-right">
-          {{ item.current.measurement.toFixed(2) }}<br/>
-          ({{ item.current.stdev.toFixed(2) }})
-        </td>
-        <td class="text-right">
           {{ item.previous.measurement ? item.previous.measurement.toFixed(2) : "N/A" }}<br/>
           {{ item.previous.stdev ? "(" + item.previous.stdev.toFixed(2) + ")": "" }}
+        </td>
+        <td class="text-right">
+          {{ item.current.measurement.toFixed(2) }}<br/>
+          ({{ item.current.stdev.toFixed(2) }})
         </td>
         <td class="text-right">
           <b>
