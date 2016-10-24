@@ -294,7 +294,11 @@ app.controller('CompareBuilds', ['$scope', '$http', '$routeParams', '$q', '$rout
         }
     }
 
-    $scope.compare = function() {
+    $scope.compare = function(ev) {
+        if (ev && ev.keyCode != 13) {
+            return;
+        }
+
         if (!($scope.compareFrom && $scope.compareTo)) {
             alert('Please inform the build numbers to compare');
             return;

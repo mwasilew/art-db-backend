@@ -25,6 +25,7 @@
       id="compareFrom"
       ng-model='compareFrom'
       placeholder='build number'
+      ng-keypress='compare($event)'
     />
   </div>
 
@@ -37,6 +38,7 @@
       id="compareTo"
       ng-model='compareTo'
       placeholder='build number'
+      ng-keypress='compare($event)'
     />
   </div>
 
