@@ -61,8 +61,8 @@
   <table class="table table-bordered">
     <tr>
       <td></td>
-      <th>#{{buildFrom.id}}</th>
-      <th>#{{buildTo.id}}</th>
+      <th><a href='#/build/{{buildFrom.id}}'>#{{buildFrom.id}}</a></th>
+      <th><a href='#/build/{{buildTo.id}}'>#{{buildTo.id}}</a></th>
     </tr>
     <tr>
       <th>Branch</th>
@@ -115,8 +115,8 @@
       </tr>
       <tr ng-hide='hide'>
         <th style="width: 60%">name (sample size)</th>
-        <th class="text-right">#{{buildFrom.id}} (stdev)</th>
-        <th class="text-right">#{{buildTo.id}} (stdev)</th>
+        <th class="text-right"><a href='#/build/{{buildFrom.id}}'>#{{buildFrom.id}}</a> (stdev)</th>
+        <th class="text-right"><a href='#/build/{{buildTo.id}}'>#{{buildTo.id}}</a> (stdev)</th>
         <th class="text-right">
           change
           <a class='label label-default' ng-click='reverse = false' ng-show='reverse'  ><i class='fa fa-sort-asc'></i></a>
