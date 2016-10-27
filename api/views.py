@@ -1,3 +1,4 @@
+import json
 import re
 import urlparse
 import mimetypes
@@ -23,6 +24,7 @@ from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from rest_framework.decorators import list_route
 
 from benchmarks import models as benchmarks_models
+from benchmarks.models import geomean
 from benchmarks import tasks, testminer
 from benchmarks import progress
 from benchmarks import comparison
@@ -165,6 +167,47 @@ class BenchmarkGroupSummaryViewSet(viewsets.ModelViewSet):
             group__name=group,
             result__branch_name=branch,
         )
+
+
+@api_view(["GET"])
+def dynamic_benchmark_summary(request):
+    branch = request.query_params.get('branch')
+    environment = request.query_params.get('environment')
+    benchmarks = request.query_params.getlist('benchmarks')
+
+    testjobs = benchmarks_models.TestJob.objects.filter(environment__identifier=environment)
+    testjobs = testjobs.select_related('result')
+    testjobs = testjobs.filter(result__branch_name=branch)
+    if settings.IGNORE_GERRIT is False:
+        testjobs = testjobs.filter(result__gerrit_change_number=None)
+
+    testjob_ids = [ attrs['id'] for attrs in testjobs.values('id') ]
+
+    queryset = (benchmarks_models.ResultData.objects
+                .select_related("benchmark", "result")
+                .filter(
+                    test_job_id__in=testjob_ids,
+                    benchmark__name__in=benchmarks,
+
+                )
+                .order_by('created_at'))
+
+    data = []
+    for result_id, result_data in groupby(queryset, lambda rd: rd.result_id):
+        values = []
+        for r in result_data:
+            created_at = r.created_at
+            values = values + r.values
+        data.append({
+            'result': result_id,
+            'created_at': created_at.isoformat(),
+            'measurement': geomean(values),
+            'name': 'Summary',
+        })
+
+    response = HttpResponse(json.dumps(data), content_type='application/json')
+    return response
+
 
 # result
 class ResultViewSet(viewsets.ModelViewSet):
