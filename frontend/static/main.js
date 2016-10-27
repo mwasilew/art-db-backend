@@ -374,7 +374,7 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
             }
 
             var charts = document.getElementById('charts');
-            var this_chart_id = 'chart-' + slug(benchmark.label);
+            var this_chart_id = 'chart-' + slug(benchmark.name);
             var this_chart = document.getElementById(this_chart_id);
             if (!this_chart) {
                 this_chart = document.createElement('div');
@@ -410,7 +410,7 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                     data_by_env[0].config.params.benchmark_group;
 
                 var benchmark = _.find($scope.benchmarks, ['name', bname]);
-                var target_id = 'chart-' + slug(benchmark.label);
+                var target_id = 'chart-' + slug(benchmark.name);
                 var target = document.getElementById(target_id);
 
                 $scope.drawChart(benchmark, $scope.branch, data_by_env, target);
@@ -439,7 +439,7 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
     }
 
     $scope.removeBenchmark = function(benchmark) {
-        document.getElementById('chart-' + slug(benchmark.label)).remove();
+        document.getElementById('chart-' + slug(benchmark.name)).remove();
         _.remove($scope.benchmarks, benchmark);
         benchmark.graphed = false;
         $scope.updateCharts();
