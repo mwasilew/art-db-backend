@@ -229,14 +229,12 @@ app.controller('BuildDetail', ['$scope', '$http', '$routeParams', '$q', '$routeP
     $q.all([
         $http.get('/api/result/' + $routeParams.buildId + '/'),
         $http.get('/api/result/' + $routeParams.buildId + '/benchmarks/'),
-        $http.get('/api/result/' + $routeParams.buildId + '/benchmarks_compare/'),
         $http.get('/api/result/' + $routeParams.buildId + '/baseline/')
     ]).then(function(response) {
         $scope.error = null;
         $scope.build = response[0].data;
         $scope.benchmarks = response[1].data;
-        $scope.benchmarksCompare = response[2].data;
-        $scope.baseline = response[3].data;
+        $scope.baseline = response[2].data;
     }).catch(function(error) {
         $scope.error = error;
     });
@@ -264,33 +262,6 @@ app.controller('BuildDetail', ['$scope', '$http', '$routeParams', '$q', '$routeP
             return false;
         };
     };
-
-    $scope.filterBenchmarksCompared = function(criteria) {
-        $location.search({'benchmarks': criteria || null});
-
-        return function( item ) {
-            if (!criteria) {
-                return true;
-            }
-            if (item.current.benchmark.toLowerCase().indexOf(criteria.toLowerCase()) != -1 ||
-                item.current.name.toLowerCase().indexOf(criteria.toLowerCase()) != -1) {
-                return true;
-            }
-            return false;
-        };
-    };
-
-    $scope.getChangeClass = function(criteria) {
-        if (criteria < -3) {
-            return "success";
-        }
-        if (criteria >= -3 && criteria <= 3) {
-            return "";
-        }
-        if (criteria > 3) {
-            return "danger";
-        }
-    }
 
 }]);
 
@@ -323,7 +294,11 @@ app.controller('CompareBuilds', ['$scope', '$http', '$routeParams', '$q', '$rout
         }
     }
 
-    $scope.compare = function() {
+    $scope.compare = function(ev) {
+        if (ev && ev.keyCode != 13) {
+            return;
+        }
+
         if (!($scope.compareFrom && $scope.compareTo)) {
             alert('Please inform the build numbers to compare');
             return;

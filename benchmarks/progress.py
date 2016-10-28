@@ -96,4 +96,5 @@ def get_progress_between_results(current, baseline):
             )
             result.append(progress)
 
+    result.sort(key=lambda p: p.environment.identifier)
     return result
