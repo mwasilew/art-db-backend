@@ -410,6 +410,8 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                     })
                     $scope.dynamic_benchmark_summary.label = "Summary of selected benchmarks";
 
+                    this_chart.title = 'Summary of: ' + _.join(_.map(selected, function(b) { return b.name} ), ', ');
+
                 } else {
                     /* no benchmarks selected: just display the overall summary
                      * instead
