@@ -158,7 +158,7 @@
         </tr>
       </thead>
       <tbody ng-hide='hide'>
-        <tr ng-repeat="item in section.data | filter:filterBenchmarks(queryBenchmarks)">
+        <tr ng-repeat="item in section.data | orderBy:['benchmark','name'] | filter:filterBenchmarks(queryBenchmarks)">
           <td>
             {{ item.benchmark }} / <b>{{ item.name }}</b>
             ({{ item.values.length }})
