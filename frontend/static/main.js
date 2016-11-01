@@ -374,7 +374,7 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
             }
 
             var charts = document.getElementById('charts');
-            var this_chart_id = 'chart-' + slug(benchmark.label);
+            var this_chart_id = 'chart-' + slug(benchmark.name);
             var this_chart = document.getElementById(this_chart_id);
             if (!this_chart) {
                 this_chart = document.createElement('div');
@@ -393,7 +393,35 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
             if (benchmark.type == 'benchmark_group' || benchmark.type == 'root_benchmark_group') {
                 stats_endpoint = '/api/benchmark_group_summary/';
                 params.benchmark_group = benchmark.name;
-            } else {
+            } else if (benchmark.type == 'dynamic_benchmark_summary') {
+
+                var selected = _.filter($scope.benchmarks, function(benchmark) {
+                    return benchmark.type == 'benchmark';
+                });
+                params.summary = 1;
+
+                if (selected.length > 0) {
+                    /* if there are any benckmarks selected, we'll get a
+                     * dynamically-calculated summary of them
+                     */
+                    stats_endpoint = '/api/dynamic_benchmark_summary/';
+                    params.benchmarks = _.map(selected, function(benchmark) {
+                        return benchmark.name;
+                    })
+                    $scope.dynamic_benchmark_summary.label = "Summary of selected benchmarks";
+
+                    this_chart.title = 'Summary of: ' + _.join(_.map(selected, function(b) { return b.name} ), ', ');
+
+                } else {
+                    /* no benchmarks selected: just display the overall summary
+                     * instead
+                     */
+                    stats_endpoint = '/api/benchmark_group_summary/';
+                    params.benchmark_group = '/';
+                    $scope.dynamic_benchmark_summary.label = "Summary of all benchmarks";
+                }
+            }
+            else {
                 stats_endpoint = '/api/stats/';
                 params.benchmark = benchmark.name;
             }
@@ -406,11 +434,16 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                 env_params.environment = env;
                 return $http.get(stats_endpoint, { params: env_params });
             })).then(function(data_by_env) {
-                var bname = data_by_env[0].config.params.benchmark ||
-                    data_by_env[0].config.params.benchmark_group;
+                var bname;
+                if (data_by_env[0].config.params.summary) {
+                    bname = ':summary:';
+                } else {
+                    bname = data_by_env[0].config.params.benchmark ||
+                        data_by_env[0].config.params.benchmark_group;
+                }
 
                 var benchmark = _.find($scope.benchmarks, ['name', bname]);
-                var target_id = 'chart-' + slug(benchmark.label);
+                var target_id = 'chart-' + slug(benchmark.name);
                 var target = document.getElementById(target_id);
 
                 $scope.drawChart(benchmark, $scope.branch, data_by_env, target);
@@ -433,15 +466,21 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
         var benchmark = $scope.benchmark;
         if (! _.find($scope.benchmarks, benchmark)) {
             $scope.benchmarks.push(benchmark);
+            if (benchmark.type == 'benchmark') {
+                $scope.dynamic_benchmark_summary.graphed = false;
+            }
             $scope.updateCharts();
         }
         $scope.benchmark = undefined;
     }
 
     $scope.removeBenchmark = function(benchmark) {
-        document.getElementById('chart-' + slug(benchmark.label)).remove();
+        document.getElementById('chart-' + slug(benchmark.name)).remove();
         _.remove($scope.benchmarks, benchmark);
         benchmark.graphed = false;
+        if (benchmark.type == 'benchmark') {
+            $scope.dynamic_benchmark_summary.graphed = false;
+        }
         $scope.updateCharts();
     }
 
@@ -603,6 +642,13 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
         $scope.branchList = response[0].data;
 
         var benchmarkList = [];
+        $scope.dynamic_benchmark_summary = {
+            name: ":summary:",
+            label: 'Summary of selected benchmarks',
+            padding: '',
+            type: 'dynamic_benchmark_summary'
+        };
+        benchmarkList.push($scope.dynamic_benchmark_summary);
         benchmarkList.push({ name: "/", label: 'Overall summary', padding: '', type: 'root_benchmark_group' });
         _.each(_.groupBy(response[1].data, 'group'), function(benchmarks, group) {
             benchmarkList.push({ name: group, label: group + ' (summary)', padding: '  ', type: 'benchmark_group' });
@@ -627,7 +673,7 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
         } else {
             defaults = {
                 branch: 'master',
-                benchmarks: ['/'],
+                benchmarks: [':summary:'],
                 environments: _.map($scope.environmentList, function(env) {
                     return env.identifier;
                 })

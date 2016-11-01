@@ -251,6 +251,21 @@ class BenchmarkGroup(models.Model):
         return self.name
 
 
+def geomean(values):
+    # The intuitive/naive way of calculating a geometric mean (first
+    # multiply the n values, then take the nth-root of the result) does not
+    # work in practice. When you multiple an large enough amount of large
+    # enough numbers, their product will oferflow the float representation,
+    # and the result will be Infinity.
+    #
+    # Will use the alternative method described in
+    # https://en.wikipedia.org/wiki/Geometric_mean -- topic "Relationship
+    # with arithmetic mean of logarithms" -- which is exp(sum(log(x_i)/n))
+    n = len(values)
+    log_sum = reduce(lambda x,y: x + y, map(log, values))
+    return exp(log_sum/n)
+
+
 class BenchmarkGroupSummary(models.Model):
     group = models.ForeignKey(BenchmarkGroup, related_name='progress_data')
     environment = models.ForeignKey(Environment, related_name='progress_data', null=True)
@@ -262,27 +277,12 @@ class BenchmarkGroupSummary(models.Model):
 
     def save(self, *args, **kwargs):
         if self.values:
-            self.measurement = BenchmarkGroupSummary.__geomean__(self.values)
+            self.measurement = geomean(self.values)
         super(BenchmarkGroupSummary, self).save(*args, **kwargs)
 
     @property
     def name(self):
         return "Geometric mean"
-
-    @staticmethod
-    def __geomean__(values):
-        # The intuitive/naive way of calculating a geometric mean (first
-        # multiply the n values, then take the nth-root of the result) does not
-        # work in practice. When you multiple an large enough amount of large
-        # enough numbers, their product will oferflow the float representation,
-        # and the result will be Infinity.
-        #
-        # Will use the alternative method described in
-        # https://en.wikipedia.org/wiki/Geometric_mean -- topic "Relationship
-        # with arithmetic mean of logarithms" -- which is exp(sum(log(x_i)/n))
-        n = len(values)
-        log_sum = reduce(lambda x,y: x + y, map(log, values))
-        return exp(log_sum/n)
 
 
 class Benchmark(models.Model):

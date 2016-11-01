@@ -32,6 +32,6 @@ urlpatterns = [
         views.download_testjob_data,
         name='testjobdata'
     ),
-
+    url(r'^dynamic_benchmark_summary/', views.dynamic_benchmark_summary),
 ]
 
