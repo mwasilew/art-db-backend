@@ -46,6 +46,15 @@
       </a>
       <em ng-hide="baseline">No baseline build</em>
     </dd>
+
+    <dt>Manifest</dt>
+    <dd>
+    {{build.manifest.manifest_hash}}
+    <a class='label label-info' href='/api/manifest_data/{{build.manifest.id}}/download/'>
+      <i class='fa fa-download'></i>
+      XML
+    </a>
+    </dd>
   </dl>
 
   <div ng-show="build.test_jobs.length">
