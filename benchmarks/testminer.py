@@ -80,14 +80,14 @@ def parse_microbenchmark_results(test_result_dict):
     test_result_list = []
     if 'benchmarks' in test_result_dict.keys():
         test_result_benchmarks = test_result_dict['benchmarks']
-    extract_microbenchmarks(test_result_benchmarks, test_result_list)
+        extract_microbenchmarks(test_result_benchmarks, test_result_list)
 
     # Extract compilation statistics
     # the format is:
     # compilation statistics/BENCHMARK_NAME/SUBSCORE/SUB_SUBSCORE
     if "compilation statistics" in test_result_dict.keys():
         test_result_statistics = test_result_dict['compilation statistics']
-    extract_compilation_statistics(test_result_statistics, test_result_list)
+        extract_compilation_statistics(test_result_statistics, test_result_list)
 
     return test_result_list
 
