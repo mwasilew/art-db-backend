@@ -30,6 +30,7 @@ class Command(BaseCommand):
             if testjob.data:
                 try:
                     data = testjob.data.file.read()
+                    testjob.data.close()
                     tester = testjob.get_tester()
                     test_results = tester.parse_test_results(data)
                     testjob.results_loaded = False

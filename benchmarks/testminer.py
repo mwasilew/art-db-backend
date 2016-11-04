@@ -27,14 +27,17 @@ except ImportError:
     DEVNULL = open(os.devnull, 'wb')
 
 
-def parse_microbenchmark_results(test_result_dict):
-    test_result_list = []
-    if 'benchmarks' in test_result_dict.keys():
-        test_result_dict = test_result_dict['benchmarks']
+def add_subscore_measurements(test_result_list, test_name, measurements):
+    for i in measurements:
+        test_case = {"name": test_name,
+                     "measurement": i}
+        test_result_list.append(test_case)
 
+
+def extract_microbenchmarks(test_result_benchmarks, test_result_list):
     # Key Format: benchmarks/micro/<BENCHMARK_NAME>.<SUBSCORE>
     # Extract and unique them to form a benchmark name list
-    for full_benchmark_name, measurements in test_result_dict.iteritems():
+    for full_benchmark_name, measurements in test_result_benchmarks.iteritems():
         test_result = {}
         # benchmark iteration
         benchmark_group = '/'.join(full_benchmark_name.split('/')[0:-1]) + '/'
@@ -43,12 +46,49 @@ def parse_microbenchmark_results(test_result_dict):
         test_result['benchmark_group'] = benchmark_group
         test_result['subscore'] = []
         test_name = benchmark[1]
-        for i in measurements:
-            test_case = { "name": test_name,
-                         "measurement": i }
-            test_result['subscore'].append(test_case)
+        add_subscore_measurements(
+            test_result['subscore'],
+            test_name,
+            measurements)
 
         test_result_list.append(test_result)
+
+
+def extract_compilation_statistics(test_result_statistics, test_result_list):
+    for benchmark_name, benchmark_subscores in test_result_statistics.iteritems():
+        for subscore, values in benchmark_subscores.iteritems():
+            benchmark_group = "compilation statistics" + "/" + benchmark_name + "/"
+            test_result = {}
+            test_result['benchmark_name'] = subscore
+            test_result['benchmark_group'] = benchmark_group
+            test_result['subscore'] = []
+            if isinstance(values, dict):
+                for sub, val in values.iteritems():
+                    add_subscore_measurements(
+                        test_result['subscore'],
+                        sub,
+                        val)
+            else:
+                add_subscore_measurements(
+                    test_result['subscore'],
+                    subscore,
+                    values)
+            test_result_list.append(test_result)
+
+
+def parse_microbenchmark_results(test_result_dict):
+    test_result_list = []
+    if 'benchmarks' in test_result_dict.keys():
+        test_result_benchmarks = test_result_dict['benchmarks']
+        extract_microbenchmarks(test_result_benchmarks, test_result_list)
+
+    # Extract compilation statistics
+    # the format is:
+    # compilation statistics/BENCHMARK_NAME/SUBSCORE/SUB_SUBSCORE
+    if "compilation statistics" in test_result_dict.keys():
+        test_result_statistics = test_result_dict['compilation statistics']
+        extract_compilation_statistics(test_result_statistics, test_result_list)
+
     return test_result_list
 
 

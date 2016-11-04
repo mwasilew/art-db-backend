@@ -381,13 +381,17 @@ class ResultTests(APITestCase):
             'created_at': '2016-01-06 09:00:01',
             # NOTE NO 'test_jobs'
             'environment1.json': StringIO(json.dumps({
-                "benchmarks/group1/foo.foo1": [1,2,2],
-                "benchmarks/group2/bar.bar1": [3,3,4],
+                "benchmarks": {
+                    "benchmarks/group1/foo.foo1": [1,2,2],
+                    "benchmarks/group2/bar.bar1": [3,3,4],
+                }
             })),
 
             "environment2.json": StringIO(json.dumps({
+                "benchmarks": {
                     "benchmarks/group1/foo.foo1": [2,2,3],
                     "benchmarks/group2/bar.bar1": [4,4,5],
+                }
             })),
         }
         response = self.client.post('/api/result/', data=data)
