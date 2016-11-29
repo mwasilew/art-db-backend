@@ -53,6 +53,11 @@
     - update
     - celery
 
+- name: start supervisord on boot
+  template: src=templates/supervisor.cron
+            dest=/etc/cron.d/supervisor
+            owner=root group=root mode=0644
+
 - name: supervisor restart
   shell: "{{supervisorctl_bin}} -c {{supervisord_conf}} restart all"
   sudo_user: "{{apache_user}}"

@@ -1,0 +1,1 @@
+@reboot	{{apache_user}}	{{supervisord_bin}} -c {{supervisord_conf}}
