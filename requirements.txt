@@ -6,7 +6,9 @@ psycopg2==2.6.1
 wheel==0.24.0
 pdbpp==0.8.3
 -e git://git.linaro.org/lava/django-crowd-rest-backend.git@c741f1738786c58253b400ffc27a16967702f84c#egg=django_crowd_rest_backend-dev
-django-celery==3.1.17
+celery>=3.1,<4.0
+django-celery>=3.1,<4.0
+kombu>=3.0,<4.0
 supervisor==3.2.0
 redis==2.10.5
 PyYAML==3.11
