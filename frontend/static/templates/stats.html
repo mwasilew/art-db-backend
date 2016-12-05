@@ -28,6 +28,10 @@
             <span ng-show='get_environment_ids().length == 0'>
               <strong>Select environment(s)</strong>
             </span>
+            <div class='pull-right'>
+              <a class='btn btn-xs btn-default' ng-show='get_environment_ids().length < environments.length' ng-click='toggleEnvironments(true)'>check all</a>
+              <a class='btn btn-xs btn-default' ng-show='get_environment_ids().length > 0' ng-click='toggleEnvironments(false)'>uncheck all</a>
+            </div>
           </div>
           <ul class='list-group'>
             <li class='list-group-item' ng-repeat='environment in environments'>

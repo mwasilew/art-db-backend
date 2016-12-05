@@ -614,6 +614,13 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                 });
     }
 
+    $scope.toggleEnvironments = function(v) {
+        _.each($scope.environments, function(env) {
+            env.selected = v;
+        });
+        $scope.change();
+    }
+
     $scope.reset = function() {
         $scope.branch = undefined;
         _.each($scope.environments, function(env) {
