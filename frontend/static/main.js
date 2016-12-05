@@ -382,12 +382,17 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                 this_chart.id = this_chart_id;
                 charts.appendChild(this_chart);
             }
-            this_chart.innerHTML = '<i class="fa fa-cog fa-spin"></i>';
 
             var params = {
                 branch: $scope.branch.branch_name,
                 environment: $scope.get_environment_ids()
             };
+
+            if (params.environment.length > 0) {
+                this_chart.innerHTML = '<i class="fa fa-cog fa-spin"></i>';
+            } else {
+                this_chart.innerHTML = '<div class="alert alert-warning"><i class="fa fa-info-circle"></i>No data to chart. Select at least 1 environment.</div>';
+            }
 
             var stats_endpoint;
             if (benchmark.type == 'benchmark_group' || benchmark.type == 'root_benchmark_group') {
