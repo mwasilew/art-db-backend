@@ -35,7 +35,7 @@
                 <input type='checkbox' name='environment[]'
                        id='environment-{{environment.identifier}}'
                        value='{{environment.identifier}}'
-                       ng-click='toggleEnvironment(environment.identifier)'
+                       ng-click='change()'
                        ng-model='environment.selected'
                 />
                 <label for='environment-{{environment.identifier}}'>

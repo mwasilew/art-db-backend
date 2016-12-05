@@ -614,15 +614,6 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                 });
     }
 
-    $scope.toggleEnvironment = function(env_id) {
-        for (var i = 0; i < $scope.environments.length; i++) {
-            if ($scope.environments.identifier == env_id) {
-                $scope.environments.selected = ! $scope.environments.selected;
-            }
-        }
-        $scope.change();
-    };
-
     $scope.reset = function() {
         $scope.branch = undefined;
         _.each($scope.environments, function(env) {
