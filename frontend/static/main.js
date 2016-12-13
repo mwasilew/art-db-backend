@@ -385,7 +385,8 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
 
             var params = {
                 branch: $scope.branch.branch_name,
-                environment: $scope.get_environment_ids()
+                environment: $scope.get_environment_ids(),
+                limit: $scope.limit
             };
 
             if (params.environment.length > 0) {
@@ -461,7 +462,8 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
         $location.search({
             branch: $scope.branch.branch_name,
             environment: $scope.get_environment_ids(),
-            benchmark: _.map($scope.benchmarks, 'name')
+            benchmark: _.map($scope.benchmarks, 'name'),
+            limit: $scope.limit
         });
 
         $scope.disabled = false;
@@ -671,10 +673,12 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
             defaults = {
                 branch: $routeParams.branch,
                 benchmarks: forceArray($routeParams.benchmark),
-                environments: forceArray($routeParams.environment)
+                environments: forceArray($routeParams.environment),
+                limit: $routeParams.limit
             };
         } else {
             defaults = {
+                limit: '20',
                 branch: 'master',
                 benchmarks: [':summary:'],
                 environments: _.map($scope.environmentList, function(env) {
@@ -696,6 +700,8 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
         $scope.benchmarks = _.map(defaults.benchmarks, function(b) {
             return _.find($scope.benchmarkList, ['name', b])
         });
+
+        $scope.limit = defaults.limit;
 
     }).then($scope.change);
 

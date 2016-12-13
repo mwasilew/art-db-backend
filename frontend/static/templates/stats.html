@@ -66,6 +66,22 @@
           </div>
         </div>
 
+        <div class='panel panel-default'>
+          <div class='panel-heading'>
+            Data range
+          </div>
+          <div class='panel-body'>
+            <select ng-disabled="disabled" ng-model="limit" class="form-control"
+                    ng-change="change()">
+                <option value="10">Display last 10 builds</option>
+                <option value="20">Display last 20 builds</option>
+                <option value="50">Display last 50 builds</option>
+                <option value="100">Display last 100 builds</option>
+                <option value="-1">Display all builds</option>
+            </select>
+          </div>
+        </div>
+
         <a class='btn btn-default' ng-show='project' ng-click='reset()'>Reset filter</a>
 
       </form>
