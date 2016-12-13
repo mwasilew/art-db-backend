@@ -778,8 +778,8 @@ class StatsTest(APITestCase):
         })
 
         self.assertEqual(len(response.data), 2)
-        self.assertEqual(response.data[0]['measurement'], 5)
-        self.assertEqual(response.data[1]['measurement'], 10)
+        self.assertEqual(response.data[0]['measurement'], 10)
+        self.assertEqual(response.data[1]['measurement'], 5)
 
 
 class BenchmarkGroupSummaryTest(APITestCase):

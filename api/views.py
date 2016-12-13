@@ -118,6 +118,16 @@ class BranchViewSet(viewsets.ModelViewSet):
     pagination_class = None
 
 
+def get_limit(request):
+    try:
+        n = int(request.query_params.get('limit'))
+    except (TypeError, ValueError):
+        n = None
+    if n < 0:
+        n = None
+    return n
+
+
 class StatsViewSet(viewsets.ModelViewSet):
     queryset = (benchmarks_models.ResultData.objects
                 .select_related("benchmark", "result")
@@ -148,9 +158,14 @@ class StatsViewSet(viewsets.ModelViewSet):
 
         testjob_ids = [ attrs['id'] for attrs in testjobs.values('id') ]
 
-        self.__queryset__ = self.queryset.filter(test_job_id__in=testjob_ids,
-                                                 benchmark__name__in=benchmarks)
+        n = get_limit(self.request)
+
+        self.__queryset__ = self.queryset.filter(
+            test_job_id__in=testjob_ids,
+            benchmark__name__in=benchmarks
+        ).order_by('-created_at')[:n]
         return self.__queryset__
+
 
 class BenchmarkGroupSummaryViewSet(viewsets.ModelViewSet):
     queryset = benchmarks_models.BenchmarkGroupSummary.objects.filter(result__gerrit_change_number=None).order_by('created_at')
@@ -162,11 +177,14 @@ class BenchmarkGroupSummaryViewSet(viewsets.ModelViewSet):
         group = self.request.query_params.get('benchmark_group')
         env = self.request.query_params.get('environment')
         branch = self.request.query_params.get('branch')
+
+        n = get_limit(self.request)
+
         return self.queryset.filter(
             environment__identifier=env,
             group__name=group,
             result__branch_name=branch,
-        )
+        ).order_by('-created_at')[:n]
 
 
 @api_view(["GET"])
@@ -183,6 +201,8 @@ def dynamic_benchmark_summary(request):
 
     testjob_ids = [ attrs['id'] for attrs in testjobs.values('id') ]
 
+    n = get_limit(request) * len(benchmarks)
+
     queryset = (benchmarks_models.ResultData.objects
                 .select_related("benchmark", "result")
                 .filter(
@@ -190,7 +210,7 @@ def dynamic_benchmark_summary(request):
                     benchmark__name__in=benchmarks,
 
                 )
-                .order_by('created_at'))
+                .order_by('-created_at'))[:n]
 
     data = []
     for result_id, result_data in groupby(queryset, lambda rd: rd.result_id):
