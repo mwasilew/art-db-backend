@@ -106,7 +106,12 @@
 - name: Enable mod_wsgi
   command:  a2enmod {{ item }}
             creates=/etc/apache2/mods-enabled/{{ item }}.load
-  with_items: apache_modules
+  with_items:
+    - ssl
+    - wsgi
+    - expires
+    - headers
+    - rewrite
   notify: restart-apache
   tags:
       - install

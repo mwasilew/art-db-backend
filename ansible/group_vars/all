@@ -11,12 +11,6 @@ db_port: 5432
 
 email: "art-reports@linaro.org"
 
-apache_modules:
-  - ssl
-  - wsgi
-  - expires
-  - headers
-  - rewrite
 
 hostname: "{{inventory_hostname}}"
 install_base: "/srv/{{inventory_hostname}}"

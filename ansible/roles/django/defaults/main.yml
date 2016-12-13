@@ -1,3 +1,0 @@
-apache_modules:
-  - ssl
-  - wsgi
