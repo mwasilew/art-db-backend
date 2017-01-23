@@ -74,8 +74,8 @@ def get_progress_since(date):
 def get_progress_between_results(current, baseline):
     result = []
 
-    test_jobs = current.test_jobs.prefetch_related('environment').all()
-    baseline_test_jobs = baseline.test_jobs.prefetch_related('environment').all()
+    test_jobs = current.test_jobs.prefetch_related('environment').exclude(environment=None).all()
+    baseline_test_jobs = baseline.test_jobs.prefetch_related('environment').exclude(environment=None).all()
 
     for current_testjob in test_jobs.all():
 
