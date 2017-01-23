@@ -17,6 +17,7 @@ before_install:
   - psql -c 'create database "art-reports";' -U postgres
 
 install:
+  - pip install --upgrade setuptools
   - pip install -r requirements-dev.txt
   - "mkdir -p ext && git clone https://android-review.linaro.org/linaro/art-testing ext/art-testing"
 
