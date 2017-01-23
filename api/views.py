@@ -201,7 +201,7 @@ def dynamic_benchmark_summary(request):
 
     testjob_ids = [ attrs['id'] for attrs in testjobs.values('id') ]
 
-    n = get_limit(request) * len(benchmarks)
+    n = get_limit(request)
 
     queryset = (benchmarks_models.ResultData.objects
                 .select_related("benchmark", "result")
@@ -210,7 +210,11 @@ def dynamic_benchmark_summary(request):
                     benchmark__name__in=benchmarks,
 
                 )
-                .order_by('-created_at'))[:n]
+                .order_by('-created_at'))
+
+    if n:
+        n = n * len(benchmarks)
+        queryset = queryset[:n]
 
     data = []
     for result_id, result_data in groupby(queryset, lambda rd: rd.result_id):
