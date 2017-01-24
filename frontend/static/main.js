@@ -1,4 +1,4 @@
-var app = angular.module('art', ['ngRoute']);
+var app = angular.module('art', ['ngRoute', 'ngMaterial']);
 
 app.controller('Toolbar', ['$scope', '$http', '$rootScope', function($scope, $http, $rootScope) {
 
@@ -365,104 +365,110 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
 
         $scope.disabled = true;
 
-        for (var i = 0; i < $scope.benchmarks.length; i++) {
-            var benchmark = $scope.benchmarks[i];
+        if (($scope.limit != -100) || ($scope.limit == -100 && $scope.startDate)) {
+            for (var i = 0; i < $scope.benchmarks.length; i++) {
+                var benchmark = $scope.benchmarks[i];
 
-            // skip benchmarks that were already graphed
-            if (benchmark.graphed) {
-                continue;
-            }
+                // skip benchmarks that were already graphed
+                if (benchmark.graphed) {
+                    continue;
+                }
 
-            var charts = document.getElementById('charts');
-            var this_chart_id = 'chart-' + slug(benchmark.name);
-            var this_chart = document.getElementById(this_chart_id);
-            if (!this_chart) {
-                this_chart = document.createElement('div');
-                this_chart.className = 'chart panel panel-default';
-                this_chart.id = this_chart_id;
-                charts.appendChild(this_chart);
-            }
+                var charts = document.getElementById('charts');
+                var this_chart_id = 'chart-' + slug(benchmark.name);
+                var this_chart = document.getElementById(this_chart_id);
+                if (!this_chart) {
+                    this_chart = document.createElement('div');
+                    this_chart.className = 'chart panel panel-default';
+                    this_chart.id = this_chart_id;
+                    charts.appendChild(this_chart);
+                }
 
-            var params = {
-                branch: $scope.branch.branch_name,
-                environment: $scope.get_environment_ids(),
-                limit: $scope.limit
-            };
+                var params = {
+                    branch: $scope.branch.branch_name,
+                    environment: $scope.get_environment_ids(),
+                    startDate: $scope.startDate && $scope.startDate.getTime() / 1000,
+                    endDate: $scope.endDate && $scope.endDate.getTime() / 1000,
+                    limit: $scope.limit
+                };
 
-            if (params.environment.length > 0) {
-                this_chart.innerHTML = '<i class="fa fa-cog fa-spin"></i>';
-            } else {
-                this_chart.innerHTML = '<div class="alert alert-warning"><i class="fa fa-info-circle"></i>No data to chart. Select at least 1 environment.</div>';
-            }
-
-            var stats_endpoint;
-            if (benchmark.type == 'benchmark_group' || benchmark.type == 'root_benchmark_group') {
-                stats_endpoint = '/api/benchmark_group_summary/';
-                params.benchmark_group = benchmark.name;
-            } else if (benchmark.type == 'dynamic_benchmark_summary') {
-
-                var selected = _.filter($scope.benchmarks, function(benchmark) {
-                    return benchmark.type == 'benchmark';
-                });
-                params.summary = 1;
-
-                if (selected.length > 0) {
-                    /* if there are any benckmarks selected, we'll get a
-                     * dynamically-calculated summary of them
-                     */
-                    stats_endpoint = '/api/dynamic_benchmark_summary/';
-                    params.benchmarks = _.map(selected, function(benchmark) {
-                        return benchmark.name;
-                    })
-                    $scope.dynamic_benchmark_summary.label = "Summary of selected benchmarks";
-
-                    this_chart.title = 'Summary of: ' + _.join(_.map(selected, function(b) { return b.name} ), ', ');
-
+                if (params.environment.length > 0) {
+                    this_chart.innerHTML = '<i class="fa fa-cog fa-spin"></i>';
                 } else {
-                    /* no benchmarks selected: just display the overall summary
-                     * instead
-                     */
+                    this_chart.innerHTML = '<div class="alert alert-warning"><i class="fa fa-info-circle"></i>No data to chart. Select at least 1 environment.</div>';
+                }
+
+                var stats_endpoint;
+                if (benchmark.type == 'benchmark_group' || benchmark.type == 'root_benchmark_group') {
                     stats_endpoint = '/api/benchmark_group_summary/';
-                    params.benchmark_group = '/';
-                    $scope.dynamic_benchmark_summary.label = "Summary of all benchmarks";
-                }
-            }
-            else {
-                stats_endpoint = '/api/stats/';
-                params.benchmark = benchmark.name;
-            }
+                    params.benchmark_group = benchmark.name;
+                } else if (benchmark.type == 'dynamic_benchmark_summary') {
 
-            $q.all(_.map($scope.get_environment_ids(), function(env) {
-                var env_params = {};
-                _.each(params, function(v, k) {
-                    env_params[k] = v;
+                    var selected = _.filter($scope.benchmarks, function(benchmark) {
+                        return benchmark.type == 'benchmark';
+                    });
+                    params.summary = 1;
+
+                    if (selected.length > 0) {
+                        /* if there are any benckmarks selected, we'll get a
+                         * dynamically-calculated summary of them
+                         */
+                        stats_endpoint = '/api/dynamic_benchmark_summary/';
+                        params.benchmarks = _.map(selected, function(benchmark) {
+                            return benchmark.name;
+                        })
+                        $scope.dynamic_benchmark_summary.label = "Summary of selected benchmarks";
+
+                        this_chart.title = 'Summary of: ' + _.join(_.map(selected, function(b) { return b.name} ), ', ');
+
+                    } else {
+                        /* no benchmarks selected: just display the overall summary
+                         * instead
+                         */
+                        stats_endpoint = '/api/benchmark_group_summary/';
+                        params.benchmark_group = '/';
+                        $scope.dynamic_benchmark_summary.label = "Summary of all benchmarks";
+                    }
+                }
+                else {
+                    stats_endpoint = '/api/stats/';
+                    params.benchmark = benchmark.name;
+                }
+
+                $q.all(_.map($scope.get_environment_ids(), function(env) {
+                    var env_params = {};
+                    _.each(params, function(v, k) {
+                        env_params[k] = v;
+                    });
+                    env_params.environment = env;
+                    return $http.get(stats_endpoint, { params: env_params });
+                })).then(function(data_by_env) {
+                    var bname;
+                    if (data_by_env[0].config.params.summary) {
+                        bname = ':summary:';
+                    } else {
+                        bname = data_by_env[0].config.params.benchmark ||
+                            data_by_env[0].config.params.benchmark_group;
+                    }
+
+                    var benchmark = _.find($scope.benchmarks, ['name', bname]);
+                    var target_id = 'chart-' + slug(benchmark.name);
+                    var target = document.getElementById(target_id);
+
+                    $scope.drawChart(benchmark, $scope.branch, data_by_env, target);
+
+
+                    benchmark.graphed = true;
                 });
-                env_params.environment = env;
-                return $http.get(stats_endpoint, { params: env_params });
-            })).then(function(data_by_env) {
-                var bname;
-                if (data_by_env[0].config.params.summary) {
-                    bname = ':summary:';
-                } else {
-                    bname = data_by_env[0].config.params.benchmark ||
-                        data_by_env[0].config.params.benchmark_group;
-                }
-
-                var benchmark = _.find($scope.benchmarks, ['name', bname]);
-                var target_id = 'chart-' + slug(benchmark.name);
-                var target = document.getElementById(target_id);
-
-                $scope.drawChart(benchmark, $scope.branch, data_by_env, target);
-
-
-                benchmark.graphed = true;
-            });
+            }
         }
 
         $location.search({
             branch: $scope.branch.branch_name,
             environment: $scope.get_environment_ids(),
             benchmark: _.map($scope.benchmarks, 'name'),
+            startDate: $scope.startDate && $scope.startDate.getTime() / 1000,
+            endDate: $scope.endDate && $scope.endDate.getTime() / 1000,
             limit: $scope.limit
         });
 
@@ -668,17 +674,29 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
 
         $scope.environmentList = response[2].data;
 
+        function defaultStartDate() {
+            var d = new Date();
+            d.setDate(d.getDate() - 30);
+            d.setHours(0);
+            d.setMinutes(0);
+            d.setSeconds(0);
+            return d;
+        }
+
         var defaults;
         if ($routeParams.branch || $routeParams.benchmark || $routeParams.environment) {
             defaults = {
                 branch: $routeParams.branch,
                 benchmarks: forceArray($routeParams.benchmark),
                 environments: forceArray($routeParams.environment),
+                startDate: $routeParams.startDate && new Date($routeParams.startDate * 1000),
+                endDate: $routeParams.endDate && new Date($routeParams.endDate * 1000),
                 limit: $routeParams.limit
             };
         } else {
             defaults = {
-                limit: '20',
+                limit: '-100',
+                startDate: defaultStartDate(),
                 branch: 'master',
                 benchmarks: [':summary:'],
                 environments: _.map($scope.environmentList, function(env) {
@@ -702,6 +720,8 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
         });
 
         $scope.limit = defaults.limit;
+        $scope.startDate = defaults.startDate;
+        $scope.endDate = defaults.endDate;
 
     }).then($scope.change);
 
