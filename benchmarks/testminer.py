@@ -41,11 +41,21 @@ def extract_microbenchmarks(test_result_benchmarks, test_result_list):
         test_result = {}
         # benchmark iteration
         benchmark_group = '/'.join(full_benchmark_name.split('/')[0:-1]) + '/'
-        benchmark = full_benchmark_name.split('/')[-1].split('.')
-        test_result['benchmark_name'] = benchmark[0]
+        benchmark = full_benchmark_name.split('/')[-1]
+        split_benchmark = False
+        if '.' in benchmark:
+            split_benchmark = True
+            benchmark = benchmark.split('.')
+        if split_benchmark:
+            test_result['benchmark_name'] = benchmark[0]
+        else:
+            test_result['benchmark_name'] = benchmark
         test_result['benchmark_group'] = benchmark_group
         test_result['subscore'] = []
-        test_name = benchmark[1]
+        if split_benchmark:
+            test_name = benchmark[1]
+        else:
+            test_name = benchmark
         add_subscore_measurements(
             test_result['subscore'],
             test_name,
