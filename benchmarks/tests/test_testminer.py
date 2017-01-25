@@ -96,3 +96,11 @@ class ArtMicrobenchmarksTestResultsTest(TestCase):
         self.assertEqual(len(test_results), 2)
         self.assertEqual(len([t for t in test_results if t['benchmark_group'] == 'benchmarks/group1/']), 1)
         self.assertEqual(len([t for t in test_results if t['benchmark_group'] == 'benchmarks/group2/']), 1)
+
+    def test_parse_test_results_3(self):
+        input_json = '{"benchmarks" : { "benchmarks/group1/Foo.Baz": [420897.5, 434825.5, 417673.0], "benchmarks/group1/FooBar": [5420897.5, 5434825.5, 5417673.0], "benchmarks/group2/Foo.Bar": [5420897.5, 5434825.5, 5417673.0] } }'
+        tester = ArtMicrobenchmarksTestResults('https://example.com/')
+        test_results = tester.parse_test_results(input_json)
+        self.assertEqual(len(test_results), 3)
+        self.assertEqual(len([t for t in test_results if t['benchmark_group'] == 'benchmarks/group1/']), 2)
+        self.assertEqual(len([t for t in test_results if t['benchmark_group'] == 'benchmarks/group2/']), 1)
