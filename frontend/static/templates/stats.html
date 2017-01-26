@@ -73,12 +73,29 @@
           <div class='panel-body'>
             <select ng-disabled="disabled" ng-model="limit" class="form-control"
                     ng-change="change()">
+                <option value="-100">Filter by date range</option>
                 <option value="10">Display last 10 builds</option>
                 <option value="20">Display last 20 builds</option>
                 <option value="50">Display last 50 builds</option>
                 <option value="100">Display last 100 builds</option>
                 <option value="-1">Display all builds</option>
             </select>
+
+            <div ng-show='limit == -100'>
+              <div>
+                <small>Start date</small>
+              </div>
+              <div>
+                <md-datepicker ng-model="startDate" ng-change='change()' md-placeholder="start date?"></md-datepicker>
+              </div>
+              <div>
+                <small>End date</small>
+              </div>
+              <div>
+                <md-datepicker ng-model="endDate" ng-change='change()' md-placeholder="today"></md-datepicker>
+              </div>
+            </div>
+
           </div>
         </div>
 

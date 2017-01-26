@@ -11,6 +11,7 @@ from django.conf import settings
 from django.db import transaction
 from django.db.models import Avg, StdDev, Count
 from django.http import HttpResponse
+from datetime import datetime
 
 from rest_framework import views
 from rest_framework import viewsets
@@ -128,6 +129,19 @@ def get_limit(request):
     return n
 
 
+def get_date_range(request):
+    start = request.query_params.get('startDate')
+    end = request.query_params.get('endDate')
+
+    if start:
+        date_range = { 'created_at__gt': datetime.fromtimestamp(float(start)) }
+        if end:
+            date_range['created_at__lt'] = datetime.fromtimestamp(float(end))
+        return date_range
+    else:
+        return None
+
+
 class StatsViewSet(viewsets.ModelViewSet):
     queryset = (benchmarks_models.ResultData.objects
                 .select_related("benchmark", "result")
@@ -160,10 +174,16 @@ class StatsViewSet(viewsets.ModelViewSet):
 
         n = get_limit(self.request)
 
-        self.__queryset__ = self.queryset.filter(
+        queryset = self.queryset.filter(
             test_job_id__in=testjob_ids,
             benchmark__name__in=benchmarks
-        ).order_by('-created_at')[:n]
+        )
+
+        dates = get_date_range(self.request)
+        if dates:
+            queryset = queryset.filter(**dates)
+
+        self.__queryset__ = queryset.order_by('-created_at')[:n]
         return self.__queryset__
 
 
@@ -180,11 +200,17 @@ class BenchmarkGroupSummaryViewSet(viewsets.ModelViewSet):
 
         n = get_limit(self.request)
 
-        return self.queryset.filter(
+        queryset = self.queryset.filter(
             environment__identifier=env,
             group__name=group,
             result__branch_name=branch,
         ).order_by('-created_at')[:n]
+
+        dates = get_date_range(self.request)
+        if dates:
+            queryset = queryset.filter(**dates)
+
+        return queryset
 
 
 @api_view(["GET"])
@@ -215,6 +241,10 @@ def dynamic_benchmark_summary(request):
     if n:
         n = n * len(benchmarks)
         queryset = queryset[:n]
+
+    dates = get_date_range(request)
+    if dates:
+        queryset = queryset.filter(**dates)
 
     data = []
     for result_id, result_data in groupby(queryset, lambda rd: rd.result_id):
