@@ -261,6 +261,12 @@ def geomean(values):
     # Will use the alternative method described in
     # https://en.wikipedia.org/wiki/Geometric_mean -- topic "Relationship
     # with arithmetic mean of logarithms" -- which is exp(sum(log(x_i)/n))
+    #
+    # zeros are discarded
+    values = [v for v in values if v > 0]
+    if len(values) == 0:
+        return 0
+
     n = len(values)
     log_sum = reduce(lambda x,y: x + y, map(log, values))
     return exp(log_sum/n)
