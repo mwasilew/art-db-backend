@@ -204,13 +204,13 @@ class BenchmarkGroupSummaryViewSet(viewsets.ModelViewSet):
             environment__identifier=env,
             group__name=group,
             result__branch_name=branch,
-        ).order_by('-created_at')[:n]
+        ).order_by('-created_at')
 
         dates = get_date_range(self.request)
         if dates:
             queryset = queryset.filter(**dates)
 
-        return queryset
+        return queryset[:n]
 
 
 @api_view(["GET"])
@@ -238,13 +238,14 @@ def dynamic_benchmark_summary(request):
                 )
                 .order_by('-created_at'))
 
-    if n:
-        n = n * len(benchmarks)
-        queryset = queryset[:n]
 
     dates = get_date_range(request)
     if dates:
         queryset = queryset.filter(**dates)
+
+    if n:
+        n = n * len(benchmarks)
+        queryset = queryset[:n]
 
     data = []
     for result_id, result_data in groupby(queryset, lambda rd: rd.result_id):
