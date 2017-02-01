@@ -130,6 +130,9 @@ def get_limit(request):
 
 
 def get_date_range(request):
+    if get_limit(request):
+        return None
+
     start = request.query_params.get('startDate')
     end = request.query_params.get('endDate')
 
