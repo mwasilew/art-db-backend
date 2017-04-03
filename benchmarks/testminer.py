@@ -158,8 +158,9 @@ class ArtJenkinsTestResults(TestSystem):
     def __init__(self, base_url, username, password):
         spl = urlsplit(base_url)
         self.url = spl.scheme + "://" + spl.netloc
-        self.job_name = spl.path.split("/")[3]
-        self.build_number = int(spl.path.split("/")[4])
+        # compliant with api.views.ResultViewSet.__create_test_job__
+        self.job_name = spl.path.split("/")[2]
+        self.build_number = int(spl.path.split("/")[3])
         self.username = username # API username
         self.password = password # API token
 

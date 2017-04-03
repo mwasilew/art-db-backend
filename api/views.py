@@ -402,6 +402,8 @@ class ResultViewSet(viewsets.ModelViewSet):
 
     def __create_test_job__(self, result, env, data):
         environment, _ = benchmarks_models.Environment.objects.get_or_create(identifier=env)
+        spl = urlparse.urlsplit(result.build_url)
+        runnerurl = "%s://%s/job/%s/%s/" % (spl.scheme, spl.netloc, result.name, result.build_number)
         testjob = benchmarks_models.TestJob.objects.create(
             id='J' + str(result.build_id) + '_' + result.name + '_' + env,
             result=result,
@@ -410,7 +412,7 @@ class ResultViewSet(viewsets.ModelViewSet):
             completed=True,
             data=data,
             testrunnerclass='ArtJenkinsTestResults',
-            testrunnerurl=result.build_url,
+            testrunnerurl=runnerurl,
             environment=environment,
             created_at=result.created_at,
         )
