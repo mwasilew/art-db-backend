@@ -188,7 +188,6 @@ class TestJob(models.Model):
         jenkins_id_re = re.compile(r"J\d+_[\w\d\_\.]+")
         if jenkins_id_re.match(self.id):
             self.testrunnerclass = "ArtJenkinsTestResults"
-            self.testrunnerurl = self.result.build_url
             self.url = self.result.build_url
         super(TestJob, self).save(*args, **kwargs)
 
@@ -219,12 +218,11 @@ class TestJob(models.Model):
         return True
 
     def get_tester(self):
-        baseurl = self.testrunnerurl
         host = urlparse.urlsplit(self.testrunnerurl).netloc
         (username, password) = settings.CREDENTIALS[host]
 
         tester_class = getattr(testminer, self.testrunnerclass)
-        return tester_class(baseurl, username, password)
+        return tester_class(self.testrunnerurl, username, password)
 
     @property
     def data_filetype(self):
