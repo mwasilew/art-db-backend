@@ -402,7 +402,7 @@ class ResultViewSet(viewsets.ModelViewSet):
 
     def __create_test_job__(self, result, env, data):
         environment, _ = benchmarks_models.Environment.objects.get_or_create(identifier=env)
-        spl = urlsplit(result.build_url)
+        spl = urlparse.urlsplit(result.build_url)
         runnerurl = "%s://%s/job/%s/%s/" % (spl.scheme, spl.netloc, result.name, result.build_number)
         testjob = benchmarks_models.TestJob.objects.create(
             id='J' + str(result.build_id) + '_' + result.name + '_' + env,
