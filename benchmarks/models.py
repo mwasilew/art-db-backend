@@ -114,11 +114,20 @@ class Result(models.Model):
         if self.__baseline__ != False:
             return self.__baseline__
 
-        self.__baseline__ = self._default_manager.exclude(id=self.id).filter(
+        possible_baselines = self._default_manager.exclude(id=self.id).filter(
             branch_name=self.branch_name,
             gerrit_change_number=None,
             manifest__reduced__hash=self.manifest.reduced.hash
-        ).order_by('-created_at').first()
+        ).order_by('-created_at')
+
+        # baseline must have environments in common
+        environments = [e['environment_id'] for e in self.test_jobs.all().values('environment_id').distinct()]
+        self.__baseline__ = None
+
+        for baseline in possible_baselines:
+            if baseline.test_jobs.filter(environment_id__in=environments).exists():
+                self.__baseline__ = baseline
+                break
 
         return self.__baseline__
 
