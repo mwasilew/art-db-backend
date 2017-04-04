@@ -407,6 +407,8 @@ class ResultTests(APITestCase):
 
     def test_baseline_1(self):
 
+        env = G(models.Environment)
+
         baseline = G(models.Result,
                      manifest__manifest=MINIMAL_XML,
                      branch_name="master",
@@ -423,11 +425,19 @@ class ResultTests(APITestCase):
           name="load-avg",
           measurement=10)
 
+        G(models.TestJob,
+          result=current,
+          environment=env)
+
         G(models.ResultData,
           result=baseline,
           benchmark__name="load",
           name="load-avg",
           measurement=10)
+
+        G(models.TestJob,
+          result=baseline,
+          environment=env)
 
         response = self.client.get('/api/result/%s/baseline/' % current.pk)
 
@@ -450,6 +460,65 @@ class ResultTests(APITestCase):
         response = self.client.get('/api/result/%s/baseline/' % result_1.pk)
 
         self.assertEqual(response.status_code, 204)
+
+    def test_baseline_3(self):
+        now = timezone.now()
+        yesterday = now - relativedelta(days=1)
+
+        env = G(models.Environment)
+        env2 = G(models.Environment)
+
+        wrong_baseline = G(models.Result,
+                           manifest__manifest=MINIMAL_XML,
+                           branch_name="master",
+                           created_at=now,
+                           gerrit_change_number=None)
+
+        baseline = G(models.Result,
+                     manifest__manifest=MINIMAL_XML,
+                     branch_name="master",
+                     created_at=yesterday,
+                     gerrit_change_number=None)
+
+        current = G(models.Result,
+                    manifest__manifest=MINIMAL_XML,
+                    branch_name="master",
+                    gerrit_change_number=123)
+
+        G(models.ResultData,
+          result=current,
+          benchmark__name="load",
+          name="load-avg",
+          measurement=10)
+
+        G(models.TestJob,
+          result=current,
+          environment=env)
+
+        G(models.ResultData,
+          result=wrong_baseline,
+          benchmark__name="load",
+          name="load-avg",
+          measurement=10)
+
+        G(models.TestJob,
+          result=wrong_baseline,
+          environment=env2)
+
+        G(models.ResultData,
+          result=baseline,
+          benchmark__name="load",
+          name="load-avg",
+          measurement=10)
+
+        G(models.TestJob,
+          result=baseline,
+          environment=env)
+
+        response = self.client.get('/api/result/%s/baseline/' % current.pk)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['id'], baseline.id)
 
 
 class ManifestTests(APITestCase):
