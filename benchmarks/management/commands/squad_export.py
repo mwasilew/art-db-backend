@@ -38,7 +38,8 @@ class Command(BaseCommand):
             print('Processed build %d/%d' % (c, total))
 
     def export(self, result, directory):
-        builddir = os.path.join(directory, result.name, str(result.build_number))
+        build_id = result.manifest.reduced_id
+        builddir = os.path.join(directory, result.name, build_id)
         for testjob in result.test_jobs.all():
             self.export_testjob(testjob, builddir)
 
