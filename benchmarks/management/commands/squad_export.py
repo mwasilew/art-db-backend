@@ -2,6 +2,7 @@
 import json
 import os
 import re
+import shutil
 import sys
 from django.core.management.base import BaseCommand
 
@@ -77,3 +78,6 @@ class Command(BaseCommand):
                 f.write(json.dumps(metrics, indent=4))
             with open(os.path.join(jobdir, 'metadata.json'), 'w') as f:
                 f.write(json.dumps(metadata, indent=4))
+        if testjob.data:
+            filename = testjob.data.file.name
+            shutil.copy2(filename, os.path.join(jobdir, os.path.basename(filename)))
