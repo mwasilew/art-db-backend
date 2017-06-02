@@ -12,6 +12,7 @@ from django.db import transaction, IntegrityError
 from django.db.models import Avg, StdDev, Count
 from django.http import HttpResponse
 from datetime import datetime
+import time
 
 from rest_framework import views
 from rest_framework import viewsets
@@ -354,11 +355,15 @@ class ResultViewSet(viewsets.ModelViewSet):
         return response.Response(data)
 
     def create(self, request, *args, **kwargs):
+        attempts = 0
         while True:
             try:
                 return self.__create__(request, *args, **kwargs)
             except IntegrityError:
-                continue
+                attempts = attempts + 1
+                time.sleep(0.5)
+                if attempts >= 10:
+                    raise
 
     @transaction.atomic
     def __create__(self, request, *args, **kwargs):
