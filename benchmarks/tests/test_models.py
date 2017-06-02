@@ -12,8 +12,8 @@ from benchmarks.tests import get_file
 
 from benchmarks.models import Result, ResultData, TestJob, Manifest, Benchmark
 
+from benchmarks.testing import MANIFEST
 
-MINIMAL_XML = '<?xml version="1.0" encoding="UTF-8"?><body></body>'
 FULL_MANFIEST = open(os.path.join(os.path.dirname(__file__), 'manifest.xml')).read()
 
 
@@ -28,7 +28,7 @@ class ManifestTest(TestCase):
 class ResultTestCase(TestCase):
 
     def test_complete_1(self):
-        result = G(Result, manifest__manifest=MINIMAL_XML)
+        result = G(Result, manifest=MANIFEST())
 
         self.assertEqual(result.completed, False)
 
@@ -38,7 +38,7 @@ class ResultTestCase(TestCase):
         self.assertEqual(result.completed, True)
 
     def test_complete_2(self):
-        result = G(Result, manifest__manifest=MINIMAL_XML)
+        result = G(Result, manifest=MANIFEST())
 
         testjob = G(TestJob, result=result, completed=False)
 
@@ -47,7 +47,7 @@ class ResultTestCase(TestCase):
         self.assertEqual(result.completed, False)
 
     def test_updated_at_on_creation(self):
-        result = G(Result, manifest__manifest=MINIMAL_XML)
+        result = G(Result, manifest=MANIFEST())
         self.assertTrue(result.updated_at is not None)
 
     def test_testjobs_updated(self):
@@ -55,7 +55,7 @@ class ResultTestCase(TestCase):
         present = timezone.now()
         past = present - relativedelta(days=1)
 
-        result = G(Result, manifest__manifest=MINIMAL_XML)
+        result = G(Result, manifest=MANIFEST())
         testjob = G(TestJob, result=result, completed=False, updated_at=present)
 
         result.updated_at = past
@@ -74,13 +74,13 @@ class ResultTestCase(TestCase):
         then = now - relativedelta(days=7)
 
         result_1 = G(Result,
-                     manifest__manifest=MINIMAL_XML,
+                     manifest=MANIFEST(),
                      branch_name="master",
                      gerrit_change_number=123,
                      created_at=now)
 
         result_2 = G(Result,
-                     manifest__manifest=MINIMAL_XML,
+                     manifest=MANIFEST(),
                      branch_name="master",
                      gerrit_change_number=None,
                      created_at=then)
@@ -99,13 +99,13 @@ class ResultTestCase(TestCase):
         then = now - relativedelta(days=7)
 
         result_1 = G(Result,
-                     manifest__manifest=MINIMAL_XML,
+                     manifest=MANIFEST(),
                      branch_name="master",
                      gerrit_change_number=123,
                      created_at=now)
 
         result_2 = G(Result,
-                     manifest__manifest=MINIMAL_XML,
+                     manifest=MANIFEST(),
                      branch_name="master",
                      gerrit_change_number=None,
                      created_at=then)
@@ -124,19 +124,19 @@ class ResultTestCase(TestCase):
         then = now - relativedelta(days=7)
 
         result_1 = G(Result,
-                     manifest__manifest=MINIMAL_XML,
+                     manifest=MANIFEST(),
                      branch_name="master",
                      gerrit_change_number=123,
                      created_at=now)
 
         result_2 = G(Result,
-                     manifest__manifest=MINIMAL_XML,
+                     manifest=MANIFEST(),
                      branch_name="master",
                      gerrit_change_number=None,
                      created_at=then)
 
         result_3 = G(Result,
-                     manifest__manifest=MINIMAL_XML,
+                     manifest=MANIFEST(),
                      branch_name="master",
                      gerrit_change_number=None,
                      created_at=then)
@@ -161,13 +161,13 @@ class ResultTestCase(TestCase):
         then = now - relativedelta(days=7)
 
         current_master = G(Result,
-                           manifest__manifest=MINIMAL_XML,
+                           manifest=MANIFEST(),
                            branch_name="master",
                            gerrit_change_number=None,
                            created_at=now)
 
         previous_master = G(Result,
-                            manifest__manifest=MINIMAL_XML,
+                            manifest=MANIFEST(),
                             branch_name="master",
                             gerrit_change_number=None,
                             created_at=then)
@@ -193,7 +193,7 @@ class TestJobTestCase(TestCase):
         self.assertEqual({}, job.metadata)
 
     def test_can_resubmit_test_single_node(self):
-        result = G(Result, manifest__manifest=MINIMAL_XML)
+        result = G(Result, manifest=MANIFEST())
         job = TestJob(result=result)
         job.save()
         self.assertFalse(job.can_resubmit())
@@ -214,7 +214,7 @@ class TestJobTestCase(TestCase):
         self.assertTrue(job.can_resubmit())
 
     def test_can_resubmit_test_multi_node_host(self):
-        result = G(Result, manifest__manifest=MINIMAL_XML)
+        result = G(Result, manifest=MANIFEST())
         job = TestJob(result=result, id="12345.0")
         job.save()
         self.assertFalse(job.can_resubmit())
@@ -235,7 +235,7 @@ class TestJobTestCase(TestCase):
         self.assertTrue(job.can_resubmit())
 
     def test_can_resubmit_test_multi_node_target(self):
-        result = G(Result, manifest__manifest=MINIMAL_XML)
+        result = G(Result, manifest=MANIFEST())
         job = TestJob(result=result, id="12345.1")
         job.save()
         self.assertFalse(job.can_resubmit())
@@ -256,7 +256,7 @@ class TestJobTestCase(TestCase):
         self.assertFalse(job.can_resubmit())
 
     def test_data_filetype(self):
-        result = G(Result, manifest__manifest=MINIMAL_XML)
+        result = G(Result, manifest=MANIFEST())
         job = G(TestJob, result=result, id="12345.1")
         job.data = get_file('now.json')
 

@@ -11,7 +11,7 @@ from benchmarks.progress import Progress
 
 from benchmarks.tests import get_file
 
-MINIMAL_XML = '<?xml version="1.0" encoding="UTF-8"?><body></body>'
+from benchmarks.testing import MANIFEST
 
 
 class SendEmailTestCase(TestCase):
@@ -21,7 +21,7 @@ class SendEmailTestCase(TestCase):
         past = self.now - relativedelta(days=1)
         self.current = G(
             Result,
-            manifest__manifest=MINIMAL_XML,
+            manifest=MANIFEST(),
             branch_name='master',
             gerrit_change_number=123,
             created_at=self.now,
@@ -29,7 +29,7 @@ class SendEmailTestCase(TestCase):
 
         self.baseline = G(
             Result,
-            manifest__manifest=MINIMAL_XML,
+            manifest=MANIFEST(),
             branch_name='master',
             gerrit_change_number=None,
             created_at=past,
@@ -84,7 +84,7 @@ class BenchmarkProgressTest(TestCase):
     def __progress__(self, past, **kwargs):
         build1 = G(
             Result,
-            manifest__manifest=MINIMAL_XML,
+            manifest=MANIFEST(),
             branch_name='master',
             name='myproject',
             gerrit_change_number=None,
@@ -92,7 +92,7 @@ class BenchmarkProgressTest(TestCase):
         )
         build2 = G(
             Result,
-            manifest__manifest=MINIMAL_XML,
+            manifest=MANIFEST(),
             branch_name="master",
             name='myproject',
             gerrit_change_number=None,

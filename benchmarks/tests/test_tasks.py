@@ -29,7 +29,7 @@ from benchmarks.tasks import monthly_benchmark_progress
 from benchmarks.tests import get_file
 
 
-MINIMAL_XML = '<?xml version="1.0" encoding="UTF-8"?><body></body>'
+from benchmarks.testing import MANIFEST
 
 
 def lava_xmlrpc_503(jid):
@@ -95,7 +95,7 @@ class LavaFetchTest(TestCase):
 
     @patch("benchmarks.tasks.get_testjob_data", set_status("Complete"))
     def test_set_testjob_result_saves_testjob(self):
-        result = G(Result, manifest__manifest=MINIMAL_XML)
+        result = G(Result, manifest=MANIFEST())
         testjob = G(TestJob, result=result, status='Submitted')
         set_testjob_results.apply(args=[testjob.id])
 
@@ -105,7 +105,7 @@ class LavaFetchTest(TestCase):
 
     @patch("benchmarks.tasks.get_testjob_data", populate_successful_job)
     def test_dont_duplicate_test_results(self):
-        result = G(Result, manifest__manifest=MINIMAL_XML)
+        result = G(Result, manifest=MANIFEST())
         testjob = G(TestJob, result=result, status='Submitted')
 
         set_testjob_results.apply(args=[testjob.id])
@@ -136,14 +136,14 @@ class ReportsTest(TestCase):
         self.past = self.now - relativedelta(days=1)
         self.baseline = G(
             Result,
-            manifest__manifest=MINIMAL_XML,
+            manifest=MANIFEST(),
             branch_name='master',
             gerrit_change_number=None,
             created_at=self.past
         )
         self.current = G(
             Result,
-            manifest__manifest=MINIMAL_XML,
+            manifest=MANIFEST(),
             branch_name='master',
             gerrit_change_number=123,
             gerrit_change_id='I8adbccfe4b39a1e849b5d7a976fd4cdc',
@@ -179,7 +179,7 @@ class ReportsTest(TestCase):
 class StoreTestJobData(TestCase):
 
     def test_result_data(self):
-        result = G(Result, manifest__manifest=MINIMAL_XML)
+        result = G(Result, manifest=MANIFEST())
         testjob = N(TestJob, result=result, status='Complete')
         test_results = [
             {
@@ -201,7 +201,7 @@ class StoreTestJobData(TestCase):
         self.assertEqual(result_data.benchmark.name, 'bar')
 
     def test_result_data_with_benchmark_group(self):
-        result = G(Result, manifest__manifest=MINIMAL_XML)
+        result = G(Result, manifest=MANIFEST())
         testjob = N(TestJob, result=result, status='Complete')
         test_results = [
             {
@@ -230,7 +230,7 @@ class BenchmarkProgressTasksTest(TestCase):
     def __create_jobs__(self, past, **kwargs):
         build1 = G(
             Result,
-            manifest__manifest=MINIMAL_XML,
+            manifest=MANIFEST(),
             branch_name='master',
             name='myproject',
             gerrit_change_number=None,
@@ -238,7 +238,7 @@ class BenchmarkProgressTasksTest(TestCase):
         )
         build2 = G(
             Result,
-            manifest__manifest=MINIMAL_XML,
+            manifest=MANIFEST(),
             branch_name="master",
             name='myproject',
             gerrit_change_number=None,
