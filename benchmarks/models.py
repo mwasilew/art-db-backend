@@ -99,6 +99,7 @@ class Result(models.Model):
 
     class Meta:
         index_together = ["build_id", "name"]
+        unique_together = ["build_id", "name"]
         ordering = ['-created_at']
 
     @property

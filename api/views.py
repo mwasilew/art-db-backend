@@ -8,7 +8,7 @@ mimetypes.init()
 from itertools import groupby
 
 from django.conf import settings
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.db.models import Avg, StdDev, Count
 from django.http import HttpResponse
 from datetime import datetime
@@ -353,8 +353,15 @@ class ResultViewSet(viewsets.ModelViewSet):
 
         return response.Response(data)
 
-    @transaction.atomic
     def create(self, request, *args, **kwargs):
+        while True:
+            try:
+                return self.__create__(request, *args, **kwargs)
+            except IntegrityError:
+                continue
+
+    @transaction.atomic
+    def __create__(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
 
         delayed_tasks = []
