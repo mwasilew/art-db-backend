@@ -8,10 +8,11 @@ mimetypes.init()
 from itertools import groupby
 
 from django.conf import settings
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.db.models import Avg, StdDev, Count
 from django.http import HttpResponse
 from datetime import datetime
+import time
 
 from rest_framework import views
 from rest_framework import viewsets
@@ -353,8 +354,19 @@ class ResultViewSet(viewsets.ModelViewSet):
 
         return response.Response(data)
 
-    @transaction.atomic
     def create(self, request, *args, **kwargs):
+        attempts = 0
+        while True:
+            try:
+                return self.__create__(request, *args, **kwargs)
+            except IntegrityError:
+                attempts = attempts + 1
+                time.sleep(0.5)
+                if attempts >= 10:
+                    raise
+
+    @transaction.atomic
+    def __create__(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
 
         delayed_tasks = []
@@ -624,94 +636,3 @@ class EnvironmentsView(views.APIView):
         return response.Response(self.get_queryset().values("identifier", "name"))
 
 
-class CompareResults(viewsets.ViewSet):
-
-    def group_resuls(self, query):
-        # magic
-        return {
-            benchmark: {
-                score: [i.measurement for i in v]
-                for score, v in groupby(values, lambda x: x.name)}
-            for benchmark, values in
-            groupby(query, lambda x: x.benchmark.name)}
-
-    def compare_query(self, base_query, target_query):
-        base_results = self.group_resuls(base_query)
-        target_results = self.group_resuls(target_query)
-
-        data = {}
-
-        for benchmark, results in base_results.items():
-
-            scores = {}
-            data = {benchmark: scores}
-
-            target = target_results.get(benchmark)
-
-            for scorename, values in results.items():
-
-                base_avg = mean(values)
-                base_stddev = stddev(values)
-
-                if target and scorename in target:
-                    target_items = target[scorename]
-                    target_avg = mean(target_items)
-                    target_stddev = stddev(target_items)
-                    diff_avg = base_avg - target_avg
-                    diff_stddev = base_stddev - target_stddev
-                else:
-                    target_avg = None
-                    target_stddev = None
-                    diff_avg = None
-                    diff_stddev = None
-
-                scores[scorename] = {
-                    "avg": {
-                        "base": base_avg,
-                        "target": target_avg,
-                        "diff": diff_avg
-                    },
-                    "stddev": {
-                        "base": base_stddev,
-                        "target": target_stddev,
-                        "diff": diff_stddev
-                    }
-                }
-
-        return data
-
-    @list_route()
-    def branch(self, request):
-        branch_1 = request.query_params.get('branch_1')
-        branch_2 = request.query_params.get('branch_2')
-
-        if not (branch_1 and branch_2):
-            return response.Response([])
-
-        base_query = benchmarks_models.ResultData.objects.filter(result__branch_name=branch_1)
-
-        target_query = benchmarks_models.ResultData.objects.filter(result__branch_name=branch_2)
-
-        data = self.compare_query(base_query, target_query)
-
-        return response.Response(data)
-
-    @list_route()
-    def manifest(self, request):
-        manifest_1 = request.query_params.get('manifest_1')
-        manifest_2 = request.query_params.get('manifest_2')
-
-        if not (manifest_1 and manifest_2):
-            return response.Response([])
-
-        base_query = (benchmarks_models.ResultData.objects
-                      .filter(result__manifest__manifest_hash=manifest_1)
-                      .select_related('benchmark'))
-
-        target_query = (benchmarks_models.ResultData.objects
-                        .filter(result__manifest__manifest_hash=manifest_2)
-                        .select_related('benchmark'))
-
-        data = self.compare_query(base_query, target_query)
-
-        return response.Response(data)

@@ -13,7 +13,7 @@ from benchmarks import models
 from benchmarks.tests import get_file
 
 
-MINIMAL_XML = '<?xml version="1.0" encoding="UTF-8"?><body></body>'
+from benchmarks.testing import MANIFEST, MINIMAL_XML
 
 
 class TestJobTests(APITestCase):
@@ -27,7 +27,7 @@ class TestJobTests(APITestCase):
     @patch('benchmarks.tasks.set_testjob_results.apply', lambda *x, **y: None)
     @patch.dict('django.conf.settings.CREDENTIALS', {'validation.linaro.org': ("hej", "ho")})
     def test_resubmit_incomplete(self):
-        testjob = G(models.TestJob, id="000", status="Incomplete", result__manifest__manifest=MINIMAL_XML)
+        testjob = G(models.TestJob, id="000", status="Incomplete", result__manifest=MANIFEST())
 
         response = self.client.get('/api/testjob/%s/resubmit/' % testjob.id)
 
@@ -42,7 +42,7 @@ class TestJobTests(APITestCase):
     @patch('benchmarks.tasks.set_testjob_results.apply', lambda *x, **y: None)
     @patch.dict('django.conf.settings.CREDENTIALS', {'validation.linaro.org': ("hej", "ho")})
     def test_resubmit_canceled(self):
-        testjob = G(models.TestJob, id="000", status="Canceled", result__manifest__manifest=MINIMAL_XML)
+        testjob = G(models.TestJob, id="000", status="Canceled", result__manifest=MANIFEST())
 
         response = self.client.get('/api/testjob/%s/resubmit/' % testjob.id)
 
@@ -57,7 +57,7 @@ class TestJobTests(APITestCase):
     @patch('benchmarks.tasks.set_testjob_results.apply', lambda *x, **y: None)
     @patch.dict('django.conf.settings.CREDENTIALS', {'validation.linaro.org': ("hej", "ho")})
     def test_resubmit_resultsmissing(self):
-        testjob = G(models.TestJob, id="000", status="Results Missing", result__manifest__manifest=MINIMAL_XML)
+        testjob = G(models.TestJob, id="000", status="Results Missing", result__manifest=MANIFEST())
 
         response = self.client.get('/api/testjob/%s/resubmit/' % testjob.id)
 
@@ -73,7 +73,7 @@ class TestJobTests(APITestCase):
     @patch.dict('django.conf.settings.CREDENTIALS', {'validation.linaro.org': ("hej", "ho")})
     def test_resubmit_with_status_completed(self):
 
-        testjob = G(models.TestJob, status='Complete', result__manifest__manifest=MINIMAL_XML)
+        testjob = G(models.TestJob, status='Complete', result__manifest=MANIFEST())
 
         response = self.client.get('/api/testjob/%s/resubmit/' % testjob.id)
 
@@ -87,7 +87,7 @@ class TestJobTests(APITestCase):
     @patch.dict('django.conf.settings.CREDENTIALS', {'validation.linaro.org': ("hej", "ho")})
     def test_resubmit_with_status_running(self):
 
-        testjob = G(models.TestJob, status='Running', result__manifest__manifest=MINIMAL_XML)
+        testjob = G(models.TestJob, status='Running', result__manifest=MANIFEST())
 
         response = self.client.get('/api/testjob/%s/resubmit/' % testjob.id)
 
@@ -101,7 +101,7 @@ class TestJobTests(APITestCase):
     @patch.dict('django.conf.settings.CREDENTIALS', {'validation.linaro.org': ("hej", "ho")})
     def test_resubmit_with_status_submitted(self):
 
-        testjob = G(models.TestJob, status='Submitted', result__manifest__manifest=MINIMAL_XML)
+        testjob = G(models.TestJob, status='Submitted', result__manifest=MANIFEST())
 
         response = self.client.get('/api/testjob/%s/resubmit/' % testjob.id)
 
@@ -410,12 +410,12 @@ class ResultTests(APITestCase):
         env = G(models.Environment)
 
         baseline = G(models.Result,
-                     manifest__manifest=MINIMAL_XML,
+                     manifest=MANIFEST(),
                      branch_name="master",
                      gerrit_change_number=None)
 
         current = G(models.Result,
-                    manifest__manifest=MINIMAL_XML,
+                    manifest=MANIFEST(),
                     branch_name="master",
                     gerrit_change_number=123)
 
@@ -447,7 +447,7 @@ class ResultTests(APITestCase):
     def test_baseline_2(self):
 
         result_1 = G(models.Result,
-                     manifest__manifest=MINIMAL_XML,
+                     manifest=MANIFEST(),
                      branch_name="master",
                      gerrit_change_number=123)
 
@@ -469,19 +469,19 @@ class ResultTests(APITestCase):
         env2 = G(models.Environment)
 
         wrong_baseline = G(models.Result,
-                           manifest__manifest=MINIMAL_XML,
+                           manifest=MANIFEST(),
                            branch_name="master",
                            created_at=now,
                            gerrit_change_number=None)
 
         baseline = G(models.Result,
-                     manifest__manifest=MINIMAL_XML,
+                     manifest=MANIFEST(),
                      branch_name="master",
                      created_at=yesterday,
                      gerrit_change_number=None)
 
         current = G(models.Result,
-                    manifest__manifest=MINIMAL_XML,
+                    manifest=MANIFEST(),
                     branch_name="master",
                     gerrit_change_number=123)
 
@@ -564,133 +564,6 @@ class ManifestTests(APITestCase):
         self.assertEqual(response.data['count'], 1)
 
 
-class CompareTests(APITestCase):
-
-    def setUp(self):
-        user = User.objects.create_user('test', None, 'pass')
-        user.groups.create(name="admin")
-        self.client.force_authenticate(user=user)
-
-    def test_compare_with_manifest_0(self):
-        response = self.client.get('/api/compare/manifest/')
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, [])
-
-    def test_compare_with_manifest_1(self):
-
-        benchmark = G(models.Benchmark, name="cpu")
-
-        manifest_1 = G(models.Manifest, manifest=MINIMAL_XML)
-        manifest_2 = G(models.Manifest, manifest=MINIMAL_XML)
-
-        manifest_1_result = G(models.Result, manifest=manifest_1)
-        manifest_2_result = G(models.Result, manifest=manifest_2)
-
-        G(models.ResultData,
-          result=manifest_1_result,
-          benchmark=benchmark,
-          name="load",
-          values=[10])
-
-        G(models.ResultData,
-          result=manifest_2_result,
-          benchmark=benchmark,
-          name="load",
-          values=[2])
-
-        response = self.client.get('/api/compare/manifest/', {
-            'manifest_1': manifest_1.manifest_hash,
-            'manifest_2': manifest_2.manifest_hash
-        })
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data), 1)
-
-        self.assertTrue('cpu' in response.data)
-        self.assertTrue('load' in response.data['cpu'])
-        self.assertTrue('avg' in response.data['cpu']['load'])
-        self.assertTrue('stddev' in response.data['cpu']['load'])
-
-        self.assertEqual(response.data['cpu']['load']['avg']['base'], 6.0)
-        self.assertEqual(response.data['cpu']['load']['avg']['target'], 6.0)
-        self.assertEqual(response.data['cpu']['load']['avg']['diff'], 0.0)
-
-        self.assertEqual(response.data['cpu']['load']['stddev']['base'], 4.0)
-        self.assertEqual(response.data['cpu']['load']['stddev']['target'], 4.0)
-        self.assertEqual(response.data['cpu']['load']['stddev']['diff'], 0)
-
-    def test_compare_with_branch(self):
-
-        benchmark = G(models.Benchmark, name="cpu")
-
-        branch_1_name = "test1"
-        branch_2_name = "test2"
-
-        branch_1_result = G(models.Result,
-                            branch_name=branch_1_name,
-                            manifest=G(models.Manifest, manifest=MINIMAL_XML))
-
-        branch_2_result = G(models.Result,
-                            branch_name=branch_2_name,
-                            manifest=G(models.Manifest, manifest=MINIMAL_XML))
-
-        G(models.ResultData,
-          result=branch_1_result,
-          benchmark=benchmark,
-          name="load",
-          values=[10])
-
-        G(models.ResultData,
-          result=branch_2_result,
-          benchmark=benchmark,
-          name="load",
-          values=[2])
-
-        response = self.client.get('/api/compare/branch/', {
-            'branch_1': branch_1_name,
-            'branch_2': branch_2_name
-        })
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data), 1)
-
-        self.assertEqual(response.data['cpu']['load']['avg']['base'], 10)
-        self.assertEqual(response.data['cpu']['load']['avg']['target'], 2)
-        self.assertEqual(response.data['cpu']['load']['avg']['diff'], 8)
-
-        self.assertEqual(response.data['cpu']['load']['stddev']['base'], 0)
-        self.assertEqual(response.data['cpu']['load']['stddev']['target'], 0)
-        self.assertEqual(response.data['cpu']['load']['stddev']['diff'], 0)
-
-    def test_compare_missing_benchmark(self):
-
-        benchmark = G(models.Benchmark, name="cpu")
-
-        manifest_1 = G(models.Manifest, manifest=MINIMAL_XML)
-        manifest_2 = G(models.Manifest, manifest=MINIMAL_XML)
-
-        manifest_1_result = G(models.Result, manifest=manifest_1)
-
-        G(models.ResultData,
-          result=manifest_1_result,
-          benchmark=benchmark,
-          name="load",
-          values=[10])
-
-        response = self.client.get('/api/compare/manifest/', {
-            'manifest_1': manifest_1.manifest_hash,
-            'manifest_2': manifest_2.manifest_hash
-        })
-
-        self.assertEqual(response.data['cpu']['load']['avg']['base'], 10)
-        self.assertEqual(response.data['cpu']['load']['avg']['target'], 10)
-        self.assertEqual(response.data['cpu']['load']['avg']['diff'], 0)
-
-        self.assertEqual(response.data['cpu']['load']['stddev']['base'], 0)
-        self.assertEqual(response.data['cpu']['load']['stddev']['target'], 0)
-        self.assertEqual(response.data['cpu']['load']['stddev']['diff'], 0)
-
 class StatsTest(APITestCase):
 
     def setUp(self):
@@ -703,14 +576,14 @@ class StatsTest(APITestCase):
         yesterday = now - relativedelta(days=1)
 
         baseline = G(models.Result,
-              manifest__manifest=MINIMAL_XML,
+              manifest=MANIFEST(),
               branch_name='master',
               name="TheProject",
               created_at=yesterday,
               gerrit_change_number=None)
 
         patched = G(models.Result,
-             manifest__manifest=MINIMAL_XML,
+             manifest=MANIFEST(),
              branch_name='master',
              name="TheProject",
              created_at=now,
@@ -758,14 +631,14 @@ class StatsTest(APITestCase):
         yesterday = now - relativedelta(days=1)
 
         baseline = G(models.Result,
-              manifest__manifest=MINIMAL_XML,
+              manifest=MANIFEST(),
               branch_name='master',
               name="TheProject",
               created_at=yesterday,
               gerrit_change_number=None)
 
         patched = G(models.Result,
-             manifest__manifest=MINIMAL_XML,
+             manifest=MANIFEST(),
              branch_name='master',
              name="TheProject",
              created_at=now,
@@ -807,14 +680,14 @@ class StatsTest(APITestCase):
         yesterday = now - relativedelta(days=1)
 
         baseline = G(models.Result,
-              manifest__manifest=MINIMAL_XML,
+              manifest=MANIFEST(),
               branch_name='master',
               name="TheProject",
               created_at=yesterday,
               gerrit_change_number=None)
 
         patched = G(models.Result,
-             manifest__manifest=MINIMAL_XML,
+             manifest=MANIFEST(),
              branch_name='master',
              name="TheProject",
              created_at=now,
@@ -858,7 +731,7 @@ class BenchmarkGroupSummaryTest(APITestCase):
         self.client.force_authenticate(user=user)
 
     def test_basic(self):
-        result = G(models.Result, manifest__manifest=MINIMAL_XML, gerrit_change_number=None)
+        result = G(models.Result, manifest=MANIFEST(), gerrit_change_number=None)
         group = G(models.BenchmarkGroup)
         env = G(models.Environment)
         G(models.BenchmarkGroupSummary, group=group, environment=env, result=result)
@@ -870,8 +743,8 @@ class BenchmarkGroupSummaryTest(APITestCase):
         self.assertEqual(1, len(response.data))
 
     def test_returns_only_mainline_results(self):
-        mainline_result = G(models.Result, manifest__manifest=MINIMAL_XML, branch_name='master', gerrit_change_number=None)
-        patch_result = G(models.Result, manifest__manifest=MINIMAL_XML, branch_name='master', gerrit_change_number=999)
+        mainline_result = G(models.Result, manifest=MANIFEST(), branch_name='master', gerrit_change_number=None)
+        patch_result = G(models.Result, manifest=MANIFEST(), branch_name='master', gerrit_change_number=999)
         group = G(models.BenchmarkGroup)
         env = G(models.Environment)
         G(models.BenchmarkGroupSummary, group=group, environment=env, result=mainline_result)
@@ -891,7 +764,7 @@ class TestJobData(APITestCase):
             id="0001",
             status="Complete",
             completed=True,
-            result__manifest__manifest=MINIMAL_XML
+            result__manifest=MANIFEST()
         )
         user = User.objects.create_superuser('test', 'email@test.com', 'test')
         self.client.force_authenticate(user=user)

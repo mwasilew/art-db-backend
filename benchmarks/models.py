@@ -31,7 +31,7 @@ class ManifestReduced(models.Model):
 class Manifest(models.Model):
     reduced = models.ForeignKey(ManifestReduced, related_name="manifests", null=True)
 
-    manifest_hash = models.CharField(max_length=40, editable=False)
+    manifest_hash = models.CharField(max_length=40, editable=False, unique=True)
     manifest = models.TextField()
 
     class Meta:
@@ -99,6 +99,7 @@ class Result(models.Model):
 
     class Meta:
         index_together = ["build_id", "name"]
+        unique_together = ["build_id", "name"]
         ordering = ['-created_at']
 
     @property

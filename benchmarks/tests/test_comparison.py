@@ -8,7 +8,7 @@ from benchmarks.tests import get_file
 from benchmarks.models import Result, ResultData, TestJob
 from benchmarks.comparison import render_comparison
 
-MINIMAL_XML = '<?xml version="1.0" encoding="UTF-8"?><body></body>'
+from benchmarks.testing import MANIFEST
 
 
 class ComparisonTest(TestCase):
@@ -20,14 +20,14 @@ class ComparisonTest(TestCase):
 
         result_now = G(Result,
                       name="name1",
-                      manifest__manifest=MINIMAL_XML,
+                      manifest=MANIFEST(),
                       branch_name="master",
                       gerrit_change_number=None,
                       created_at=now)
 
         result_then = G(Result,
                       name="name2",
-                      manifest__manifest=MINIMAL_XML,
+                      manifest=MANIFEST(),
                       branch_name="master",
                       gerrit_change_number=None,
                       created_at=now)

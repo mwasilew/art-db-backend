@@ -19,7 +19,6 @@ router.register(r'stats', views.StatsViewSet)
 router.register(r'benchmark_group_summary', views.BenchmarkGroupSummaryViewSet)
 
 # functional view
-router.register(r'compare', views.CompareResults, base_name="compare")
 router.register(r'settings', views.SettingsViewSet, base_name="settings")
 
 urlpatterns = [
