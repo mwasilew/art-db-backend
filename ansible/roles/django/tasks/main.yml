@@ -17,7 +17,13 @@
 
 
 - name: Upgrade PIP manager
-  pip: name=pip extra_args="-U"
+  pip: name=virtualenv extra_args="-U"
+
+  tags:
+    - install
+    - update
+
+- name: Upgrade virtualenv
   pip: name=virtualenv extra_args="-U"
 
   tags:
