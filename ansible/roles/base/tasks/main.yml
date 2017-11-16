@@ -1,8 +1,9 @@
 - name: Install base packages
   apt: pkg={{item}} state=installed update-cache=yes
   with_items:
-    - libffi-dev 
+    - libffi-dev
     - libssl-dev
+    - libldap2-dev
   tags:
     - install
     - update
