@@ -12,14 +12,16 @@ Vagrant.configure(2) do |config|
     v.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
   end
 
-  config.vm.provision "shell" do |shell|
-    shell.path = 'dev-setup.sh'
-    shell.privileged = false
-  end unless ENV['ANSIBLE']
+  if !ENV['NOPROVISION']
+    config.vm.provision "shell" do |shell|
+      shell.path = 'dev-setup.sh'
+      shell.privileged = false
+    end unless ENV['ANSIBLE']
 
-  config.vm.provision "ansible" do |ansible|
-    ansible.playbook = "ansible/site.yml"
-  end if ENV['ANSIBLE']
+    config.vm.provision "ansible" do |ansible|
+      ansible.playbook = "ansible/site.yml"
+    end if ENV['ANSIBLE']
+  end
 
   config.ssh.forward_agent = true
 end
