@@ -5,16 +5,13 @@ URL = "https://{{ hostname }}"
 CELERY_SEND_TASK_ERROR_EMAILS = True
 BROKER_URL = 'amqp://guest:guest@localhost:5672/{{hostname}}'
 
-AUTH_CROWD_ALWAYS_UPDATE_USER = False
-AUTH_CROWD_ALWAYS_UPDATE_GROUPS = False
-AUTH_CROWD_APPLICATION_USER = '{{crowd_user}}'
-AUTH_CROWD_APPLICATION_PASSWORD = '{{crowd_pass}}'
-AUTH_CROWD_SERVER_REST_URI = '{{crowd_rest_uri}}'
-
 AUTHENTICATION_BACKENDS = (
-    'crowdrest.backend.CrowdRestBackend',
+    'django_auth_ldap.backend.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
+AUTH_LDAP_SERVER_URI = "{{AUTH_LDAP_SERVER_URI}}"
+AUTH_LDAP_BIND_DN = '{{AUTH_LDAP_BIND_DN}}'
+AUTH_LDAP_BIND_PASSWORD = '{{AUTH_LDAP_BIND_PASSWORD}}'
 
 CREDENTIALS = {
     'validation.linaro.org': (

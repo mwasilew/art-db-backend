@@ -4,9 +4,9 @@ db_password: '***'
 db_host: '127.0.0.1'
 db_port: '5432'
 
-crowd_user: '***'
-crowd_pass: '***'
-crowd_rest_uri: 'https://login.linaro.org:8443/crowd/rest/usermanagement/1'
+AUTH_LDAP_SERVER_URI = "ldaps://login.linaro.org"
+AUTH_LDAP_BIND_DN = 'cn=ldapbind,dc=linaro,dc=org'
+AUTH_LDAP_BIND_PASSWORD = '********************'
 
 secret_key: '***'
 
