@@ -24,6 +24,7 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install -qy \
 if [ ! -f .virtualenv/bin/python ]; then
   virtualenv .virtualenv
 fi
+.virtualenv/bin/pip install --upgrade setuptools
 .virtualenv/bin/pip install -r requirements-dev.txt
 
 if [ ! -f crayonbox/settings/private.py ]; then
