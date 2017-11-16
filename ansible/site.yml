@@ -11,6 +11,5 @@
   - postgres
   - rabbitmq
   - django
-  - art-reports-populate
   - celeryd
   - apache-site
