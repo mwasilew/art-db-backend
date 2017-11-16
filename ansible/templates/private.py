@@ -1,4 +1,6 @@
 from . import *
+import ldap
+from django_auth_ldap.config import LDAPSearch
 
 
 URL = "https://{{ hostname }}"
@@ -12,6 +14,8 @@ AUTHENTICATION_BACKENDS = (
 AUTH_LDAP_SERVER_URI = "{{AUTH_LDAP_SERVER_URI}}"
 AUTH_LDAP_BIND_DN = '{{AUTH_LDAP_BIND_DN}}'
 AUTH_LDAP_BIND_PASSWORD = '{{AUTH_LDAP_BIND_PASSWORD}}'
+AUTH_LDAP_USER_SEARCH = LDAPSearch("{{AUTH_LDAP_USER_SEARCH_BASE}}",
+    ldap.SCOPE_SUBTREE, "{{AUTH_LDAP_USER_SEARCH_RESULT}}")
 
 CREDENTIALS = {
     'validation.linaro.org': (
