@@ -39,7 +39,7 @@
        version={{git_tag}}
        update=yes
        ssh_opts="-o StrictHostKeyChecking=no"
-  sudo_user: "{{apache_user}}"
+  become_user: "{{apache_user}}"
   notify: restart-apache
   tags:
     - install
@@ -47,7 +47,7 @@
     - django
 
 - name: Install required application packages
-  sudo_user: "{{apache_user}}"
+  become_user: "{{apache_user}}"
   pip: >
     requirements={{install_base}}/project/requirements.txt
     virtualenv={{install_base}}/.virtualenv
@@ -78,7 +78,7 @@
     - django
 
 - name: Run syncdb command
-  sudo_user: "{{apache_user}}"
+  become_user: "{{apache_user}}"
   django_manage: app_path={{django_app_root}}
                  settings={{django_settings}}
                  virtualenv={{install_base}}/.virtualenv
@@ -88,7 +88,7 @@
     - django
 
 - name: Run migrations (if installed)
-  sudo_user: "{{apache_user}}"
+  become_user: "{{apache_user}}"
   django_manage: app_path={{django_app_root}}
                  settings={{django_settings}}
                  virtualenv={{install_base}}/.virtualenv
@@ -103,7 +103,6 @@
                  virtualenv={{install_base}}/.virtualenv
                  command=collectstatic
   register: django_static
-  failed_when: 'django_static.failed and (django_static.msg is defined and ("Unknown django command" not in django_static.msg))'
   notify: restart-apache
   tags:
     - update

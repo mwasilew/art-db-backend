@@ -46,7 +46,7 @@
 
 - name: running supervisord
   shell: "{{supervisord_bin}} -c {{supervisord_conf}}"
-  sudo_user: "{{apache_user}}"
+  become_user: "{{apache_user}}"
   when: supervisor_running|failed
   tags:
     - install
@@ -60,9 +60,9 @@
 
 - name: supervisor restart
   shell: "{{supervisorctl_bin}} -c {{supervisord_conf}} restart all"
-  sudo_user: "{{apache_user}}"
+  become_user: "{{apache_user}}"
 
 - name: supervisor update
   shell: "{{supervisorctl_bin}} -c {{supervisord_conf}} update"
-  sudo_user: "{{apache_user}}"
+  become_user: "{{apache_user}}"
 

@@ -18,15 +18,15 @@
     - restart-postgres
 
 - name: Create postgres user
-  sudo_user: postgres
-  postgresql_user: user={{db_user}}
+  become_user: postgres
+  postgresql_user: name={{db_user}}
                    password={{db_password}}
                    role_attr_flags=CREATEDB,NOSUPERUSER
   tags:
     - database
 
 - name: Create postgres database
-  sudo_user: postgres
+  become_user: postgres
   postgresql_db: name={{db_name}}
                  owner={{db_user}}
   tags:
@@ -35,8 +35,7 @@
 - name: Alter postgresql database template for extension hstore
   command: psql {{db_name}} -c 'create extension if not exists hstore;'
   register: psql_hstore
-  sudo: yes
-  sudo_user: postgres
+  become_user: postgres
   ignore_errors: True
   changed_when: not psql_hstore.stderr
   tags:
