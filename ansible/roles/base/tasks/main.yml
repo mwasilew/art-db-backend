@@ -4,6 +4,7 @@
     - libffi-dev
     - libssl-dev
     - libldap2-dev
+    - libsasl2-dev
   tags:
     - install
     - update
