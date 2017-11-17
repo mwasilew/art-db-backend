@@ -8,7 +8,7 @@ get_data() {
 }
 
 sudo apt-get update
-sudo DEBIAN_FRONTEND=noninteractive apt-get -qy install python-dev python-pip libffi-dev libssl-dev git wget python-virtualenv openjdk-7-jre-headless
+sudo DEBIAN_FRONTEND=noninteractive apt-get -qy install python-dev python-pip libffi-dev libssl-dev libldap2-dev libsasl2-dev git wget python-virtualenv openjdk-7-jre-headless
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -qy postgresql postgresql-contrib libpq-dev
 
 if [ -d /vagrant ]; then
