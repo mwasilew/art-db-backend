@@ -5,8 +5,9 @@
     - update
 
 - name: rabbitmq vhost
-  shell: sudo rabbitmqctl add_vhost {{hostname}}
-  ignore_errors: on
+  shell: rabbitmqctl add_vhost {{hostname}} || true
+  register: vhost
+  changed_when: '"vhost_already_exists" not in vhost.stderr'
 
 - name: rabbitmq vhost permissions
   shell: rabbitmqctl set_permissions -p {{hostname}} guest ".*" ".*" ".*"
