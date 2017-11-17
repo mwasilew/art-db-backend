@@ -10,10 +10,11 @@
     - update
 
 - name: Enable postgres to listen on local interface
-  lineinfile: dest=/etc/postgresql/9.3/main/postgresql.conf
-              regexp="^listen_addresses"
-              insertafter="^#listen_addresses"
-              line="listen_addresses = 'localhost'"
+  lineinfile:
+    dest: /etc/postgresql/9.3/main/postgresql.conf
+    regexp: "^listen_addresses"
+    insertafter: "^#listen_addresses"
+    line: "listen_addresses = 'localhost'"
   notify:
     - restart-postgres
 
