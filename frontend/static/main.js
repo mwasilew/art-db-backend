@@ -455,10 +455,16 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                     var target_id = 'chart-' + slug(benchmark.name);
                     var target = document.getElementById(target_id);
 
-                    $scope.drawChart(benchmark, $scope.branch, data_by_env, target);
-
-
-                    benchmark.graphed = true;
+                    $http.get('/api/annotations/', { params: params }).then(function(response) {
+                        var annotations = _.map(response.data, function(item) {
+                            return {
+                                x: Date.parse(item.date),
+                                label: item.label
+                            }
+                        })
+                        $scope.drawChart(benchmark, $scope.branch, data_by_env, annotations, target);
+                        benchmark.graphed = true;
+                    })
                 });
             }
         }
@@ -497,9 +503,24 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
         $scope.updateCharts();
     }
 
-    $scope.drawChart = function(benchmark, branch, env_data, element) {
+    $scope.drawChart = function(benchmark, branch, env_data, annotations, element) {
         var series = [];
         var i = -1;
+
+        var plotLines = _.map(annotations, function(item) {
+            return {
+                color: '#babdb6',
+                width: 0.5,
+                value: item.x,
+                label: {
+                    rotation: 0,
+                    align: 'right',
+                    x: -5,
+                    style: { "width": "100px" },
+                    text: item.label
+                }
+            }
+        })
 
         _.each(env_data, function(response) {
 
@@ -567,6 +588,7 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                             month: '%e. %b',
                             year: '%b'
                         },
+                        plotLines: plotLines,
                         title: {
                             text: 'Date'
                         }

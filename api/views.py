@@ -268,6 +268,27 @@ def dynamic_benchmark_summary(request):
     return response
 
 
+@api_view(["GET"])
+def annotations(request):
+    results = benchmarks_models.Result.objects.exclude(annotation=None)
+    dates = get_date_range(request)
+    if dates:
+        results = results.filter(**dates)
+
+    limit = get_limit(request)
+    if limit:
+        results = results[:limit]
+
+    data = []
+    for r in results.values('created_at', 'annotation'):
+        r['date'] = r.pop('created_at').isoformat()
+        r['label'] = r.pop('annotation')
+        data.append(r)
+
+    response = HttpResponse(json.dumps(data), content_type='application/json')
+    return response
+
+
 # result
 class ResultViewSet(viewsets.ModelViewSet):
     permission_classes = [DjangoModelPermissions]
