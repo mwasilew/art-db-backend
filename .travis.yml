@@ -30,4 +30,7 @@ notifications:
     on_success: change
     on_failure: change
   irc:
-    - "chat.freenode.net#linaro-qa"
+    on_success: change
+    on_failure: change
+    channels:
+      - "chat.freenode.net#linaro-qa"
