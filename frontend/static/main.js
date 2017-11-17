@@ -61,6 +61,12 @@ app.config(['$routeProvider', function($routeProvider) {
         });
 }]);
 
+
+app.config(['$httpProvider', function($httpProvider) {
+    $httpProvider.defaults.xsrfCookieName = 'csrftoken';
+    $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
+}])
+
 app.directive('pagination', ['$route', '$httpParamSerializer', '$location', function($route, $httpParamSerializer, $location) {
     return {
         restrict: 'E',
@@ -261,6 +267,18 @@ app.controller('BuildDetail', ['$scope', '$http', '$routeParams', '$q', '$routeP
             }
             return false;
         };
+    };
+
+    $scope.saving = false
+    $scope.save_annotation = function() {
+        $scope.saving = true
+        $http.post(
+            '/api/saveannotation/' + $scope.build.id + '/',
+            { annotation: $scope.build.annotation }
+        ).then(function() {
+            $scope.edit = false
+            $scope.saving = false
+        })
     };
 
 }]);

@@ -21,8 +21,10 @@ from rest_framework import mixins
 from rest_framework import status
 from rest_framework import filters
 from rest_framework.decorators import detail_route, api_view
+from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import list_route
 
 from benchmarks import models as benchmarks_models
@@ -287,6 +289,16 @@ def annotations(request):
 
     response = HttpResponse(json.dumps(data), content_type='application/json')
     return response
+
+
+@api_view(["POST"])
+@authentication_classes((SessionAuthentication,))
+@permission_classes((IsAuthenticated,))
+def save_annotation(request, build_id):
+    result = benchmarks_models.Result.objects.get(pk=build_id)
+    result.annotation = request.data.get("annotation")
+    result.save()
+    return HttpResponse('OK')
 
 
 # result

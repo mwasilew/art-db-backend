@@ -11,6 +11,22 @@
     <small>{{ build.created_at}}</small>
   </h1>
 
+  <div ng-hide='build.annotation'>
+    <button class='btn btn-default btn-sm' ng-hide='edit' ng-click='edit = true'>Add annotation</button>
+  </div>
+
+  <div class='alert alert-warning' ng-show='build.annotation || edit'>
+    <span ng-hide='edit-annotation'>{{build.annotation}}</span>
+    <form class='form-inline' ng-show='edit-annotation'>
+      <input class='form-control' type='text' size='60' ng-model='build.annotation'/>
+      <button class='btn btn-default btn-sm' ng-show='edit' ng-click='save_annotation()'>
+        <span class='fa fa-spinner fa-spin' ng-show='saving'>&nbsp;</span>
+        Save
+      </button>
+    </form>
+  <button class='btn btn-default btn-sm' ng-hide='edit' ng-click='edit = true'>Edit</button>
+  </div>
+
   <hr/>
 
   <dl class="dl-horizontal">
