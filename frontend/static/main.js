@@ -512,45 +512,45 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                 // data itself
                 series.push({
                     name: name + ' (' + env + ')',
-                                  type: 'spline',
-                                  color: Highcharts.getOptions().colors[i],
-                                  zIndex: 1,
-                                  data: _.map(data, function(point) {
-                                      return {
-                                          x: Date.parse(point.created_at),
-                                          y: point.measurement,
-                                          min: _.min(point.values),
-                                          max: _.max(point.values),
-                                          result_id: point.result,
-                                      };
-                                  })
-                                  });
+                    type: 'spline',
+                    color: Highcharts.getOptions().colors[i],
+                    zIndex: 1,
+                    data: _.map(data, function(point) {
+                        return {
+                            x: Date.parse(point.created_at),
+                            y: point.measurement,
+                            min: _.min(point.values),
+                            max: _.max(point.values),
+                            result_id: point.result,
+                        };
+                    })
+                });
 
-                    if (data[0].values == undefined) {
-                        // data does not have multiple values, skip the range
-                        // data series
-                        return;
-                    }
+                if (data[0].values == undefined) {
+                    // data does not have multiple values, skip the range
+                    // data series
+                    return;
+                }
 
-                    // range of values, based on the standard deviation
-                    series.push({
-                        name: name + ' range (' + env + ')',
-                                      type: 'areasplinerange',
-                                      color: Highcharts.getOptions().colors[i],
-                                      lineWidth: 0,
-                                      linkedTo: ':previous',
-                                      fillOpacity: 0.3,
-                                      zIndex: 0,
-                                      data: _.map(data, function(point) {
-                                          return [
-                                              Date.parse(point.created_at),
-                                              _.min(point.values),
-                                              _.max(point.values)
-                                          ]
-                                      })
-                                      });
+                // range of values, based on the standard deviation
+                series.push({
+                    name: name + ' range (' + env + ')',
+                    type: 'areasplinerange',
+                    color: Highcharts.getOptions().colors[i],
+                    lineWidth: 0,
+                    linkedTo: ':previous',
+                    fillOpacity: 0.3,
+                    zIndex: 0,
+                    data: _.map(data, function(point) {
+                        return [
+                            Date.parse(point.created_at),
+                            _.min(point.values),
+                            _.max(point.values)
+                        ]
+                    })
+                });
 
-                        });
+            });
         });
 
         Highcharts.chart(
