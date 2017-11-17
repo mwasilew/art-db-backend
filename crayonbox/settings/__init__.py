@@ -28,7 +28,7 @@ DEBUG = True
 
 TEST_RUNNER = 'crayonbox.settings.test_runner.NoLoggingTestRunner'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 APPEND_SLASH = False
 
 LOGIN_REDIRECT_URL = "/"
