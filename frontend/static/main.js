@@ -61,6 +61,12 @@ app.config(['$routeProvider', function($routeProvider) {
         });
 }]);
 
+
+app.config(['$httpProvider', function($httpProvider) {
+    $httpProvider.defaults.xsrfCookieName = 'csrftoken';
+    $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
+}])
+
 app.directive('pagination', ['$route', '$httpParamSerializer', '$location', function($route, $httpParamSerializer, $location) {
     return {
         restrict: 'E',
@@ -263,6 +269,18 @@ app.controller('BuildDetail', ['$scope', '$http', '$routeParams', '$q', '$routeP
         };
     };
 
+    $scope.saving = false
+    $scope.save_annotation = function() {
+        $scope.saving = true
+        $http.post(
+            '/api/saveannotation/' + $scope.build.id + '/',
+            { annotation: $scope.build.annotation }
+        ).then(function() {
+            $scope.edit = false
+            $scope.saving = false
+        })
+    };
+
 }]);
 
 app.controller('CompareBuilds', ['$scope', '$http', '$routeParams', '$q', '$routeParams', '$location', function($scope, $http, $routeParams, $q, $routeParams, $location) {
@@ -455,10 +473,16 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                     var target_id = 'chart-' + slug(benchmark.name);
                     var target = document.getElementById(target_id);
 
-                    $scope.drawChart(benchmark, $scope.branch, data_by_env, target);
-
-
-                    benchmark.graphed = true;
+                    $http.get('/api/annotations/', { params: params }).then(function(response) {
+                        var annotations = _.map(response.data, function(item) {
+                            return {
+                                x: Date.parse(item.date),
+                                label: item.label
+                            }
+                        })
+                        $scope.drawChart(benchmark, $scope.branch, data_by_env, annotations, target);
+                        benchmark.graphed = true;
+                    })
                 });
             }
         }
@@ -497,9 +521,24 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
         $scope.updateCharts();
     }
 
-    $scope.drawChart = function(benchmark, branch, env_data, element) {
+    $scope.drawChart = function(benchmark, branch, env_data, annotations, element) {
         var series = [];
         var i = -1;
+
+        var plotLines = _.map(annotations, function(item) {
+            return {
+                color: '#babdb6',
+                width: 0.5,
+                value: item.x,
+                label: {
+                    rotation: 0,
+                    align: 'right',
+                    x: -5,
+                    style: { "width": "100px" },
+                    text: item.label
+                }
+            }
+        })
 
         _.each(env_data, function(response) {
 
@@ -512,45 +551,45 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                 // data itself
                 series.push({
                     name: name + ' (' + env + ')',
-                                  type: 'spline',
-                                  color: Highcharts.getOptions().colors[i],
-                                  zIndex: 1,
-                                  data: _.map(data, function(point) {
-                                      return {
-                                          x: Date.parse(point.created_at),
-                                          y: point.measurement,
-                                          min: _.min(point.values),
-                                          max: _.max(point.values),
-                                          result_id: point.result,
-                                      };
-                                  })
-                                  });
+                    type: 'spline',
+                    color: Highcharts.getOptions().colors[i],
+                    zIndex: 1,
+                    data: _.map(data, function(point) {
+                        return {
+                            x: Date.parse(point.created_at),
+                            y: point.measurement,
+                            min: _.min(point.values),
+                            max: _.max(point.values),
+                            result_id: point.result,
+                        };
+                    })
+                });
 
-                    if (data[0].values == undefined) {
-                        // data does not have multiple values, skip the range
-                        // data series
-                        return;
-                    }
+                if (data[0].values == undefined) {
+                    // data does not have multiple values, skip the range
+                    // data series
+                    return;
+                }
 
-                    // range of values, based on the standard deviation
-                    series.push({
-                        name: name + ' range (' + env + ')',
-                                      type: 'areasplinerange',
-                                      color: Highcharts.getOptions().colors[i],
-                                      lineWidth: 0,
-                                      linkedTo: ':previous',
-                                      fillOpacity: 0.3,
-                                      zIndex: 0,
-                                      data: _.map(data, function(point) {
-                                          return [
-                                              Date.parse(point.created_at),
-                                              _.min(point.values),
-                                              _.max(point.values)
-                                          ]
-                                      })
-                                      });
+                // range of values, based on the standard deviation
+                series.push({
+                    name: name + ' range (' + env + ')',
+                    type: 'areasplinerange',
+                    color: Highcharts.getOptions().colors[i],
+                    lineWidth: 0,
+                    linkedTo: ':previous',
+                    fillOpacity: 0.3,
+                    zIndex: 0,
+                    data: _.map(data, function(point) {
+                        return [
+                            Date.parse(point.created_at),
+                            _.min(point.values),
+                            _.max(point.values)
+                        ]
+                    })
+                });
 
-                        });
+            });
         });
 
         Highcharts.chart(
@@ -567,6 +606,7 @@ app.controller('Stats', ['$scope', '$http', '$routeParams', '$timeout', '$q', '$
                             month: '%e. %b',
                             year: '%b'
                         },
+                        plotLines: plotLines,
                         title: {
                             text: 'Date'
                         }

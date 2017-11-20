@@ -32,5 +32,7 @@ urlpatterns = [
         name='testjobdata'
     ),
     url(r'^dynamic_benchmark_summary/', views.dynamic_benchmark_summary),
+    url(r'^annotations/', views.annotations),
+    url(r'^saveannotation/([0-9]+)/$', views.save_annotation),
 ]
 

@@ -97,6 +97,8 @@ class Result(models.Model):
     completed = models.BooleanField(default=False)
     reported = models.BooleanField(default=False)
 
+    annotation = models.CharField(max_length=1024, blank=True, null=True)
+
     class Meta:
         index_together = ["build_id", "name"]
         unique_together = ["build_id", "name"]
