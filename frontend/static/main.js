@@ -280,6 +280,10 @@ app.controller('BuildDetail', ['$scope', '$http', '$routeParams', '$q', '$routeP
             $scope.saving = false
         })
     };
+    $scope.delete_annotation = function() {
+        $scope.build.annotation = null;
+        $scope.save_annotation()
+    }
 
 }]);
 
