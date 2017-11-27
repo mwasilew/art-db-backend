@@ -272,6 +272,9 @@ app.controller('BuildDetail', ['$scope', '$http', '$routeParams', '$q', '$routeP
     $scope.saving = false
     $scope.save_annotation = function() {
         $scope.saving = true
+        if ($scope.build.annotation && $scope.build.annotation.trim() == '') {
+            $scope.build.annotation = null
+        }
         $http.post(
             '/api/saveannotation/' + $scope.build.id + '/',
             { annotation: $scope.build.annotation }
