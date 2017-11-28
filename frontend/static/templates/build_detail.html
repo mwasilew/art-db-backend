@@ -25,6 +25,7 @@
       </button>
     </form>
   <button class='btn btn-default btn-sm' ng-hide='edit' ng-click='edit = true'>Edit</button>
+  <button class='btn btn-default btn-sm' ng-show='!edit && build.annotation' ng-click='delete_annotation()'>Delete</button>
   </div>
 
   <hr/>
